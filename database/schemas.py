@@ -1,9 +1,10 @@
 from flask import Flask 
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:''@localhost/food_delivery'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'mysql+mysqlconnector://malik:abc123@localhost/food_delivery'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -58,5 +59,6 @@ class Food(db.Model):
 
 
 if __name__ == "__main__":
+    # print(repr(app.config))
     db.create_all()
 
