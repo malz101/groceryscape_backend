@@ -20,7 +20,9 @@ Once virtual environment is activated run:<br/>
 
 
 # RUN appplication
-Enter in terminal "python3 run.py"<br/>
+Ensure you are in root folder<br/>
+Enter in terminal<br/>
+"python3 run.py"<br/>
 or<br/> 
 "python run.py"
 
@@ -34,7 +36,7 @@ One of two options:
 1. Create a new mysql user and ensure password type is set to 'mysql_native_password'
     Run commands below to achieve this:<br/>
     1. CREATE USER '<newuser>'@'localhost' IDENTIFIED with mysql_native_password BY '<password>';
-    2. GRANT ALL PRIVILEGES ON *.* TO '<newuser>'@'localhost';<br/>
+    2. GRANT ALL PRIVILEGES ON \*.\* TO '<newuser>'@'localhost';<br/>
                               or<br/>
        GRANT ALL PRIVILEGES ON <database_name>.* TO '<newuser>'@'localhost';
     3. Flush Privileges;
