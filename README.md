@@ -1,7 +1,7 @@
 # online-grocery-store-restaurant
 
 # SETUP VIRTUAL ENVIRONMENT
-Navigate to root folder, i.e "online-grocery-store-restaurant"
+Navigate to root folder, i.e "online-grocery-store-restaurant"<br/>
 Run the following command in terminal:<br/>
 "python3 -m venv venv"<br/> 
 or <br/>
@@ -27,7 +27,8 @@ or<br/>
 "python run.py"
 
 # Create Database Tables
-Navigate to database folder and run "python3 schemas.py' in the terminal.<br/>
+Navigate to the 'database' folder<br/>
+Run "python3 schemas.py' in the terminal.<br/>
 Ensure virtual environment is activated before you do so
 
 # If using mysql-server
