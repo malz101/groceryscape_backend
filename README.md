@@ -47,3 +47,10 @@ One of two options:
    2. Flush Privileges;
 
 ## note venv would need to be activated each time terminal is started
+
+
+## Manage Database Schema from using Python environment (with version control)
+navigate to root directory__
+run command 'python3 manage.py init' to initialize the migrations if not already created__
+run 'python manage.py migrate' to add changes to schema__
+run 'python manage.py upgrade' to commit changes to schema
