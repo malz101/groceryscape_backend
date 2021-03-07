@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <section id="login">
+        <h1>LOGIN</h1>
+        <form action="{{ url_for('manage_employee_account.login') }}" method='post'>
+            <label>email</label>
+            <input type="email"  name="email">
+
+            <label for="password">Password</label>
+            <input type="password" name="password">
+
+            <button>Submit</button>
+
+        </form>
+    </section>
+</body>
+</html>
