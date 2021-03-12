@@ -18,7 +18,6 @@ class Customer(db.Model):
     password = db.Column(db.String(45), nullable=False)
     town = db.Column(db.String(45), nullable=False)
     parish = db.Column(db.String(45), nullable=False)
-    # dob = db.Column(db.DateTime)
 
     orders = db.relationship('Order', backref='customer')
 
@@ -39,13 +38,20 @@ class Employee(db.Model):
     salary = db.Column(db.Numeric(10,2), nullable=True)
     branch_work =  db.Column(db.Integer, db.ForeignKey('branch.id'))
 
-    # servesCustomer = db.relationship('Order', backref='employee')
+    checkouts = db.relationship('Order', backref='employee')
 
-orderDetails = db.Table('order_details',
+orders_groceries = db.Table('order_details',
     db.Column('order_id', db.Integer, db.ForeignKey('order.id'), primary_key=True),
     db.Column('grocery_id', db.Integer, db.ForeignKey('grocery.id'), primary_key=True),
     db.Column('quantity', db.Integer),
     db.Column('price', db.Numeric(10,2))
+)
+
+CartItems = db.Table('cart_items',
+    db.Column('customer_id', db.Integer, db.ForeignKey('customer.id'), primary_key=True),
+    db.Column('grocery_id', db.Integer, db.ForeignKey('grocery.id'), primary_key=True),
+    db.Column('quantity', db.Integer),
+    db.Column('cost', db.Numeric(10,2))
 )
 
 class Order(db.Model):
@@ -53,18 +59,21 @@ class Order(db.Model):
     orderDate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     status = db.Column(db.Boolean, nullable=False, default=False)
     deliveryDate = db.Column(db.DateTime)
+    deliveryTown = db.Column(db.String(45), nullable=False)
+    deliveryParish = db.Column(db.String(45), nullable=False)
 
     customerId = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
-    # servedBy = db.column(db.Integer, db.ForeignKey('employee.id'))
+    checkoutBy = db.Column(db.Integer, db.ForeignKey('employee.id'))
 
-    foodItems = db.relationship('Grocery', secondary=orderDetails)
+    foodItems = db.relationship('Grocery', secondary=orders_groceries)
 
 class Grocery(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False, unique=True)
     description = db.Column(db.String(1000), nullable=False, unique=True)
     quantity = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Integer, nullable=False)
+    units = db.Column(db.String(100), nullable=False)
+    cost_per_unit = db.Column(db.Numeric(10,2), nullable=False)
 
 
 class Payment(db.Model):
@@ -72,6 +81,21 @@ class Payment(db.Model):
     payment_date = db.Column(db.DateTime())
     amount_tendered = db.Column(db.Numeric(10,2), nullable=False)
     change = db.Column(db.Numeric(10,2), nullable=True)
+    recordedBy = db.Column(db.Integer, db.ForeignKey('employee.id'))
+
+class Cart(db.Model):
+    cart_id = db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('grocery.id'))
+    quantity = db.Column(db.Integer, nullable=False)
+    cost = db.Column(db.Numeric(10,2), nullable=True)
+
+    cartItems = db.relationship('Grocery', secondary=CartItems)
+
+class Rating(db.Model):
+    cust_id = db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True)
+    rating = db.Column(db.Integer, nullable=False)
+
 
 
 if __name__ == "__main__":

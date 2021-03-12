@@ -19,7 +19,8 @@ class GroceryAccess:
         grocery = Grocery.query.filter_by(id=grocery_id).first()
         try:
             if grocery.id:
-                return grocery
+                return {'id':grocery.id, 'name':grocery.name, 'description':grocery.description,\
+                        'quantity':grocery.quantity, 'units':grocery.units, 'cost_per_unit':grocery.cost_per_unit}
             else:
                 return False
         except:

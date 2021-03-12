@@ -6,6 +6,7 @@ from flask import session
 from routes.CustomerRoute import manage_customer_account
 from routes.EmployeeRoute import manage_employee_account
 from routes.GroceryRoute import manage_groceries
+from routes.CartRoute import manage_cart
 
 
 app = Flask(__name__)
@@ -18,6 +19,7 @@ db = SQLAlchemy(app)
 app.register_blueprint(manage_customer_account, url_prefix="/manage_customer_account")
 app.register_blueprint(manage_employee_account, url_prefix="/manage_employee_account")
 app.register_blueprint(manage_groceries, url_prefix="/manage_groceries")
+app.register_blueprint(manage_cart, url_prefix="/manage_cart")
 
 """serves the index page for customers"""
 @app.route('/')

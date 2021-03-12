@@ -1,6 +1,10 @@
-from database.CustomerAccess import CustomerManager
+from database.CustomerAccess import CustomerAccess
 
 class AccountManager:
+
+    def __init__(self, customer_access):
+
+        self.customer_access = customer_access
 
     def createAccount(self, request):
 
@@ -19,9 +23,11 @@ class AccountManager:
         """sanitize and verify details"""
 
         """create account with sanitized data"""
-        cm = CustomerManager()
-        customer = cm.registerCustomer(firstName, lastName, telephone, email, gender, password, town, parish)
-        return customer.id
+        customer = self.customer_access.registerCustomer(firstName, lastName, telephone, email, gender, password, town, parish)
+        if customer:
+            return customer
+        else:
+            return {'error': 'Failed to create customer account'}
 
     def loginToAccount(self, request):
 
@@ -32,11 +38,9 @@ class AccountManager:
             """sanitize email and password"""
 
             """get the customer's account"""
-            customer = CustomerManager().getCustomer(email, password)
-
-
+            customer = self.customer_access.getCustomer(email, password)
             if customer:
-                return customer.id, customer.firstName
+                return customer
             else:
                 return False
 
