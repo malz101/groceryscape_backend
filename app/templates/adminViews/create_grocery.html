@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+        <section id="create-grocery">
+        <h1>CREATE GROCERY</h1>
+        <form action="{{ url_for('manage_groceries.submit_grocery')}}" method='post'>
+
+            <label>Grocery Name</label>
+            <input type="text"  name="grocery_name">
+
+            <label >Description</label>
+            <input type="text"  name="description">
+
+            <label>Quantity Available</label>
+            <input type="text"  name="quantity">
+
+            <label>Price</label>
+            <input type="text"  name="price">
+
+            <button>Submit</button>
+        </form>
+
+        <form action="{{ url_for('manage_employee_account.logout') }}" method='post'>
+            <input type="hidden" name="logout" value="logout">
+        <button>Logout</button>
+
+    </form>
+
+    </section>
+
+</body>
+</html>
