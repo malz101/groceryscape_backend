@@ -5,8 +5,8 @@ from datetime import datetime
 
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    firstName = db.Column(db.String(45), nullable=False)
-    lastName = db.Column(db.String(45), nullable=False)
+    first_name = db.Column(db.String(45), nullable=False)
+    last_name = db.Column(db.String(45), nullable=False)
     telephone = db.Column(db.Integer, nullable=False)
     email = db.Column(db.String(45), nullable=False, unique=True)
     gender = db.Column(db.String(45), nullable=False)
@@ -16,38 +16,25 @@ class Customer(db.Model):
 
     orders = db.relationship('Order', backref='customer')
 
-class Branch(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False, unique=True)
-    address = db.Column(db.String(100), nullable=False, unique=True)
-    manager_id = db.Column(db.Integer, nullable=True)
+    #cart associated many to many
+    cart_items = db.relationship("Cart", back_populates="customer_carts")
+
+    #ratings associated many to many
+    grocery_ratings = db.relationship("Rating", back_populates="customer_ratings")
 
 class Employee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    firstName = db.Column(db.String(45), nullable=False)
-    lastName = db.Column(db.String(45), nullable=False)
+    first_name = db.Column(db.String(45), nullable=False)
+    last_name = db.Column(db.String(45), nullable=False)
     email = db.Column(db.String(45), nullable=False, unique=True)
     password = db.Column(db.String(45), nullable=False)
     address = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), nullable=False)
     salary = db.Column(db.Numeric(10,2), nullable=True)
-    branch_work =  db.Column(db.Integer, db.ForeignKey('branch.id'))
 
+    # represent the payment collected an employee (many to one relationship)
+    payments_collected = db.relationship('Payment', backref='employee')
     checkouts = db.relationship('Order', backref='employee')
-
-orders_groceries = db.Table('order_details',
-    db.Column('order_id', db.Integer, db.ForeignKey('order.id'), primary_key=True),
-    db.Column('grocery_id', db.Integer, db.ForeignKey('grocery.id'), primary_key=True),
-    db.Column('quantity', db.Integer),
-    db.Column('price', db.Numeric(10,2))
-)
-
-CartItems = db.Table('cart_items',
-    db.Column('customer_id', db.Integer, db.ForeignKey('customer.id'), primary_key=True),
-    db.Column('grocery_id', db.Integer, db.ForeignKey('grocery.id'), primary_key=True),
-    db.Column('quantity', db.Integer),
-    db.Column('cost', db.Numeric(10,2))
-)
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -57,10 +44,17 @@ class Order(db.Model):
     deliveryTown = db.Column(db.String(45), nullable=False)
     deliveryParish = db.Column(db.String(45), nullable=False)
 
-    customerId = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
-    checkoutBy = db.Column(db.Integer, db.ForeignKey('employee.id'))
+    # represents the many-to-many relationship between  order and groceries
+    groceries = db.relationship("OrderGroceries", back_populates="orders")
 
-    foodItems = db.relationship('Grocery', secondary=orders_groceries)
+    # represents a one-to-one relationship between payment and order
+    payment = db.relationship('Payment', backref=db.backref('order', uselist=False))
+
+    # represents a one-to-many relationship between customers and orders
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
+
+    # represents a one to many-to-many relationship between employee and orders
+    checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id'))
 
 class Grocery(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -70,24 +64,45 @@ class Grocery(db.Model):
     units = db.Column(db.String(100), nullable=False)
     cost_per_unit = db.Column(db.Numeric(10,2), nullable=False)
 
+    #order associated many to many
+    orders = db.relationship("OrderGroceries", back_populates="groceries")
 
-class Payment(db.Model):
+    #cart associated many to many
+    customer_carts = db.relationship("Cart", back_populates="cart_items")
+
+    #ratings associated many to many
+    customer_ratings = db.relationship("Rating", back_populates="grocery_ratings")
+
+class OrderGroceries(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
-    payment_date = db.Column(db.DateTime())
-    amount_tendered = db.Column(db.Numeric(10,2), nullable=False)
-    change = db.Column(db.Numeric(10,2), nullable=True)
-    recordedBy = db.Column(db.Integer, db.ForeignKey('employee.id'))
+    grocery_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True)
+    quantity = db.Column(db.Integer)
+    price = db.Column(db.Numeric(10, 2))
+
+    orders = db.relationship("Order", back_populates="groceries")
+    groceries = db.relationship("Grocery", back_populates="orders")
 
 class Cart(db.Model):
     cart_id = db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True)
-    item_id = db.Column(db.Integer, db.ForeignKey('grocery.id'))
+    item_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True)
     quantity = db.Column(db.Integer, nullable=False)
     cost = db.Column(db.Numeric(10,2), nullable=True)
 
-    cartItems = db.relationship('Grocery', secondary=CartItems)
+    cart_items = db.relationship("Grocery", back_populates="customer_carts")
+    customer_carts = db.relationship("Customer", back_populates="cart_items")
 
 class Rating(db.Model):
     cust_id = db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True)
     item_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True)
     rating = db.Column(db.Integer, nullable=False)
+
+    grocery_ratings = db.relationship("Grocery", back_populates="customer_ratings")
+    customer_ratings = db.relationship("Customer", back_populates="grocery_ratings")
+
+class Payment(db.Model):
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
+    recorded_by = db.Column(db.Integer, db.ForeignKey('employee.id'))
+    payment_date = db.Column(db.DateTime())
+    amount_tendered = db.Column(db.Numeric(10,2), nullable=False)
+    change = db.Column(db.Numeric(10,2), nullable=True)
 
