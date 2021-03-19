@@ -14,13 +14,13 @@ class Customer(db.Model):
     town = db.Column(db.String(45), nullable=False)
     parish = db.Column(db.String(45), nullable=False)
 
-    orders = db.relationship('Order', backref='customer')
+    orders = db.relationship('Order', backref='customer', cascade="all,delete")
 
     #cart associated many to many
-    cart_items = db.relationship("Cart", back_populates="customer_carts")
+    cart_items = db.relationship("Cart", back_populates="customer_carts", cascade="all,delete")
 
     #ratings associated many to many
-    grocery_ratings = db.relationship("Rating", back_populates="customer_ratings")
+    grocery_ratings = db.relationship("Rating", back_populates="customer_ratings", cascade="all,delete")
 
 class Employee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -33,45 +33,43 @@ class Employee(db.Model):
     salary = db.Column(db.Numeric(10,2), nullable=True)
 
     # represent the payment collected an employee (many to one relationship)
-    payments_collected = db.relationship('Payment', backref='employee')
-    checkouts = db.relationship('Order', backref='employee')
+    payments_collected = db.relationship('Payment', backref='employee', cascade="all,delete")
+    checkouts = db.relationship('Order', backref='employee', cascade="all,delete")
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     orderDate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     status = db.Column(db.Boolean, nullable=False, default=False)
     deliveryDate = db.Column(db.DateTime)
-    deliveryTown = db.Column(db.String(45), nullable=False)
-    deliveryParish = db.Column(db.String(45), nullable=False)
+    deliveryTown = db.Column(db.String(45))
+    deliveryParish = db.Column(db.String(45))
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
 
     # represents the many-to-many relationship between  order and groceries
-    groceries = db.relationship("OrderGroceries", back_populates="orders")
+    groceries = db.relationship("OrderGroceries", back_populates="orders", cascade="all,delete")
 
     # represents a one-to-one relationship between payment and order
-    payment = db.relationship('Payment', backref=db.backref('order', uselist=False))
-
-    # represents a one-to-many relationship between customers and orders
-    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
+    payment = db.relationship('Payment', backref=db.backref('order', uselist=False), cascade="all,delete")
 
     # represents a one to many-to-many relationship between employee and orders
     checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id'))
 
 class Grocery(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False, unique=True)
+    name = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String(1000), nullable=False)# unique=True)
     quantity = db.Column(db.Integer, nullable=False)
     units = db.Column(db.String(100), nullable=False)
     cost_per_unit = db.Column(db.Numeric(10,2), nullable=False)
 
     #order associated many to many
-    orders = db.relationship("OrderGroceries", back_populates="groceries")
+    orders = db.relationship("OrderGroceries", back_populates="groceries", cascade="all,delete")
 
     #cart associated many to many
-    customer_carts = db.relationship("Cart", back_populates="cart_items")
+    customer_carts = db.relationship("Cart", back_populates="cart_items", cascade = "all,delete")
 
     #ratings associated many to many
-    customer_ratings = db.relationship("Rating", back_populates="grocery_ratings")
+    customer_ratings = db.relationship("Rating", back_populates="grocery_ratings", cascade="all,delete")
 
 class OrderGroceries(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)

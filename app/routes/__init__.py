@@ -8,6 +8,10 @@ from .CustomerRoute import manage_customer_account
 from .EmployeeRoute import manage_employee_account
 from .GroceryRoute import manage_groceries
 from .CartRoute import manage_cart
+from ..database.db_access import customer_access
+
+from ..system_management.CustomerAccountManager import AccountManager
+account_manager = AccountManager(customer_access)
 
 
 """register blueprints"""
@@ -23,8 +27,13 @@ app.register_blueprint(manage_cart, url_prefix="/manage_cart")
 def index():
     # if customer is logged in return home page with customer data. Otherwise, return just the home page
     if 'cust_id' in session:
-        user_data = session['cust_id']
-        return render_template("customerViews/home.html", user=user_data)
+        customer = account_manager.getCustomer(session['cust_id'])
+        if customer:
+            return {"id": customer.id, 'firstName': customer.first_name, 'lastName': customer.last_name, \
+                    'telephone': customer.telephone, 'email': customer.email, 'gender': customer.gender, \
+                    'town': customer.town, 'parish': customer.parish}
+        else:
+            return {'error': 'no customer data found!'}
     else:
         return render_template("customerViews/index.html")
 

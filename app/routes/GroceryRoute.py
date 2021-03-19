@@ -16,12 +16,47 @@ def create_grocery():
     else:
         return redirect(url_for('manage_employee_account.index'))
 
-@manage_groceries.route('/submit_grocery', methods=['POST'])
+@manage_groceries.route('/submit_grocery', methods=['POST','GET'])
 def submit_grocery():
 
     if 'staff_id' in session or 'admin_id' in session:
-        new_grocery = grocery_manager.addGrocery(request)
-        return render_template('adminViews/admin_new_grocery.html', grocery_details=new_grocery)
+        newGrocery = grocery_manager.addGrocery(request)
+        return newGrocery
     else:
         return redirect(url_for('manage_employee_account.index'))
 
+@manage_groceries.route('/update_grocery', methods=['POST','GET'])
+def update_grocery():
+
+    if 'staff_id' in session or 'admin_id' in session:
+        updatedGrocery = grocery_manager.updateGrocery(request)
+        return updatedGrocery
+    else:
+        return redirect(url_for('manage_employee_account.index'))
+
+@manage_groceries.route('/delete_grocery', methods=['POST','GET'])
+def delete_grocery():
+
+    if 'staff_id' in session or 'admin_id' in session:
+        groceries = grocery_manager.deleteGrocery(request)
+        return groceries
+    else:
+        return redirect(url_for('manage_employee_account.index'))
+
+@manage_groceries.route('/get_grocery', methods=['POST','GET'])
+def get_grocery():
+
+    if 'staff_id' in session or 'admin_id' in session:
+        grocery = grocery_manager.getGrocery(request)
+        return grocery
+    else:
+        return redirect(url_for('manage_employee_account.index'))
+
+@manage_groceries.route('/get_groceries', methods=['POST','GET'])
+def get_groceries():
+
+    if 'staff_id' in session or 'admin_id' in session:
+        groceries = grocery_manager.getGroceries(request)
+        return groceries
+    else:
+        return redirect(url_for('manage_employee_account.index'))

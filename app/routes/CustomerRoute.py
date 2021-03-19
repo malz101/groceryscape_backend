@@ -10,24 +10,23 @@ manage_customer_account = Blueprint("manage_customer_account", __name__)
 customer_manager = AccountManager(customer_access)
 
 """handles customers' account requests"""
-@manage_customer_account.route('/signup', methods=['POST'])
-def signu():
+@manage_customer_account.route('/signup', methods=['POST', 'GET'])
+def signup():
 
     """Pass all the responsibility of creating an account to the account manager"""
     customer = customer_manager.createAccount(request)
     if customer:
         session['cust_id'] = customer['id']
-        return redirect(url_for('index'))
+        return customer
     else:
-        return customer.error
+        return {'error':'failed request'}
 
-@manage_customer_account.route('/login', methods=["POST"])
+@manage_customer_account.route('/login', methods=["POST", "GET"])
 def login():
-
-    customer = customer_manager.loginToAccount(request)
-    if(customer):
+    customer = customer_manager.login(request)
+    if customer:
         session['cust_id'] = customer['id']
-        return redirect(url_for('index'))
+        return customer
     else:
         return {'error': 'Invalid login details'}
 
@@ -36,5 +35,22 @@ def logout():
     if 'cust_id' in session:
         session.pop('cust_id', None)
         return redirect(url_for('index'))
+    else:
+        return redirect(url_for('index'))
+
+@manage_customer_account.route('/update_account', methods=["GET", "POST"])
+def update_account():
+    if 'cust_id' in session:
+        customer = customer_manager.updateAccount(request,session)
+        return customer
+    else:
+        return redirect(url_for('index'))
+
+
+@manage_customer_account.route('/get_customer', methods=["GET"])
+def get_customer():
+    if 'cust_id' in session:
+        customer = customer_manager.getCustomer(session['cust_id'])
+        return customer
     else:
         return redirect(url_for('index'))

@@ -20,7 +20,7 @@ def index():
     else:
         return render_template('adminViews/admin_login.html')
 
-@manage_employee_account.route('/login', methods=["POST"])
+@manage_employee_account.route('/login', methods=["POST", "GET"])
 def login():
     emp_id, role = employee_manager.login(request)
     if emp_id and role == 'staff':

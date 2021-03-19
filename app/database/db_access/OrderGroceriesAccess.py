@@ -1,4 +1,7 @@
 from ... import db
 
 class OrderGroceriesAccess:
-    pass
+
+    def getAllItemsOnOrder(self, orderId):
+        pass
+

@@ -27,6 +27,9 @@ class EmployeeAccountManager:
             email = request.form['email']
             password = request.form['password']
 
+            print("the email is "+email)
+            print("the password is " + password)
+
             """sanitize email and password"""
 
             """get the customer's account"""

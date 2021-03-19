@@ -1,0 +1,39 @@
+---------------------------------------------------------------
+                            Customer
+----------------------------------------------------------------
+sign up:
+     http://localhost:5000/manage_customer_account/signup?first_name=Lisa&last_name=Brown&telephone=18763872922&email=lisabrown@yahoo.com&password=123&gender=female&town=Change%Hill&parish=Kingston
+
+login:
+    http://localhost:5000/manage_customer_account/login?email=lisabrown@yahoo.com&password=123
+
+update account:
+    http://localhost:5000/manage_customer_account/update_account?attribute=last_name&value=Dustin
+
+logout:
+    http://localhost:5000/manage_customer_account/logout
+
+---------------------------------------------------------------
+                            Grocery
+----------------------------------------------------------------
+create grocery:
+    http://localhost:5000/manage_groceries/submit_grocery?grocery_name=biscuit&description=butterkiss&quantity=12&price=90&units=bag
+
+update grocery:
+    http://localhost:5000/manage_groceries/update_grocery?grocery_id=2&attribute=name&value=apple
+
+delete grocery:
+    http://localhost:5000/manage_groceries/delete_grocery?grocery_id=3
+
+query grocery:
+     http://localhost:5000/manage_groceries/get_grocery?grocery_id=1
+
+query all groceries:
+    http://localhost:5000/manage_groceries/get_groceries
+
+
+---------------------------------------------------------------
+                            Employee
+----------------------------------------------------------------
+login:
+    http://localhost:5000/manage_employee_account/login?email=chay@gmail.com.com&password=000
