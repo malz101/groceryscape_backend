@@ -60,5 +60,5 @@ class GroceryAccess:
         if grocery:
             db.session.delete(grocery)
             db.session.commit()
-        return self.getAllGroceries()
+        return self.getGroceries()
 

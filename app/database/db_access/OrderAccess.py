@@ -10,9 +10,9 @@ class OrderAccess:
         order = Order(customer_id=custId)
         db.session.add(order)
         db.session.commit()
-        return self.getOrderbyId(order.id)
+        return self.getOrderById(order.id)
 
-    def getOrderbyId(self, orderId):
+    def getOrderById(self, orderId):
         order = Order.query.filter_by(id=orderId).first()
         try:
             if order.id:
@@ -28,16 +28,18 @@ class OrderAccess:
             orderGroceries = OrderGroceries(order_id=order.id, grocery_id=item.item_id, quantity=item.quantity, price=item.cost)
             db.session.add(orderGroceries)
             db.session.commit()
-        return True
+        return order.id
 
     def cancelOrder(self, orderId):
         pass
 
-    def getOrderById(self, orderId):
-        pass
-
-    def getAllOrders(self):
-        pass
+    def getOrders(self):
+        orders = Order.query.filter_by().all()
+        try:
+            if orders[0].id:
+                return orders
+        except:
+            return False
 
     def scheduleDelivery(self, orderId, date, town, parish):
         pass

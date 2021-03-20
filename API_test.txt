@@ -36,4 +36,22 @@ query all groceries:
                             Employee
 ----------------------------------------------------------------
 login:
-    http://localhost:5000/manage_employee_account/login?email=chay@gmail.com.com&password=000
+    http://localhost:5000/manage_employee_account/login?email=chay@gmail.com.com&password=123
+
+---------------------------------------------------------------
+                            Cart
+----------------------------------------------------------------
+add item to cart:
+    http://localhost:5000/manage_cart/addToCart?quantity=3&item_id=2
+
+remove item from cart:
+    http://localhost:5000/manage_cart/removeFromCart?grocery_id=2
+
+query cart items:
+    http://localhost:5000/manage_cart/get_cart_items
+
+checkout cart:
+    http://localhost:5000/manage_cart/CheckOutCart
+
+update cart item:
+    http://localhost:5000/manage_cart/update_cart?item_id=5&quantity=15
