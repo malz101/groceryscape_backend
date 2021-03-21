@@ -26,7 +26,6 @@ class CartAccess:
             db.session.add(cart)
             db.session.commit()
 
-            # return self.getAllCartItems(cartId)
             return self.getAllCartItems(cartId)
 
         # 3) if grocery or customer is not valid, abort the operation
@@ -46,6 +45,8 @@ class CartAccess:
                     db.session.delete(entry)
                     db.session.commit()
                 return True
+            else:
+                return False
 
         except:
             return False
@@ -104,9 +105,10 @@ class CartAccess:
 
         cartItem = self.getCartItem(cartId, itemId)
         if cartItem:
-            if quantity < 0:
-                quantity = 0
+            if quantity < 1:
+                quantity = 1
             cartItem.quantity = quantity
+            cartItem.cost = cartItem.cart_items.cost_per_unit * quantity
             db.session.commit()
             return self.getCartItem(cartId, itemId)
         else:

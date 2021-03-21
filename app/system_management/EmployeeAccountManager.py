@@ -13,7 +13,6 @@ class EmployeeAccountManager:
         address = request.form['address']
         role = request.form['role']
         salary = request.form['salary']
-        branch_work = request.form['branch_work']
 
         """sanitize and validate details"""
 
@@ -33,7 +32,7 @@ class EmployeeAccountManager:
             """sanitize email and password"""
 
             """get the customer's account"""
-            employee = self.employee_access.getEmployee(email, password)
+            employee = self.employee_access.login(email, password)
 
             if employee:
                 return employee.id, employee.role

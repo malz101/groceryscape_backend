@@ -1,57 +1,94 @@
 ---------------------------------------------------------------
                             Customer
 ----------------------------------------------------------------
-sign up:
+1) sign up:
      http://localhost:5000/manage_customer_account/signup?first_name=Lisa&last_name=Brown&telephone=18763872922&email=lisabrown@yahoo.com&password=123&gender=female&town=Change%Hill&parish=Kingston
 
-login:
+2) login:
     http://localhost:5000/manage_customer_account/login?email=lisabrown@yahoo.com&password=123
 
-update account:
+3) update account:
     http://localhost:5000/manage_customer_account/update_account?attribute=last_name&value=Dustin
 
-logout:
+4) logout:
     http://localhost:5000/manage_customer_account/logout
 
 ---------------------------------------------------------------
                             Grocery
 ----------------------------------------------------------------
-create grocery:
+1) create grocery:
     http://localhost:5000/manage_groceries/submit_grocery?grocery_name=biscuit&description=butterkiss&quantity=12&price=90&units=bag
 
-update grocery:
+2) update grocery:
     http://localhost:5000/manage_groceries/update_grocery?grocery_id=2&attribute=name&value=apple
 
-delete grocery:
+3) delete grocery:
     http://localhost:5000/manage_groceries/delete_grocery?grocery_id=3
 
-query grocery:
+4) query grocery:
      http://localhost:5000/manage_groceries/get_grocery?grocery_id=1
 
-query all groceries:
+5) query all groceries:
     http://localhost:5000/manage_groceries/get_groceries
 
 
 ---------------------------------------------------------------
                             Employee
 ----------------------------------------------------------------
-login:
+1) login:
     http://localhost:5000/manage_employee_account/login?email=chay@gmail.com.com&password=123
+
+2) logout:
+    http://localhost:5000/manage_employee_account/logout
+
+3) add employee:
+
+4)
 
 ---------------------------------------------------------------
                             Cart
 ----------------------------------------------------------------
-add item to cart:
+1) add item to cart:
     http://localhost:5000/manage_cart/addToCart?quantity=3&item_id=2
 
-remove item from cart:
+2) remove item from cart:
     http://localhost:5000/manage_cart/removeFromCart?grocery_id=2
 
-query cart items:
+3) query cart items:
     http://localhost:5000/manage_cart/get_cart_items
 
-checkout cart:
+4) checkout cart:
     http://localhost:5000/manage_cart/CheckOutCart
 
-update cart item:
+5) update cart item:
     http://localhost:5000/manage_cart/update_cart?item_id=5&quantity=15
+
+6) empty cart:
+    http://localhost:5000/manage_cart/empty_cart
+
+---------------------------------------------------------------
+                            Rating
+---------------------------------------------------------------
+1) rate grocery:
+    http://localhost:5000/manage_rating/rate_grocery?item_id=3&rating=6
+
+2) get all ratings:
+
+3) get rating:
+
+---------------------------------------------------------------
+                            Order
+---------------------------------------------------------------
+schedule delivery:
+
+checkout order:
+
+cancel order:
+
+record payment:
+
+get order:
+
+get all order:
+
+get schedule:

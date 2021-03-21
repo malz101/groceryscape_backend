@@ -9,6 +9,7 @@ from .EmployeeRoute import manage_employee_account
 from .GroceryRoute import manage_groceries
 from .CartRoute import manage_cart
 from ..database.db_access import customer_access
+from .RatingRoute import manage_rating
 
 from ..system_management.CustomerAccountManager import AccountManager
 account_manager = AccountManager(customer_access)
@@ -19,6 +20,7 @@ app.register_blueprint(manage_customer_account, url_prefix="/manage_customer_acc
 app.register_blueprint(manage_employee_account, url_prefix="/manage_employee_account")
 app.register_blueprint(manage_groceries, url_prefix="/manage_groceries")
 app.register_blueprint(manage_cart, url_prefix="/manage_cart")
+app.register_blueprint(manage_rating, url_prefix="/manage_rating")
 
 
 """serves the index page for customers"""

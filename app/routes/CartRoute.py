@@ -34,11 +34,13 @@ def removeFromCart():
     else:
         return redirect(url_for('manage_employee_account.index'))
 
-@manage_cart.route('/emptyCart', methods=['POST','GET'])
-def emptyCart():
-
-    # cart_manager.emptyCart(1)
-    return {'res':'cart emptied'}
+@manage_cart.route('/empty_cart', methods=['POST','GET'])
+def empty_cart():
+    if 'cust_id' in session:
+        cartItems = cart_manager.emptyCart(session)
+        return cartItems
+    else:
+        return redirect(url_for('manage_employee_account.index'))
 
 @manage_cart.route('/get_cart_items', methods=['POST','GET'])
 def get_cart_items():
