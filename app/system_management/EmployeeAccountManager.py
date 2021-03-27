@@ -4,37 +4,65 @@ class EmployeeAccountManager:
         
     def createEmployee(self, request):
 
-        """extract details from the request"""
 
-        firstName = request.form['firstName']
-        lastName = request.form['lastName']
-        email = request.form['email']
-        password = request.form['password']
-        address = request.form['address']
-        role = request.form['role']
-        salary = request.form['salary']
+        try:
+            getParam = self.getRequestType(request)
+            firstName = getParam('first_name')
+            lastName = getParam('last_name')
+            email = getParam('email')
+            password = getParam('password')
+            address = getParam('address')
+            role = getParam('role')
+            salary = getParam('salary')
 
-        """sanitize and validate details"""
+            """sanitize and validate details"""
 
-        """create account with sanitized data"""
-        employee = self.employee_access.registerEmployee(firstName, lastName, email, password, address, role, float(salary), branch_work)
-        return employee.id
-
+            """create account with sanitized data"""
+            employee = self.employee_access.registerEmployee(firstName, lastName, email, password, address, role, float(salary))
+            if employee:
+                return {"id": str(employee.id), 'first_name': employee.first_name, 'last_name': employee.last_name, \
+                         'email': employee.email,'password': employee.password, 'role': employee.role,\
+                        'salary': str(employee.salary), 'address':employee.address}
+            else:
+                return False
+                
+        except:
+            return False
+        
     def login(self, request):
 
-        if request.method == "POST":
-            email = request.form['email']
-            password = request.form['password']
-
-            print("the email is "+email)
-            print("the password is " + password)
+        try:
+            getParam = self.getRequestType(request)
+            email = getParam('email')
+            password = getParam('password')
 
             """sanitize email and password"""
 
-            """get the customer's account"""
+            """get the employee's account"""
             employee = self.employee_access.login(email, password)
-
             if employee:
-                return employee.id, employee.role
+                return  {"id": str(employee.id), 'first_name': employee.first_name, 'last_name': employee.last_name, \
+                         'email': employee.email,'password': employee.password, 'role': employee.role,\
+                        'salary': str(employee.salary), 'address':employee.address}
             else:
-                return False, False
+                return False
+        except:
+            return False
+
+    def getEmployee(self,empId):
+        try:
+            employee = self.employee_access.getEmployee(empId)
+            if employee:
+                return {"id": str(employee.id), 'first_name': employee.first_name, 'last_name': employee.last_name, \
+                         'email': employee.email,'password': employee.password, 'role': employee.role,\
+                        'salary': str(employee.salary), 'address':employee.address}
+            else:
+                return {'msg':'employee might be deleted or updated'}
+        except:
+            return {'msg': 'failed request'}
+            
+    def getRequestType(self, request):
+        if request.method == 'GET':
+            return request.args.get
+        else:
+            return request.form.get

@@ -14,46 +14,47 @@ employee_manager = EmployeeAccountManager(employee_access)
 @manage_employee_account.route('/index')
 def index():
     if 'staff_id' in session:
-        return render_template('adminViews/admin_home.html', user=session['emp_id'])
-    if 'admin_id' in session:
-        return render_template('adminViews/admin_home.html', user=session['admin_id'])
+        employee = employee_manager.getEmployee(session['staff_id'])
+        return employee
+    elif 'admin_id' in session:
+        return employee_manager.getEmployee(session['admin_id'])
     else:
-        return render_template('adminViews/admin_login.html')
+        return {'msg':'you are not logged in!'} 
 
 @manage_employee_account.route('/login', methods=["POST", "GET"])
 def login():
-    emp_id, role = employee_manager.login(request)
-    if emp_id and role == 'staff':
-        session['staff_id'] = emp_id
-        return render_template("adminViews/admin_home.html", user=emp_id)
-    elif emp_id and role == 'admin':
-        session['admin_id'] = emp_id
-        return render_template("adminViews/admin_home.html", user=emp_id)
-    else:
-        return redirect(url_for('manage_employee_account.index'))
-
-"""register an employee"""
-@manage_employee_account.route('/register', methods=['POST'])
-def register():
-    """Pass all the responsibility of creating an account to the account manager"""
-    if 'admin_id' in session:
-        emp_id = employee_manager.createEmployee(request)
-        if emp_id:
-            return redirect(url_for('manage_employee_account.index'))
+    employee = employee_manager.login(request)
+    if employee:
+        # logout if already logged into an account
+        if 'staff_id' in session:
+            session.pop('staff_id', None)
+        if 'admin_id' in session:
+            session.pop('admin_id', None)
+            
+        if employee['role'] == 'admin':
+            session['admin_id'] = int(employee['id'])
         else:
-            return redirect(url_for('manage_employee_account.index'), error='ERROR')
+            session['staff_id'] = int(employee['id'])
+        return employee
     else:
-        return redirect(url_for('manage_employee_account.index'))
-
-"""request to create a new employee account"""
-@manage_employee_account.route('/create_employee')
-def create_employee():
+        return {'error': 'employee not found'}
+    
+"""register an employee"""
+@manage_employee_account.route('/register', methods=['GET','POST'])
+def register():
     if 'admin_id' in session:
-        return render_template('adminViews/admin_add_employee.html')
+        employee = employee_manager.createEmployee(request)
+        if employee:
+            if employee['role'] == 'admin':
+                session['admin_id'] = int(employee['id'])
+            else:
+                session['staff_id'] = int(employee['id'])
+            return employee
+        else:
+            return {'error': 'failed request'}
     else:
-        return redirect(url_for('manage_employee_account.index'))
-
-
+        return {'msg':'only admin can perform this task'}
+    
 @manage_employee_account.route('/logout', methods=["GET", "POST"])
 def logout():
     if 'staff_id' in session:

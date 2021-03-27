@@ -19,6 +19,9 @@ class RatingManager:
                 return {'msg':'operation could not be completed'}
         except:
             return {'msg':'failed request'}
+        
+    def getDataFrame(self):
+        return self.rating_access.getDataFrame()
 
     def getRequestType(self, request):
         if request.method == 'GET':

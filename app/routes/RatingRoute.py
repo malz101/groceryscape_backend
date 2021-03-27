@@ -15,3 +15,11 @@ def rate_grocery():
         return rating
     else:
         return redirect(url_for('index'))
+
+@manage_rating.route('/data_frame', methods=['POST','GET'])
+def data_frame():
+    if 'cust_id' in session:
+        rating = rating_manager.getDataFrame()
+        return str(rating)
+    else:
+        return redirect(url_for('index'))

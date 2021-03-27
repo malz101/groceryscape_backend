@@ -36,13 +36,13 @@
                             Employee
 ----------------------------------------------------------------
 1) login:
-    http://localhost:5000/manage_employee_account/login?email=chay@gmail.com.com&password=123
+    http://localhost:5000/manage_employee_account/login?email=chay@gmail.com&password=000
 
 2) logout:
     http://localhost:5000/manage_employee_account/logout
 
 3) add employee:
-
+    http://localhost:5000/manage_employee_account/register?first_name=Jeremy&last_name=Thomas&email=jeremythomas@hotmail.com&address=Cross%20Road,%20Kgn&password=000&role=admin&salary=200000.00
 4)
 
 ---------------------------------------------------------------
@@ -79,16 +79,20 @@
 ---------------------------------------------------------------
                             Order
 ---------------------------------------------------------------
-schedule delivery:
+1) schedule delivery:
+        http://localhost:5000/manage_order/schedule_order?order_id=3&date=2021-04-20 15:30:00&town=UWI&parish=St. Andrew
 
-checkout order:
+2) checkout order:
+     http://localhost:5000/manage_order/checkout_order?order_id=3
+
+3) get order:
+    http://localhost:5000/manage_order/get_order?order_id=4
+
+4) get all order:
+    http://localhost:5000/manage_order/get_orders
 
 cancel order:
 
-record payment:
-
-get order:
-
-get all order:
-
 get schedule:
+
+record payment:

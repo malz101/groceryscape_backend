@@ -46,7 +46,6 @@ def update_account():
     else:
         return redirect(url_for('index'))
 
-
 @manage_customer_account.route('/get_customer', methods=["GET"])
 def get_customer():
     if 'cust_id' in session:

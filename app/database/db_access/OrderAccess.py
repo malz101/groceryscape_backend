@@ -42,10 +42,25 @@ class OrderAccess:
             return False
 
     def scheduleDelivery(self, orderId, date, town, parish):
-        pass
-
-    def checkoutBy(self, orderId, employee):
-        pass
+        
+        order = self.getOrderById(orderId)
+        if order:
+            order.deliveryDate = date
+            order.deliveryTown = town
+            order.deliveryParish = parish
+            db.session.commit()
+            return order
+        else:
+            return False
+            
+    def checkoutOrder(self, orderId, employee):
+        order = self.getOrderById(orderId)
+        if order:
+            order.checkout_by = employee
+            db.session.commit()
+            return  order
+        else:
+            return False
 
 
 

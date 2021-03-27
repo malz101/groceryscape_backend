@@ -1,5 +1,8 @@
 from ... import db
 from ..Models import Rating, Grocery, Customer
+from sqlalchemy import create_engine
+import pymysql
+import  pandas as pd
 
 class RatingAccess:
 
@@ -41,3 +44,9 @@ class RatingAccess:
                 return False
         except:
             return False
+        
+    def getDataFrame(self):
+        db_connection = create_engine('mysql+pymysql://root:''@localhost:3306/food_delivery')
+        df = pd.read_sql('SELECT * FROM rating', con=db_connection)
+        print(df)
+        return df
