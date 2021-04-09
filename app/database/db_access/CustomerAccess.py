@@ -23,10 +23,10 @@ class CustomerAccess:
         return self.getCustomerById(customer.id)
 
     def getCustomerById(self, id):
-
         customer = Customer.query.filter_by(id=id).first()
         try:
-            if customer.id == id:
+            if customer.id == int(id):
+                print(customer)
                 return customer
             else:
                 return False

@@ -45,7 +45,7 @@ class RatingAccess:
         except:
             return False
         
-    def getDataFrame(self):
+    def getRatingDF(self):
         db_connection = create_engine('mysql+pymysql://root:''@localhost:3306/food_delivery')
         df = pd.read_sql('SELECT * FROM rating', con=db_connection)
         print(df)

@@ -11,9 +11,13 @@ from .CartRoute import manage_cart
 from ..database.db_access import customer_access
 from .RatingRoute import manage_rating
 from .OrderRoute import manage_order
+from app.system_management.MLManager import MLManager
+from app.database.db_access import rating_access
+from app.database.db_access import grocery_access
+from app.database.db_access import order_access
 
 from ..system_management.CustomerAccountManager import AccountManager
-account_manager = AccountManager(customer_access)
+account_manager = AccountManager(customer_access, MLManager(rating_access,grocery_access),order_access)
 
 
 """register blueprints"""

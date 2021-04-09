@@ -20,7 +20,7 @@ class CartAccess:
         # 2) if grocery and cust are valid make an entry into the cart table
         if grocery and customer:
 
-            cart = Cart(cart_id=customer.id, quantity=quantity, cost=grocery.cost_per_unit*quantity )
+            cart = Cart(cart_id=customer.id, quantity=quantity)
             cart.cart_items = grocery
             customer.cart_items.append(cart)
             db.session.add(cart)
@@ -108,7 +108,6 @@ class CartAccess:
             if quantity < 1:
                 quantity = 1
             cartItem.quantity = quantity
-            cartItem.cost = cartItem.cart_items.cost_per_unit * quantity
             db.session.commit()
             return self.getCartItem(cartId, itemId)
         else:

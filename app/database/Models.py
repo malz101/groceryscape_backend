@@ -39,7 +39,7 @@ class Employee(db.Model):
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     orderDate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    status = db.Column(db.Boolean, nullable=False, default=False)
+    status = db.Column(db.String, nullable=False, default='PENDING')
     deliveryDate = db.Column(db.DateTime)
     deliveryTown = db.Column(db.String(45))
     deliveryParish = db.Column(db.String(45))
@@ -75,7 +75,6 @@ class OrderGroceries(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
     grocery_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True)
     quantity = db.Column(db.Integer)
-    price = db.Column(db.Numeric(10, 2))
 
     orders = db.relationship("Order", back_populates="groceries")
     groceries = db.relationship("Grocery", back_populates="orders")
@@ -84,8 +83,7 @@ class Cart(db.Model):
     cart_id = db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True)
     item_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True)
     quantity = db.Column(db.Integer, nullable=False)
-    cost = db.Column(db.Numeric(10,2), nullable=True)
-
+    
     cart_items = db.relationship("Grocery", back_populates="customer_carts")
     customer_carts = db.relationship("Customer", back_populates="cart_items")
 
@@ -100,7 +98,7 @@ class Rating(db.Model):
 class Payment(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
     recorded_by = db.Column(db.Integer, db.ForeignKey('employee.id'))
-    payment_date = db.Column(db.DateTime())
+    payment_date = db.Column(db.DateTime(),default=datetime.utcnow)
     amount_tendered = db.Column(db.Numeric(10,2), nullable=False)
     change = db.Column(db.Numeric(10,2), nullable=True)
 
