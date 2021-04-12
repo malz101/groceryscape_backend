@@ -1,5 +1,8 @@
 # online-grocery-store-restaurant
 
+## HEROKU APP URL
+https://infinite-beach-27814.herokuapp.com/
+
 ## SETUP VIRTUAL ENVIRONMENT
 Navigate to root folder, i.e "online-grocery-store-restaurant"<br/>
 Run the following command in terminal:<br/>
