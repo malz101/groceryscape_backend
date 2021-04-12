@@ -3,6 +3,7 @@ from ..Models import Rating, Grocery, Customer
 from sqlalchemy import create_engine
 import pymysql
 import  pandas as pd
+import os
 
 class RatingAccess:
 
@@ -46,7 +47,7 @@ class RatingAccess:
             return False
         
     def getRatingDF(self):
-        db_connection = create_engine('mysql+pymysql://root:''@localhost:3306/food_delivery')
+        db_connection = create_engine(os.environ.get('PYMYSQL_DATABASE_URI') or 'mysql+pymysql://root:''@localhost:3306/food_delivery')
         df = pd.read_sql('SELECT * FROM rating', con=db_connection)
         print(df)
         return df
