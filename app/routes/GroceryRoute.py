@@ -43,20 +43,7 @@ def delete_grocery():
     else:
         return redirect(url_for('manage_employee_account.index'))
 
-@manage_groceries.route('/get_grocery', methods=['POST','GET'])
-def get_grocery():
-
-    if 'staff_id' in session or 'admin_id' in session:
-        grocery = grocery_manager.getGrocery(request)
-        return grocery
-    else:
-        return redirect(url_for('manage_employee_account.index'))
-
 @manage_groceries.route('/get_groceries', methods=['POST','GET'])
 def get_groceries():
-
-    if 'staff_id' in session or 'admin_id' in session:
-        groceries = grocery_manager.getGroceries(request)
-        return groceries
-    else:
-        return redirect(url_for('manage_employee_account.index'))
+    groceries = grocery_manager.getGroceries(request)
+    return groceries

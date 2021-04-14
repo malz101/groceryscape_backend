@@ -38,7 +38,7 @@ class AccountManager:
             getParam = self.getRequestType(request)
             email = getParam('email')
             password = getParam('password')
-
+            
             """sanitize email and password"""
 
             """get the customer's account"""

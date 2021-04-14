@@ -37,9 +37,9 @@ def index():
     if 'cust_id' in session:
         customer = account_manager.getCustomer(session['cust_id'])
         if customer:
-            return {"id": customer.id, 'firstName': customer.first_name, 'lastName': customer.last_name, \
-                    'telephone': customer.telephone, 'email': customer.email, 'gender': customer.gender, \
-                    'town': customer.town, 'parish': customer.parish}
+            return {"id": customer['id'], 'firstName': customer['first_name'], 'lastName': customer['last_name'], \
+                    'telephone': customer['telephone'], 'email': customer['email'], 'gender': customer['gender'], \
+                    'town': customer['town'], 'parish': customer['parish']}
         else:
             return {'error': 'no customer data found!'}
     else:
