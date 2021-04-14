@@ -71,7 +71,7 @@ class OrderAccess:
             return False
 
     def getSchedule(self):
-        orders = Order.query.filter(or_(Order.status.like('PENDING'),Order.status.like('CHECKED OUT'))).all()
+        orders = Order.query.filter(or_(Order.status=='PENDING',Order.status=='CHECKED OUT')).all()
         try:
             if orders[0].id:
                 return orders
@@ -87,7 +87,8 @@ class OrderAccess:
             return False
 
     def getCustomerPendingOrder(self,custId):
-        orders = Order.query.filter(and_(or_(Order.status.like('PENDING'),Order.status.like('CHECKED OUT')),Order.customer_id.like(custId))).all()
+        orders = Order.query.filter(and_(Order.customer_id==int(custId),\
+                                            or_(Order.status=='PENDING',Order.status=='CHECKED OUT'))).all()
         try:
             if orders[0].id:
                 # orders = [order for order in orders if order.customer_id == custId]

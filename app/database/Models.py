@@ -8,7 +8,7 @@ class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(45), nullable=False)
     last_name = db.Column(db.String(45), nullable=False)
-    telephone = db.Column(db.Integer, nullable=False)
+    telephone = db.Column(db.String(11), nullable=False)
     email = db.Column(db.String(45), nullable=False, unique=True)
     gender = db.Column(db.String(45), nullable=False)
     password = db.Column(db.String(45), nullable=False)
@@ -41,11 +41,11 @@ class Employee(db.Model):
 class Order(db.Model):
     __tablename__ = 'orders'
     id = db.Column(db.Integer, primary_key=True)
-    orderDate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    orderdate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     status = db.Column(db.String, nullable=False, default='PENDING')
-    deliveryDate = db.Column(db.DateTime)
-    deliveryTown = db.Column(db.String(45))
-    deliveryParish = db.Column(db.String(45))
+    deliverydate = db.Column(db.DateTime)
+    deliverytown = db.Column(db.String(45))
+    deliveryparish = db.Column(db.String(45))
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
 
     # represents the many-to-many relationship between  orders and groceries

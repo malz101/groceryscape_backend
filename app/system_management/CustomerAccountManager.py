@@ -8,29 +8,29 @@ class AccountManager:
     def createAccount(self, request):
 
         """extract details from the request"""
-        try:
-            getParam = self.getRequestType(request)
-            firstName = getParam('first_name')
-            lastName = getParam('last_name')
-            telephone = getParam('telephone')
-            email = getParam('email')
-            gender = getParam('gender')
-            password = getParam('password')
-            town = getParam('town')
-            parish = getParam('parish')
+        # try:
+        getParam = self.getRequestType(request)
+        firstName = getParam('first_name')
+        lastName = getParam('last_name')
+        telephone = getParam('telephone')
+        email = getParam('email')
+        gender = getParam('gender')
+        password = getParam('password')
+        town = getParam('town')
+        parish = getParam('parish')
 
-            """sanitize and verify details"""
+        """sanitize and verify details"""
 
-            """create account with sanitized data"""
-            customer = self.customer_access.registerCustomer(firstName, lastName, int(telephone), email, gender, password, town, parish)
-            if customer:
-                return {"id": str(customer.id), 'firstName': customer.first_name, 'lastName': customer.last_name, \
-                         'telephone': customer.telephone, 'email': customer.email, 'gender': customer.gender, \
-                         'password': customer.password, 'town': customer.town, 'parish': customer.parish}
-            else:
-                return False
-        except:
+        """create account with sanitized data"""
+        customer = self.customer_access.registerCustomer(firstName, lastName, telephone, email, gender, password, town, parish)
+        if customer:
+            return {"id": str(customer.id), 'firstName': customer.first_name, 'lastName': customer.last_name, \
+                        'telephone': customer.telephone, 'email': customer.email, 'gender': customer.gender, \
+                        'password': customer.password, 'town': customer.town, 'parish': customer.parish}
+        else:
             return False
+        # except:
+        #     return False
 
     def login(self, request):
 
@@ -128,13 +128,13 @@ class AccountManager:
                         empName = (empFname.first_name + " " + empLname.last_name)
                     else:
                         empName = 'False'
-                    response[str(order.id)] = {'order_id': str(order.id), 'order_date': str(order.orderDate), \
+                    response[str(order.id)] = {'order_id': str(order.id), 'order_date': str(order.orderdate), \
                                                'status': str(order.status), 'customer_id': str(order.customer_id), \
                                                'customer': (order.customer.first_name + " " + \
                                                             order.customer.last_name),
-                                               'delivery_date': str(order.deliveryDate), \
-                                               'delivery_town': str(order.deliveryTown), 'delivery_parish': \
-                                                   str(order.deliveryParish), 'checkout_by': empName}
+                                               'delivery_date': str(order.deliverydate), \
+                                               'delivery_town': str(order.deliverytown), 'delivery_parish': \
+                                                   str(order.deliveryparish), 'checkout_by': empName}
                 return response
             else:
                 return {'msg': 'no order found'}
@@ -142,30 +142,30 @@ class AccountManager:
         #     return {'msg':'failed request'}
     
     def getMyPendingOrders(self, session):
-        try:
-            cust_id = session['cust_id']
-            response = {}
-            orders = self.orderAccess.getCustomerPendingOrder(cust_id)
-            if orders:
-                for order in orders:
-                    empFname = order.employee
-                    empLname = order.employee
-                    if empFname:
-                        empName = (empFname.first_name + " " + empLname.last_name)
-                    else:
-                        empName = 'False'
-                    response[str(order.id)] = {'order_id': str(order.id), 'order_date': str(order.orderDate), \
-                                               'status': str(order.status), 'customer_id': str(order.customer_id), \
-                                               'customer': (order.customer.first_name + " " + \
-                                                            order.customer.last_name),
-                                               'delivery_date': str(order.deliveryDate), \
-                                               'delivery_town': str(order.deliveryTown), 'delivery_parish': \
-                                                   str(order.deliveryParish), 'checkout_by': empName}
-                return response
-            else:
-                return {'msg': 'no order found'}
-        except:
-            return {'msg': 'failed request'}
+        # try:
+        cust_id = session['cust_id']
+        response = {}
+        orders = self.orderAccess.getCustomerPendingOrder(cust_id)
+        if orders:
+            for order in orders:
+                empFname = order.employee
+                empLname = order.employee
+                if empFname:
+                    empName = (empFname.first_name + " " + empLname.last_name)
+                else:
+                    empName = 'False'
+                response[str(order.id)] = {'order_id': str(order.id), 'order_date': str(order.orderdate), \
+                                            'status': str(order.status), 'customer_id': str(order.customer_id), \
+                                            'customer': (order.customer.first_name + " " + \
+                                                        order.customer.last_name),
+                                            'delivery_date': str(order.deliverydate), \
+                                            'delivery_town': str(order.deliverytown), 'delivery_parish': \
+                                                str(order.deliveryparish), 'checkout_by': empName}
+            return response
+        else:
+            return {'msg': 'no order found'}
+        # except:
+        #     return {'msg': 'failed request'}
 
     def getRequestType(self, request):
         if request.method == 'GET':

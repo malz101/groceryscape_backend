@@ -8,5 +8,4 @@ app = Flask(__name__)
 CORS(app)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
-
 from app import routes

@@ -13,7 +13,7 @@ CREATE TABLE  customer  (
    id  SERIAL NOT NULL PRIMARY KEY ,
    first_name  varchar(45) NOT NULL,
    last_name  varchar(45) NOT NULL,
-   telephone  integer NOT NULL,
+   telephone  varchar(11) NOT NULL,
    email  varchar(45) NOT NULL UNIQUE,
    gender  varchar(45) NOT NULL,
    password  varchar(45) NOT NULL,
