@@ -39,7 +39,7 @@ class Employee(db.Model):
     checkouts = db.relationship('Order', backref='employee', cascade="all,delete")
 
 class Order(db.Model):
-    __tablename__ = 'order'
+    __tablename__ = 'orders'
     id = db.Column(db.Integer, primary_key=True)
     orderDate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     status = db.Column(db.String, nullable=False, default='PENDING')
@@ -48,11 +48,11 @@ class Order(db.Model):
     deliveryParish = db.Column(db.String(45))
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
 
-    # represents the many-to-many relationship between  order and groceries
+    # represents the many-to-many relationship between  orders and groceries
     groceries = db.relationship("OrderGroceries", back_populates="orders", cascade="all,delete")
 
     # represents a one-to-one relationship between payment and order
-    payment = db.relationship('Payment', backref=db.backref('order', uselist=False), cascade="all,delete")
+    payment = db.relationship('Payment', backref=db.backref('orders', uselist=False), cascade="all,delete")
 
     # represents a one to many-to-many relationship between employee and orders
     checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id'))
@@ -77,7 +77,7 @@ class Grocery(db.Model):
 
 class OrderGroceries(db.Model):
     __tablename__ = 'order_groceries'
-    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), primary_key=True)
     grocery_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True)
     quantity = db.Column(db.Integer)
 
@@ -104,7 +104,7 @@ class Rating(db.Model):
 
 class Payment(db.Model):
     __tablename__ = 'payment'
-    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), primary_key=True)
     recorded_by = db.Column(db.Integer, db.ForeignKey('employee.id'))
     payment_date = db.Column(db.DateTime(),default=datetime.utcnow)
     amount_tendered = db.Column(db.Numeric(10,2), nullable=False)
