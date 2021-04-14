@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 class Customer(db.Model):
+    __tablename__ = 'customer'
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(45), nullable=False)
     last_name = db.Column(db.String(45), nullable=False)
@@ -23,6 +24,7 @@ class Customer(db.Model):
     grocery_ratings = db.relationship("Rating", back_populates="customer_ratings", cascade="all,delete")
 
 class Employee(db.Model):
+    __tablename__ = 'employee'
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(45), nullable=False)
     last_name = db.Column(db.String(45), nullable=False)
@@ -37,6 +39,7 @@ class Employee(db.Model):
     checkouts = db.relationship('Order', backref='employee', cascade="all,delete")
 
 class Order(db.Model):
+    __tablename__ = 'order'
     id = db.Column(db.Integer, primary_key=True)
     orderDate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     status = db.Column(db.String, nullable=False, default='PENDING')
@@ -55,6 +58,7 @@ class Order(db.Model):
     checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id'))
 
 class Grocery(db.Model):
+    __tablename__ = 'grocery'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String(1000), nullable=False)# unique=True)
@@ -72,6 +76,7 @@ class Grocery(db.Model):
     customer_ratings = db.relationship("Rating", back_populates="grocery_ratings", cascade="all,delete")
 
 class OrderGroceries(db.Model):
+    __tablename__ = 'order_groceries'
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
     grocery_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True)
     quantity = db.Column(db.Integer)
@@ -80,6 +85,7 @@ class OrderGroceries(db.Model):
     groceries = db.relationship("Grocery", back_populates="orders")
 
 class Cart(db.Model):
+    __tablename__ = 'cart'
     cart_id = db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True)
     item_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True)
     quantity = db.Column(db.Integer, nullable=False)
@@ -88,6 +94,7 @@ class Cart(db.Model):
     customer_carts = db.relationship("Customer", back_populates="cart_items")
 
 class Rating(db.Model):
+    __tablename__ = 'rating'
     cust_id = db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True)
     item_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True)
     rating = db.Column(db.Integer, nullable=False)
@@ -96,6 +103,7 @@ class Rating(db.Model):
     customer_ratings = db.relationship("Customer", back_populates="grocery_ratings")
 
 class Payment(db.Model):
+    __tablename__ = 'payment'
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
     recorded_by = db.Column(db.Integer, db.ForeignKey('employee.id'))
     payment_date = db.Column(db.DateTime(),default=datetime.utcnow)
