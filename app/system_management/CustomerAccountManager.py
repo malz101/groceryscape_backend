@@ -24,7 +24,7 @@ class AccountManager:
             """create account with sanitized data"""
             customer = self.customer_access.registerCustomer(firstName, lastName, int(telephone), email, gender, password, town, parish)
             if customer:
-                return {"id": str(customer.id), 'firstName': customer.first_name, 'lastName': customer.last_name, \
+                return {"cust_id": str(customer.id), 'firstName': customer.first_name, 'lastName': customer.last_name, \
                          'telephone': customer.telephone, 'email': customer.email, 'gender': customer.gender, \
                          'password': customer.password, 'town': customer.town, 'parish': customer.parish}
             else:
@@ -44,7 +44,7 @@ class AccountManager:
             """get the customer's account"""
             customer = self.customer_access.login(email, password)
             if customer:
-                return {"id": str(customer.id), 'first_name': customer.first_name, 'last_name': customer.last_name, \
+                return {"cust_id": str(customer.id), 'first_name': customer.first_name, 'last_name': customer.last_name, \
                         'telephone': str(customer.telephone), 'email': customer.email, 'gender': customer.gender, \
                         'password': customer.password, 'town': customer.town, 'parish': customer.parish}
             else:
@@ -57,7 +57,7 @@ class AccountManager:
         try:
             customer = self.customer_access.getCustomerById(int(customerId))
             if customer:
-                return {"id": str(customer.id), 'first_name': customer.first_name, 'last_name': customer.last_name, \
+                return {"cust_id": str(customer.id), 'first_name': customer.first_name, 'last_name': customer.last_name, \
                         'telephone': str(customer.telephone), 'email': customer.email, 'gender': customer.gender, \
                         'password': customer.password, 'town': customer.town, 'parish': customer.parish}
             else:
@@ -78,7 +78,7 @@ class AccountManager:
             '''perform update'''
             customer = self.customer_access.updateAccount(int(customerId), attribute, value)
             if customer:
-                return {"id": str(customer.id), 'first_name': customer.first_name, 'last_name': customer.last_name, \
+                return {"cust_id": str(customer.id), 'first_name': customer.first_name, 'last_name': customer.last_name, \
                         'telephone': str(customer.telephone), 'email': customer.email, 'gender': customer.gender, \
                         'password': customer.password, 'town': customer.town, 'parish': customer.parish}
             else:
@@ -90,7 +90,6 @@ class AccountManager:
         
         try:
             custId = session['cust_id']
-            print(custId)
             if self.customer_access.getCustomerById(custId):
                 groceries = self.MLManager.getRecommendGroceries(custId)
                 if groceries:

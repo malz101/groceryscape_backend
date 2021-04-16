@@ -1,5 +1,6 @@
 from flask import Blueprint
 from flask import redirect, url_for, session, request, render_template
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from ..system_management.EmployeeAccountManager import EmployeeAccountManager
 from ..database.db_access import employee_access
 
@@ -13,17 +14,16 @@ employee_manager = EmployeeAccountManager(employee_access)
 @manage_employee_account.route('/')
 @manage_employee_account.route('/index')
 def index():
-    if 'staff_id' in session:
-        employee = employee_manager.getEmployee(session['staff_id'])
+    employee = get_jwt_identity()
+    if employee:
         return employee
-    elif 'admin_id' in session:
-        return employee_manager.getEmployee(session['admin_id'])
     else:
         return {'msg':'you are not logged in!'} 
 
 @manage_employee_account.route('/login', methods=["POST", "GET"])
 def login():
     employee = employee_manager.login(request)
+    token = create_access_token(identity=employee)
     if employee:
         # logout if already logged into an account
         if 'staff_id' in session:
@@ -35,14 +35,17 @@ def login():
             session['admin_id'] = int(employee['id'])
         else:
             session['staff_id'] = int(employee['id'])
-        return employee
+            
+        return {"token": token, "employee":employee}
     else:
         return {'error': 'employee not found'}
     
 """register an employee"""
 @manage_employee_account.route('/register', methods=['GET','POST'])
+@jwt_required()
 def register():
-    if 'admin_id' in session:
+    user = get_jwt_identity()
+    if user['role'] == 'admin':
         employee = employee_manager.createEmployee(request)
         if employee:
             if employee['role'] == 'admin':
@@ -61,6 +64,4 @@ def logout():
         session.pop('staff_id', None)
     if 'admin_id' in session:
         session.pop('admin_id', None)
-        return redirect(url_for('manage_employee_account.index'))
-    else:
-        return redirect(url_for('manage_employee_account.index'))
+    return redirect(url_for('manage_employee_account.index'))

@@ -5,12 +5,12 @@ class CartManager:
         self.groceryAccess = groceryAccess
         self.cartAccess = cartAccess
 
-    def addToCart(self, request, session):
+    def addToCart(self, request, user):
 
         try:
             '''extract request params'''
             getParam = self.getRequestType(request)
-            cartId = session['cust_id']
+            cartId = user['cust_id']
             quantity = getParam('quantity')
             itemId = getParam('item_id')
 
@@ -22,7 +22,7 @@ class CartManager:
             if cart:
                 for grocery in cart:
                     response[str(grocery.item_id)] = {'grocery_id':grocery.item_id,'name':grocery.cart_items.name,\
-                                                      'quantity':str(grocery.quantity),'cost':str(grocery.cost)}
+                                                      'quantity':str(grocery.quantity)}
 
                 return response
             else:

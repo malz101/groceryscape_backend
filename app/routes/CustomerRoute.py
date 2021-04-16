@@ -1,5 +1,6 @@
 from flask import Blueprint
 from flask import redirect, url_for, session, request, render_template
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from ..system_management.CustomerAccountManager import AccountManager
 from ..database.db_access import customer_access
 from ..system_management.MLManager import MLManager
@@ -22,7 +23,8 @@ def signup():
     customer = customer_manager.createAccount(request)
     if customer:
         session['cust_id'] = customer['id']
-        return customer
+        token = create_access_token(identity=customer)
+        return {"token": token, "customer":customer}
     else:
         return {'error':'failed request'}
 
@@ -31,7 +33,8 @@ def login():
     customer = customer_manager.login(request)
     if customer:
         session['cust_id'] = customer['id']
-        return customer
+        token = create_access_token(identity=customer)
+        return {"token": token, "customer":customer}
     else:
         return {'error': 'Invalid login details'}
 
@@ -39,53 +42,62 @@ def login():
 def logout():
     if 'cust_id' in session:
         session.pop('cust_id', None)
-        return redirect(url_for('index'))
-    else:
-        return redirect(url_for('index'))
+    return redirect(url_for('index'))
 
 @manage_customer_account.route('/update_account', methods=["GET", "POST"])
+@jwt_required()
 def update_account():
-    if 'cust_id' in session:
-        customer = customer_manager.updateAccount(request,session)
+    user = get_jwt_identity()
+    if user:
+        customer = customer_manager.updateAccount(request,user)
         return customer
     else:
         return redirect(url_for('index'))
 
 @manage_customer_account.route('/get_customer', methods=["GET"])
+@jwt_required()
 def get_customer():
-    if 'cust_id' in session:
-        customer = customer_manager.getCustomer(session['cust_id'])
-        return customer
+    user = get_jwt_identity()
+    if user:
+        return user
     else:
         return redirect(url_for('index'))
 
 @manage_customer_account.route('/get_recommended_groceries', methods=["GET","POST"])
+@jwt_required()
 def get_recommended_groceries():
-    if 'cust_id' in session:
-        groceries = customer_manager.getRecommendedGroceries(session)
+    user = get_jwt_identity()
+    if user:
+        groceries = customer_manager.getRecommendedGroceries(user)
         return groceries
     else:
         return redirect(url_for('index'))
     
 @manage_customer_account.route('/get_pending_orders', methods=["GET","POST"])
+@jwt_required()
 def get_pending_orders():
-    if 'cust_id' in session:
-        orders = customer_manager.getMyPendingOrders(session)
+    user = get_jwt_identity()
+    if user:
+        orders = customer_manager.getMyPendingOrders(user)
         return orders
     else:
         return redirect(url_for('index'))
     
 @manage_customer_account.route('/get_my_orders', methods=["GET","POST"])
+@jwt_required()
 def get_my_orders():
-    if 'cust_id' in session:
-        orders = customer_manager.getMyOrders(session)
+    user = get_jwt_identity()
+    if user:
+        orders = customer_manager.getMyOrders(user)
         return orders
     else:
         return redirect(url_for('index'))
     
 @manage_customer_account.route('/cancel_order', methods=["GET","POST"])
+@jwt_required()
 def cancel_order():
-    if 'cust_id' in session:
+    user = get_jwt_identity()
+    if user:
         msg = customer_manager.cancelOrder(request)
         return msg
     else:
