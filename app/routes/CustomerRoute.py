@@ -22,7 +22,7 @@ def signup():
     """Pass all the responsibility of creating an account to the account manager"""
     customer = customer_manager.createAccount(request)
     if customer:
-        session['cust_id'] = customer['id']
+        session['cust_id'] = customer['cust_id']
         token = create_access_token(identity=customer)
         return {"token": token, "customer":customer}
     else:
@@ -32,7 +32,7 @@ def signup():
 def login():
     customer = customer_manager.login(request)
     if customer:
-        session['cust_id'] = customer['id']
+        session['cust_id'] = customer['cust_id']
         token = create_access_token(identity=customer)
         return {"token": token, "customer":customer}
     else:

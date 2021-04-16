@@ -31,17 +31,16 @@ def removeFromCart():
     cartItems = cart_manager.removeItemFromCart(request, user)
     return cartItems
 
-@manage_cart.route('/empty_cart', methods=['POST','GET'])
+@manage_cart.route('/empty_cart', methods=['GET'])
 @jwt_required()
 def empty_cart():
     user = get_jwt_identity()
     cartItems = cart_manager.emptyCart(user)
     return cartItems
 
-@manage_cart.route('/get_cart_items', methods=['POST','GET'])
+@manage_cart.route('/get_cart_items', methods=['GET'])
 @jwt_required()
 def get_cart_items():
-
     user = get_jwt_identity()
     cartItems = cart_manager.getAllCartItems(user)
     return cartItems

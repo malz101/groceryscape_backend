@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask import redirect, url_for, session, request, render_template
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, verify_jwt_in_request
 from ..system_management.EmployeeAccountManager import EmployeeAccountManager
 from ..database.db_access import employee_access
 
@@ -14,6 +14,7 @@ employee_manager = EmployeeAccountManager(employee_access)
 @manage_employee_account.route('/')
 @manage_employee_account.route('/index')
 def index():
+    verify_jwt_in_request(optional=True)
     employee = get_jwt_identity()
     if employee:
         return employee
