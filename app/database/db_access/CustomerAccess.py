@@ -1,26 +1,30 @@
 from ... import db
 from ..Models import Customer
+from sqlalchemy.exc import IntegrityError
 
 class CustomerAccess:
 
     """retrieve a customer record from the database given their email and password"""
     def login(self, email, password):
         customer = Customer.query.filter_by(email=email).first()
-        try:
-            if customer.email == email and customer.password == password:
-                return customer
-            else:
-                return False
-        except:
+
+        if customer.email == email and customer.password == password:
+            return customer
+        else:
             return False
 
     """register a customer to the db"""
     def registerCustomer(self, firstName, lastName, telephone, email, gender, password, town, parish):
-
-        customer = Customer(first_name=firstName, last_name=lastName, telephone=telephone, email=email, gender=gender, password=password, town=town, parish=parish)
-        db.session.add(customer)
-        db.session.commit()
-        return self.getCustomerById(customer.id)
+        customer = {}
+        try:
+            customer = Customer(first_name=firstName, last_name=lastName, telephone=telephone, email=email, gender=gender, password=password, town=town, parish=parish)
+            db.session.add(customer)
+            db.session.commit()
+            customer = self.getCustomerById(customer.id)
+            return customer
+        except IntegrityError as e:
+            db.session.rollback()
+            return False
 
     def getCustomerById(self, id):
         customer = Customer.query.filter_by(id=id).first()

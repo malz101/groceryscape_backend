@@ -43,9 +43,9 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     orderdate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     status = db.Column(db.String, nullable=False, default='PENDING')
-    deliveryDate = db.Column(db.DateTime)
-    deliveryTown = db.Column(db.String(45))
-    deliveryParish = db.Column(db.String(45),db.ForeignKey('delivery_parish.parish'))
+    deliverydate = db.Column(db.DateTime)
+    deliverytown = db.Column(db.String(45))
+    deliveryparish = db.Column(db.String(45),db.ForeignKey('delivery_parish.parish'))
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
 
     # represents the many-to-many relationship between  orders and groceries

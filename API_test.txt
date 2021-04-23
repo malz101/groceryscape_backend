@@ -2,13 +2,12 @@
                             Customer
 ----------------------------------------------------------------
 1) sign up:
-     http://localhost:5000/manage_customer_account/signup?first_name=Lisa&last_name=Brown&telephone=18763872922&email=lisabrown@yahoo.com&password=123&gender=female&town=Change%Hill&parish=Kingston
+     http://localhost:5000/manage_customer_account/signup
 
 2) login:
-    http://localhost:5000/manage_customer_account/login?email=lisabrown@yahoo.com&password=123
-
+    http://localhost:5000/manage_customer_account/login
 3) update account:
-    http://localhost:5000/manage_customer_account/update_account?attribute=last_name&value=Dustin
+    http://localhost:5000/manage_customer_account/update_account
 
 4) logout: ***
     http://localhost:5000/manage_customer_account/logout
@@ -20,7 +19,7 @@
     http://localhost:5000/manage_customer_account/get_pending_orders
 
 7) cancel order:
-    http://localhost:5000/manage_customer_account/cancel_order?order_id=5
+    http://localhost:5000/manage_customer_account/cancel_order/5
 
 8) get recommended groceries:
     http://localhost:5000/manage_customer_account/get_recommended_groceries

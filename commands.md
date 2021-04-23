@@ -2,7 +2,7 @@
 psql food_delivery malik
 
 # Create Postgres backup of local database
-PGPASSWORD='<password>' pg_dump -Fc --no-acl --no-owner -h localhost -U '<user_name>' food_delivery > food_delivery.dump
+PGPASSWORD=abc123 pg_dump -Fc --no-acl --no-owner -h localhost -U malik food_delivery > food_delivery.dump
 
 # Get heroku app credentials
 heroku pg:credentials:url -a infinite-beach-27814
