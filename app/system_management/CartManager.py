@@ -5,12 +5,12 @@ class CartManager:
         self.groceryAccess = groceryAccess
         self.cartAccess = cartAccess
 
-    def addToCart(self, request, session):
+    def addToCart(self, request, user):
 
         try:
             '''extract request params'''
             getParam = self.getRequestType(request)
-            cartId = session['cust_id']
+            cartId = user['cust_id']
             quantity = getParam('quantity')
             itemId = getParam('item_id')
 
@@ -22,12 +22,13 @@ class CartManager:
             if cart:
                 for grocery in cart:
                     response[str(grocery.item_id)] = {'grocery_id':grocery.item_id,'name':grocery.cart_items.name,\
-                                                      'quantity':str(grocery.quantity),'cost':str(grocery.cost)}
+                                                      'quantity':str(grocery.quantity)}
 
                 return response
             else:
                 return {'msg':'failed operation'}
-        except:
+        except Exception as e:
+            print(e)
             return {'msg':'failed operation'}
 
     def emptyCart(self, session):
@@ -54,8 +55,8 @@ class CartManager:
             if cartItems:
                 for grocery in cartItems:
                     response[str(grocery.item_id)] = {'grocery_id': str(grocery.item_id), 'quantity': str(grocery.quantity), \
-                                                      'cost': str(grocery.cost), 'name':grocery.cart_items.name}
-                return response
+                                                      'name':grocery.cart_items.name}
+                return {'msg':'success','items':response}
             else:
                 return {'msg': 'failed'}
 
@@ -68,8 +69,8 @@ class CartManager:
             cartId = session['cust_id']
             order = self.cartAccess.checkoutCart(int(cartId))
             if order:
-                return {'order_id':str(order.id), 'order_date':order.orderDate, 'status':str(order.status), \
-                        'customer_id':str(order.customer_id), 'customer':(order.customer.first_name + " "+ order.customer.last_name)}
+                return {'msg':'success', 'order':{'order_id':str(order.id), 'order_date':order.orderDate, 'status':str(order.status), \
+                        'customer_id':str(order.customer_id), 'customer':(order.customer.first_name + " "+ order.customer.last_name)}}
             else:
                 return {'msg':'order was not created'}
         except:
@@ -101,10 +102,10 @@ class CartManager:
             if cartItems:
                 for grocery in cartItems:
                     response[str(grocery.item_id)] = {'grocery_id': str(grocery.item_id), 'quantity': str(grocery.quantity), \
-                                                      'cost': str(grocery.cost), 'name':grocery.cart_items.name}
-                return response
+                                                      'cost': "100.00", 'name':grocery.cart_items.name}
+                return {'msg':'success', 'items':response}
             else:
-                return {'msg': 'not item found'}
+                return {'msg': 'not item found', 'items':{}}
         except:
             return {'msg': 'failed'}
 
