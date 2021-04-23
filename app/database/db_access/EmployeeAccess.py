@@ -21,13 +21,66 @@ class EmployeeAccess:
                 return False
         except:
             return False
+
+    def deleteEmployee(self, empId):
+        employee = self.getEmployee(empId)
+        if employee:
+            db.session.delete(employee)
+            db.session.commit()
+            return self.getEmployees()
+        else:
+            return False
+
+    def getEmployees(self):
+        employees = Employee.query.filter_by().all()
+        try:
+            if employees[0].id:
+                return employees
+            else:
+                return False
+        except:
+            return False
         
     def getEmployee(self, empId):
         employee = Employee.query.filter_by(id=empId).first()
         try:
-            if employee.id == id:
+            if employee.id == empId:
                 return employee
             else:
                 return False
         except:
             return False
+
+    def updateEmployee(self, empId, attribute, value):
+
+        employee = self.getEmployee(empId)
+        if employee:
+            if attribute == 'first_name':
+                employee.first_name = value
+                db.session.commit()
+                return self.getEmployee(empId)
+            if attribute == 'last_name':
+                employee.last_name = value
+                db.session.commit()
+                return self.getEmployee(empId)
+            if attribute == 'email':
+                employee.email = value
+                db.session.commit()
+                return self.getEmployee(empId)
+            if attribute == 'password':
+                employee.password = value
+                db.session.commit()
+                return self.getEmployee(empId)
+            if attribute == 'role':
+                employee.role = value
+                db.session.commit()
+                return self.getEmployee(empId)
+            if attribute == 'salary':
+                employee.cost_per_unit = float(value)
+                db.session.commit()
+                return self.getEmployee(empId)
+            if attribute == 'address':
+                employee.address = value
+                db.session.commit()
+                return self.getEmployee(empId)
+        return False

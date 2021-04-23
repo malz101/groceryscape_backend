@@ -14,7 +14,7 @@ order_manager = OrderManager(order_access, order_groceries_access, payment_acces
 @jwt_required()
 def schedule_order():
     user = get_jwt_identity()
-    if user:
+    if user and ('role' in user):
         order = order_manager.scheduleOrder(request)
         return order
     else:
@@ -24,8 +24,8 @@ def schedule_order():
 @jwt_required()
 def checkout_order():
     user = get_jwt_identity()
-    if user:
-        order = order_manager.checkOutOrder(session, request)
+    if user and ('role' in user):
+        order = order_manager.checkOutOrder(user, request)
         return order
     else:
         return {'msg':'you are not logged in as an employee'}
@@ -34,7 +34,7 @@ def checkout_order():
 @jwt_required()
 def get_order():
     user = get_jwt_identity()
-    if user:
+    if user and ('role' in user):
         order = order_manager.getOrder(request)
         return order
     else:
@@ -44,7 +44,7 @@ def get_order():
 @jwt_required()
 def get_orders():
     user = get_jwt_identity()
-    if user:
+    if user and ('role' in user):
         orders = order_manager.getOrders()
         return orders
     else:
@@ -54,7 +54,7 @@ def get_orders():
 @jwt_required()
 def get_total():
     user = get_jwt_identity()
-    if user:
+    if user and ('role' in user):
         return str(order_manager.getTotalOnOrder())
     else:
         return {'msg':'you are not logged in as an employee'}
@@ -63,8 +63,8 @@ def get_total():
 @jwt_required()
 def record_payment():
     user = get_jwt_identity()
-    if user:
-        payment = order_manager.recordPayment(session,request)
+    if user and ('role' in user):
+        payment = order_manager.recordPayment(user,request)
         return payment
     else:
         return {'msg':'you are not logged in as an employee'}
@@ -73,7 +73,7 @@ def record_payment():
 @jwt_required()
 def get_schedule():
     user = get_jwt_identity()
-    if user:
+    if user and ('role' in user):
         orders = order_manager.getSchedule()
         return orders
     else:

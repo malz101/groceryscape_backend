@@ -22,17 +22,15 @@ def signup():
     """Pass all the responsibility of creating an account to the account manager"""
     customer = customer_manager.createAccount(request)
     if customer:
-        session['cust_id'] = customer['cust_id']
         token = create_access_token(identity=customer)
         return {"token": token, "customer":customer}
     else:
-        return {'error':'failed request'}
+        return {'error':'sign up failed'}
 
 @manage_customer_account.route('/login', methods=["POST", "GET"])
 def login():
     customer = customer_manager.login(request)
     if customer:
-        session['cust_id'] = customer['cust_id']
         token = create_access_token(identity=customer)
         return {"token": token, "customer":customer}
     else:
@@ -48,7 +46,7 @@ def logout():
 @jwt_required()
 def update_account():
     user = get_jwt_identity()
-    if user:
+    if user and (not 'role' in user):
         customer = customer_manager.updateAccount(request,user)
         return customer
     else:
@@ -67,7 +65,7 @@ def get_customer():
 @jwt_required()
 def get_recommended_groceries():
     user = get_jwt_identity()
-    if user:
+    if user and (not 'role' in user):
         groceries = customer_manager.getRecommendedGroceries(user)
         return groceries
     else:
@@ -77,7 +75,7 @@ def get_recommended_groceries():
 @jwt_required()
 def get_pending_orders():
     user = get_jwt_identity()
-    if user:
+    if user and (not 'role' in user):
         orders = customer_manager.getMyPendingOrders(user)
         return orders
     else:
@@ -87,7 +85,7 @@ def get_pending_orders():
 @jwt_required()
 def get_my_orders():
     user = get_jwt_identity()
-    if user:
+    if user and (not 'role' in user):
         orders = customer_manager.getMyOrders(user)
         return orders
     else:
@@ -97,8 +95,18 @@ def get_my_orders():
 @jwt_required()
 def cancel_order():
     user = get_jwt_identity()
-    if user:
-        msg = customer_manager.cancelOrder(request)
+    if user and (not 'role' in user):
+        msg = customer_manager.cancelOrder(user, request)
         return msg
+    else:
+        return redirect(url_for('index'))
+
+@manage_customer_account.route('/set_delivery_location', methods=["GET","POST"])
+@jwt_required()
+def set_delivery_location():
+    user = get_jwt_identity()
+    if user and (not 'role' in user):
+        order = customer_manager.setDeliveryLocation(user, request)
+        return order
     else:
         return redirect(url_for('index'))
