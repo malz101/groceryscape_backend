@@ -43,9 +43,9 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     orderdate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     status = db.Column(db.String, nullable=False, default='PENDING')
-    deliverydate = db.Column(db.DateTime)
-    deliverytown = db.Column(db.String(45))
-    deliveryparish = db.Column(db.String(45))
+    deliveryDate = db.Column(db.DateTime)
+    deliveryTown = db.Column(db.String(45))
+    deliveryParish = db.Column(db.String(45),db.ForeignKey('delivery_parish.parish'))
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
 
     # represents the many-to-many relationship between  orders and groceries
@@ -57,6 +57,9 @@ class Order(db.Model):
     # represents a one to many-to-many relationship between employee and orders
     checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id'))
 
+    
+
+
 class Grocery(db.Model):
     __tablename__ = 'grocery'
     id = db.Column(db.Integer, primary_key=True)
@@ -65,6 +68,7 @@ class Grocery(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     units = db.Column(db.String(100), nullable=False)
     cost_per_unit = db.Column(db.Numeric(10,2), nullable=False)
+    grams_per_unit = db.Column(db.Numeric(10,2), nullable=False)
 
     #order associated many to many
     orders = db.relationship("OrderGroceries", back_populates="groceries", cascade="all,delete")
@@ -74,6 +78,8 @@ class Grocery(db.Model):
 
     #ratings associated many to many
     customer_ratings = db.relationship("Rating", back_populates="grocery_ratings", cascade="all,delete")
+
+    taxes = db.relationship("Taxes_on_goods", back_populates="grocery", cascade="all,delete")
 
 class OrderGroceries(db.Model):
     __tablename__ = 'order_groceries'
@@ -110,3 +116,20 @@ class Payment(db.Model):
     amount_tendered = db.Column(db.Numeric(10,2), nullable=False)
     change = db.Column(db.Numeric(10,2), nullable=True)
 
+class DeliveryParish(db.Model):
+    parish = db.Column(db.String(45), primary_key=True)
+    delivery_rate = db.Column(db.Numeric(10,2), nullable=False)
+
+    
+class Taxes(db.Model):
+    tax = db.Column(db.String(50), nullable=False, primary_key=True)
+    rate = db.Column(db.Numeric(10,2), nullable=False)
+
+    groceries = db.relationship("Taxes_on_goods", back_populates="tax_type", cascade="all,delete")
+
+class Taxes_on_goods(db.Model):
+    tax = db.Column(db.String, db.ForeignKey('taxes.tax'), primary_key=True)
+    grocery_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True)
+
+    grocery = db.relationship("Grocery", back_populates="taxes")
+    tax_type = db.relationship("Taxes", back_populates="groceries")

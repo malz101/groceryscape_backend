@@ -13,7 +13,7 @@ rating_manager = RatingManager(rating_access)
 @jwt_required()
 def rate_grocery():
     user = get_jwt_identity()
-    if user:
+    if user and (not 'role' in user):
         rating = rating_manager.rateGrocery(user, request)
         return rating
     else:
@@ -23,7 +23,7 @@ def rate_grocery():
 @jwt_required()
 def data_frame():
     user = get_jwt_identity()
-    if user:
+    if user and (not 'role' in user):
         rating = rating_manager.getDataFrame()
         return str(rating)
     else:

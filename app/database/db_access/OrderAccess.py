@@ -2,6 +2,9 @@ from ... import db
 from datetime import datetime
 from ..Models import Order
 from ..Models import OrderGroceries
+from .OrderGroceriesAccess import OrderGroceriesAccess
+from .CustomerAccess import CustomerAccess
+from .GroceryAccess import GroceryAccess
 from ..Models import Cart
 from sqlalchemy import and_, or_, not_
 
@@ -48,13 +51,11 @@ class OrderAccess:
         except:
             return False
 
-    def scheduleDelivery(self, orderId, date, town, parish):
+    def scheduleDelivery(self, orderId, date):
         
         order = self.getOrderById(orderId)
         if order:
             order.deliveryDate = date
-            order.deliveryTown = town
-            order.deliveryParish = parish
             db.session.commit()
             return order
         else:
@@ -105,7 +106,39 @@ class OrderAccess:
         except:
             return False
 
-    def cancelOrder(self, orderId):
-        return self.updateStatus(orderId,'CANCELED')
+    def cancelOrder(self, custId, orderId):
+        order = self.getOrderById(orderId)
+        if order:
+            if order.customer_id == custId:
+                self.updateStatus(orderId,'CANCELED')
+                return order
+            else:
+                return  False
+        else:
+            return False
 
+    def setDeliveryLocation(self, custId, orderId, parish, town):
+        order = self.getOrderById(orderId)
+        if order:
+            if order.customer_id == custId:
+                order.deliveryParish = parish
+                order.deliveryTown = town
+                db.session.commit()
+                return order
+            else:
+                return False
+        else:
+            return False
+
+    def getItemsInOrder(self, orderId):
+        return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getAllItemsOnOrder(orderId)
+
+    def getTax(self,groceryId, type):
+        return GroceryAccess().getTax(groceryId,type)
+
+    def getTotalOnOrder(self, orderId):
+        return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getTotalOnOrder(orderId)
+
+    def getDeliveryCost(self,orderId):
+        return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getDeliveryCost(orderId)
 

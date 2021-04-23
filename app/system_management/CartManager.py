@@ -21,12 +21,21 @@ class CartManager:
             response = {}
             if cart:
                 for grocery in cart:
-                    response[str(grocery.item_id)] = {'grocery_id':grocery.item_id,'name':grocery.cart_items.name,\
-                                                      'quantity':str(grocery.quantity)}
+                    cost_before_tax = grocery.quantity * grocery.cart_items.cost_per_unit
+                    GCT = self.groceryAccess.getTax(grocery.item_id, 'GCT') * grocery.quantity
+                    SCT = self.groceryAccess.getTax(grocery.item_id, 'SCT') * grocery.quantity
+                    total = float(cost_before_tax) + float(GCT) + float(SCT)
+                    total_weight = str(grocery.quantity * grocery.cart_items.grams_per_unit) + " grams"
+                    response[str(grocery.item_id)] = {'grocery_id': str(grocery.item_id),\
+                                                      'quantity': str(grocery.quantity), \
+                                                      'cost_before_tax': str(cost_before_tax),\
+                                                      'name': grocery.cart_items.name, \
+                                                      'total_weight': total_weight, 'GCT': str(GCT), 'SCT': str(SCT),\
+                                                      'total': str(total)}
 
-                return response
+                return {'msg':'success', 'items':response, 'grand_total':self.cartAccess.getTotalOnCart(cartId)}
             else:
-                return {'msg':'failed operation'}
+                return {'msg':'item not added'}
         except Exception as e:
             print(e)
             return {'msg':'failed operation'}
@@ -43,30 +52,39 @@ class CartManager:
         except:
             return {'msg':'operation failed'}
 
-    def removeItemFromCart(self, request, session):
+    def removeItemFromCart(self, request, user):
 
         try:
             getParam = self.getRequestType(request)
             itemId = getParam('grocery_id')
-            cartId = session['cust_id']
+            cartId = user['cust_id']
 
             cartItems = self.cartAccess.removeItem(cartId, itemId)
             response = {}
             if cartItems:
                 for grocery in cartItems:
-                    response[str(grocery.item_id)] = {'grocery_id': str(grocery.item_id), 'quantity': str(grocery.quantity), \
-                                                      'name':grocery.cart_items.name}
-                return {'msg':'success','items':response}
+                    cost_before_tax = grocery.quantity * grocery.cart_items.cost_per_unit
+                    GCT = self.groceryAccess.getTax(grocery.item_id, 'GCT') * grocery.quantity
+                    SCT = self.groceryAccess.getTax(grocery.item_id, 'SCT') * grocery.quantity
+                    total = float(cost_before_tax) + float(GCT) + float(SCT)
+                    total_weight = str(grocery.quantity * grocery.cart_items.grams_per_unit) + " grams"
+                    response[str(grocery.item_id)] = {'grocery_id': str(grocery.item_id), \
+                                                      'quantity': str(grocery.quantity), \
+                                                      'cost_before_tax': str(cost_before_tax), \
+                                                      'name': grocery.cart_items.name, \
+                                                      'total_weight': total_weight, 'GCT': str(GCT), 'SCT': str(SCT), \
+                                                      'total': str(total)}
+                return {'msg':'success', 'items':response, 'grand_total':self.cartAccess.getTotalOnCart(cartId)}
             else:
-                return {'msg': 'failed'}
+                return {'msg': 'no item found', 'items':{}}
 
         except:
             return {'msg':'failed operation'}
 
-    def checkoutCart(self, session):
+    def checkoutCart(self, user):
 
         try:
-            cartId = session['cust_id']
+            cartId = user['cust_id']
             order = self.cartAccess.checkoutCart(int(cartId))
             if order:
                 return {'msg':'success', 'order':{'order_id':str(order.id), 'order_date':order.orderDate, 'status':str(order.status), \
@@ -76,36 +94,51 @@ class CartManager:
         except:
             return {'msg':'failed request'}
 
-    def updateCartItem(self, request, session):
+    def updateCartItem(self, request, user):
 
         try:
             getParam = self.getRequestType(request)
             itemId = getParam('item_id')
             quantity = getParam('quantity')
-            cartId = session['cust_id']
+            cartId = user['cust_id']
 
-            cartItem = self.cartAccess.updateCartItem(int(cartId),int(itemId),int(quantity))
-            if cartItem:
-                return {'grocery_id': str(cartItem.item_id), 'quantity': str(cartItem.quantity), \
-                        'cost': str(cartItem.cost), 'name':cartItem.cart_items.name}
+            grocery = self.cartAccess.updateCartItem(int(cartId),int(itemId),int(quantity))
+            if grocery:
+                cost_before_tax = grocery.quantity * grocery.cart_items.cost_per_unit
+                GCT = self.groceryAccess.getTax(grocery.item_id, 'GCT') * grocery.quantity
+                SCT = self.groceryAccess.getTax(grocery.item_id, 'SCT') * grocery.quantity
+                total = float(cost_before_tax) + float(GCT) + float(SCT)
+                total_weight = str(grocery.quantity * grocery.cart_items.grams_per_unit) + " grams"
+                return {'grocery_id': str(grocery.item_id), \
+                                                  'quantity': str(grocery.quantity), \
+                                                  'cost_before_tax': str(cost_before_tax), \
+                                                  'name': grocery.cart_items.name, \
+                                                  'total_weight': total_weight, 'GCT': str(GCT), 'SCT': str(SCT), \
+                                                  'total': str(total)}
             else:
                 return {'msg':'not updated'}
         except:
             return {'msg':'failed request'}
 
-    def getAllCartItems(self, session):
+    def getAllCartItems(self, user):
 
         try:
-            cartId = session['cust_id']
+            cartId = user['cust_id']
             cartItems = self.cartAccess.getAllCartItems(cartId)
             response = {}
             if cartItems:
                 for grocery in cartItems:
+                    cost_before_tax = grocery.quantity*grocery.cart_items.cost_per_unit
+                    GCT = self.groceryAccess.getTax(grocery.item_id,'GCT')*grocery.quantity
+                    SCT = self.groceryAccess.getTax(grocery.item_id,'SCT')*grocery.quantity
+                    total = float(cost_before_tax) + float(GCT) + float(SCT)
+                    total_weight = str(grocery.quantity*grocery.cart_items.grams_per_unit)+" grams"
                     response[str(grocery.item_id)] = {'grocery_id': str(grocery.item_id), 'quantity': str(grocery.quantity), \
-                                                      'cost': "100.00", 'name':grocery.cart_items.name}
-                return {'msg':'success', 'items':response}
+                                                      'cost_before_tax': str(cost_before_tax),'name':grocery.cart_items.name,\
+                                                      'total_weight':total_weight,'GCT':str(GCT),'SCT':str(SCT),'total': str(total)}
+                return {'msg':'success', 'items':response, 'grand_total':self.cartAccess.getTotalOnCart(cartId)}
             else:
-                return {'msg': 'not item found', 'items':{}}
+                return {'msg': 'no item found', 'items':{}}
         except:
             return {'msg': 'failed'}
 

@@ -1,5 +1,6 @@
 from ... import db
 from ..Models import OrderGroceries
+from ..Models import DeliveryParish
 
 class OrderGroceriesAccess:
 
@@ -25,10 +26,25 @@ class OrderGroceriesAccess:
         total = 0
         if items:
             for item in items:
-                total += item.price
+                # print(item.orders.deliveryParish)
+                delivery_cost = float(self.getParish(str(item.orders.deliveryParish)).delivery_rate)
+                cost_before_tax = item.quantity * item.groceries.cost_per_unit
+                GCT = self.groceryAccess.getTax(item.grocery_id, 'GCT') * item.quantity
+                SCT = self.groceryAccess.getTax(item.grocery_id, 'SCT') * item.quantity
+                total_on_item = float(cost_before_tax) + float(GCT) + float(SCT) + delivery_cost
+                total += total_on_item
             return total
         else:
             return False
 
+    def getParish(self,parish):
+        par = DeliveryParish.query.filter_by(parish=parish).first()
+        return par
 
+    def getDeliveryCost(self,orderId):
+        order = self.orderAccess.getOrderById(orderId)
+        if order:
+            return float(self.getParish(str(order.deliveryParish)).delivery_rate)
+        else:
+            return False
 

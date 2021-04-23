@@ -1,11 +1,14 @@
 from ... import db
 from ..Models import Grocery
+from ..Models import Taxes
+from ..Models import Taxes_on_goods
+from sqlalchemy import and_, or_, not_
 
 class GroceryAccess:
 
-    def create_grocery(self, name, description, quantity, units, price):
+    def create_grocery(self, name, description, quantity, units, price, grams_per_unit):
 
-        grocery = Grocery(name=name, description=description, quantity=quantity, units=units, cost_per_unit=price)
+        grocery = Grocery(name=name, description=description, quantity=quantity, units=units, cost_per_unit=price, grams_per_unit=grams_per_unit)
         db.session.add(grocery)
         db.session.commit()
         return self.searchForGrocery(grocery.id)
@@ -32,6 +35,10 @@ class GroceryAccess:
                 return self.searchForGrocery(groceryId)
             if attribute == 'cost_per_unit':
                 grocery.cost_per_unit = float(value)
+                db.session.commit()
+                return self.searchForGrocery(groceryId)
+            if attribute == 'grams_per_unit':
+                grocery.grams_per_unit = float(value)
                 db.session.commit()
                 return self.searchForGrocery(groceryId)
         return False
@@ -61,4 +68,23 @@ class GroceryAccess:
             db.session.delete(grocery)
             db.session.commit()
         return self.getGroceries()
+    
+    def getTaxType(self, groceryId, type):
+        grocery = self.searchForGrocery(groceryId)
+        if grocery:
+            tax = Taxes_on_goods.query.filter(and_(Taxes_on_goods.tax.like(type), Taxes_on_goods.grocery_id.like(groceryId))).first()
+            try:
+                if tax.grocery_id:
+                    return tax
+            except:
+                return False
+        else:
+            return False
+    
+    def getTax(self, groceryId, type):
+        taxOnItem = self.getTaxType(groceryId, type)
+        if taxOnItem:
+            return float(taxOnItem.tax_type.rate) * float(taxOnItem.grocery.cost_per_unit)
+        else:
+            return 0
 

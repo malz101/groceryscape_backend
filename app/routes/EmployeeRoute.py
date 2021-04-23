@@ -27,16 +27,6 @@ def login():
     token = create_access_token(identity=employee)
     if employee:
         # logout if already logged into an account
-        if 'staff_id' in session:
-            session.pop('staff_id', None)
-        if 'admin_id' in session:
-            session.pop('admin_id', None)
-            
-        if employee['role'] == 'admin':
-            session['admin_id'] = int(employee['id'])
-        else:
-            session['staff_id'] = int(employee['id'])
-            
         return {"token": token, "employee":employee}
     else:
         return {'error': 'employee not found'}
@@ -46,18 +36,73 @@ def login():
 @jwt_required()
 def register():
     user = get_jwt_identity()
-    if user['role'] == 'admin':
-        employee = employee_manager.createEmployee(request)
-        if employee:
-            if employee['role'] == 'admin':
-                session['admin_id'] = int(employee['id'])
+    if user and ('role' in user):
+        if user['role'] == 'admin':
+            employee = employee_manager.createEmployee(request)
+            if employee:
+                return employee
             else:
-                session['staff_id'] = int(employee['id'])
+                return {'error': 'account was not created'}
+        else:
+            return {'msg':'only admin can perform this task'}
+    else:
+        return {'msg': 'you are not logged in as an employee'}
+
+"""get employees"""
+@manage_employee_account.route('/get_employees', methods=['GET','POST'])
+@jwt_required()
+def get_employees():
+    user = get_jwt_identity()
+    if user and ('role' in user):
+        if user['role'] == 'admin':
+            employees = employee_manager.getEmployees()
+            return employees
+        else:
+            return {'msg':'only admin can perform this task'}
+    else:
+        return {'msg': 'you are not logged in as an employee'}
+
+"""get employee"""
+@manage_employee_account.route('/get_employee', methods=['GET','POST'])
+@jwt_required()
+def get_employee():
+    user = get_jwt_identity()
+    if user and ('role' in user):
+        if user['role'] == 'admin':
+            employee = employee_manager.getEmployee(request)
             return employee
         else:
-            return {'error': 'failed request'}
+            return {'msg':'only admin can perform this task'}
     else:
-        return {'msg':'only admin can perform this task'}
+        return {'msg': 'you are not logged in as an employee'}
+
+@manage_employee_account.route('/update_employee', methods=['POST','GET'])
+@jwt_required()
+def update_employee():
+
+    user = get_jwt_identity()
+    if user and ('role' in user):
+        if user['role'] == 'admin':
+            employee = employee_manager.updateEmployee(request)
+            return employee
+        else:
+            return {'msg': 'only admin can perform this task'}
+    else:
+        return {'msg': 'you are not logged in as an employee'}
+
+"""delete an employee"""
+@manage_employee_account.route('/delete_employee', methods=['GET','POST'])
+@jwt_required()
+def delete_employee():
+    user = get_jwt_identity()
+    if user and ('role' in user):
+        if user['role'] == 'admin':
+            msg = employee_manager.deleteEmployee(request)
+            return msg
+        else:
+            return {'msg': 'only admin can perform this task'}
+    else:
+        return {'msg': 'you are not logged in as an employee'}
     
 @manage_employee_account.route('/logout', methods=["GET", "POST"])
 def logout():

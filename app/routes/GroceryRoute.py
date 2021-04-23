@@ -14,7 +14,7 @@ grocery_manager = GroceryManager(grocery_access)
 @jwt_required()
 def create_grocery():
     user = get_jwt_identity()
-    if user:
+    if user and ('role' in user):
         return render_template('adminViews/create_grocery.html')
     else:
         return redirect(url_for('manage_employee_account.index'))
@@ -23,7 +23,7 @@ def create_grocery():
 @jwt_required()
 def submit_grocery():
     user = get_jwt_identity()
-    if user:
+    if user and ('role' in user):
         newGrocery = grocery_manager.addGrocery(request)
         return newGrocery
     else:
@@ -34,7 +34,7 @@ def submit_grocery():
 def update_grocery():
 
     user = get_jwt_identity()
-    if user:
+    if user and ('role' in user):
         updatedGrocery = grocery_manager.updateGrocery(request)
         return updatedGrocery
     else:
@@ -45,7 +45,7 @@ def update_grocery():
 def delete_grocery():
 
     user = get_jwt_identity()
-    if user:
+    if user and ('role' in user):
         groceries = grocery_manager.deleteGrocery(request)
         return groceries
     else:
@@ -55,3 +55,8 @@ def delete_grocery():
 def get_groceries():
     groceries = grocery_manager.getGroceries(request)
     return groceries
+
+@manage_groceries.route('/get_grocery', methods=['POST','GET'])
+def get_grocery():
+    grocery = grocery_manager.getGrocery(request)
+    return grocery

@@ -3,10 +3,10 @@ class RatingManager:
     def __init__(self, rating_access):
         self.rating_access = rating_access
 
-    def rateGrocery(self, session, request):
+    def rateGrocery(self, user, request):
         try:
             getParam = self.getRequestType(request)
-            custId = session['cust_id']
+            custId = user['cust_id']
             itemId = getParam('item_id')
             rating = getParam('rating')
 
@@ -16,7 +16,7 @@ class RatingManager:
                         rating.customer_ratings.last_name), 'grocery_name':rating.grocery_ratings.name,\
                         'grocery_id':str(rating.item_id),'rating':str(rating.rating)}
             else:
-                return {'msg':'operation could not be completed'}
+                return {'msg':'operation could not be completed because customer or grocery does not exist'}
         except:
             return {'msg':'failed request'}
         

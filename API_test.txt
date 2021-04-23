@@ -10,7 +10,7 @@
 3) update account:
     http://localhost:5000/manage_customer_account/update_account?attribute=last_name&value=Dustin
 
-4) logout:
+4) logout: ***
     http://localhost:5000/manage_customer_account/logout
 
 5) get my orders:
@@ -25,11 +25,14 @@
 8) get recommended groceries:
     http://localhost:5000/manage_customer_account/get_recommended_groceries
 
+9) set delivery location:
+    http://localhost:5000/manage_customer_account/set_delivery_location?order_id=207&parish=St. Mary&town=Circus
+
 ---------------------------------------------------------------
                             Grocery
 ----------------------------------------------------------------
 1) create grocery:
-    http://localhost:5000/manage_groceries/submit_grocery?grocery_name=biscuit&description=butterkiss&quantity=12&price=90&units=bag
+    http://localhost:5000/manage_groceries/submit_grocery?grocery_name=biscuit&description=butterkiss&quantity=12&price=90&units=bag&grams_per_unit=0.67
 
 2) update grocery:
     http://localhost:5000/manage_groceries/update_grocery?grocery_id=2&attribute=name&value=apple
@@ -50,12 +53,23 @@
 1) login:
     http://localhost:5000/manage_employee_account/login?email=jordanchristine@example.org&password=1234
 
-2) logout:
+2) logout: ***
     http://localhost:5000/manage_employee_account/logout
 
 3) add employee:
     http://localhost:5000/manage_employee_account/register?first_name=Jeremy&last_name=Thomas&email=jeremythomas@hotmail.com&address=Cross%20Road,%20Kgn&password=000&role=admin&salary=200000.00
-4)
+
+4) delete employee:
+    http://localhost:5000/manage_employee_account/delete_employee?emp_id=15
+
+5) get employees:
+    http://localhost:5000/manage_employee_account/get_employees
+
+6) get an employee:
+    http://localhost:5000/manage_employee_account/get_employee?emp_id=14
+
+7) update employee:
+    http://localhost:5000/manage_employee_account/update_employee?emp_id=2&attribute=first_name&value=Tommy
 
 ---------------------------------------------------------------
                             Cart
@@ -82,9 +96,10 @@
                             Rating
 ---------------------------------------------------------------
 1) rate grocery:
-    http://localhost:5000/manage_rating/rate_grocery?item_id=3&rating=6
+    http://localhost:5000/manage_rating/rate_grocery?item_id=9&rating=6
 
 2) get all ratings:
+
 
 3) get rating:
 
@@ -92,7 +107,7 @@
                             Order
 ---------------------------------------------------------------
 1) schedule delivery:
-        http://localhost:5000/manage_order/schedule_order?order_id=3&date=2021-04-20 15:30:00&town=UWI&parish=St. Andrew
+        http://localhost:5000/manage_order/schedule_order?order_id=3&date=2021-04-20 15:30:00
 
 2) checkout order:
      http://localhost:5000/manage_order/checkout_order?order_id=3
