@@ -80,9 +80,13 @@ class OrderAccess:
         except:
             return False
 
-    def getCustomerOrders(self,custId, status='', min_order_timestamp=None,\
+    def getCustomerOrders(self,custId, status=None, min_order_timestamp=None,\
                             max_order_timestamp=None, min_delivery_timestamp=None,\
                             max_delivery_timestamp=None, delivery_town=None,delivery_parish=None):
+
+        if status is None:
+            status = ''
+        status = '%{}%'.format(status)
 
         if min_order_timestamp is None:
             min_order_timestamp = datetime(1970, 1, 1,tzinfo=timezone.utc)
@@ -91,32 +95,17 @@ class OrderAccess:
             min_delivery_timestamp = datetime(1970, 1, 1,tzinfo=timezone.utc)
 
         current_time = datetime.utcnow() # get current date and time
-
-        status = '%{}%'.format(status)
-
         # min_order_timestamp =  '%{}%'.format(min_order_timestamp)
         if max_order_timestamp is None:
-            # print('here')
-            # ts = time.time() 
-            # max_order_timestamp = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
             max_order_timestamp = current_time#.strftime('%Y-%m-%d %H:%M:%S')
-        #     max_order_timestamp = '%{}%'.format(max_order_timestamp)
         else:
             max_order_timestamp = datetime.strptime(max_order_timestamp, '%Y-%m-%d %H:%M:%S')
 
-        # min_delivery_timestamp =  '%{}%'.format(min_delivery_timestamp)
         delivery_range_provided = datetime.strptime('0001-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
         if max_delivery_timestamp is None:
-            # generate max time as two days in advance
-            # 1728000 is the number of seconds in 2 days
-            # ts = time.time()+1728000  
-            # max_delivery_timestamp = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
             max_delivery_timestamp =  current_time + timedelta(days=2)
             delivery_range_provided = None
-            # max_order_timestamp = two_days_in_advance.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-        #     max_delivery_timestamp = '%{}%'.format(max_delivery_timestamp)
         else:
-            # max_delivery_timestamp = '%{}%'.format(max_delivery_timestamp)
             max_delivery_timestamp = datetime.strptime(max_delivery_timestamp, '%Y-%m-%d %H:%M:%S')
 
 
@@ -126,6 +115,7 @@ class OrderAccess:
             delivery_town = ''
         delivery_town = '%{}%'.format(delivery_town)
 
+        parish_provided = ''
         if delivery_parish is None:
             parish_provided = None
             delivery_parish = ''

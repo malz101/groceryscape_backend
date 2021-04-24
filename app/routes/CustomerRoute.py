@@ -122,24 +122,7 @@ def get_recommended_groceries():
 
     else:
         return redirect(url_for('index'))
-    
-@manage_customer_account.route('/get_pending_orders', methods=["GET"])
-@jwt_required()
-def get_pending_orders():
-    user = get_jwt_identity()
-    if user and (not 'role' in user):
-        try:
-            orders = customer_manager.getMyPendingOrders(user)
-            if orders:
-                response = {'msg': '', 'data':{'orders':orders}}, 200
-            else:
-                reponse = {'msg':'no orders found', 'error':'notfound-0001'}, 404
-        except:
-            response = {'msg':'no orders found', 'error':'ise-0001'}, 500
-        finally:
-            return response
-    else:
-        return redirect(url_for('index'))
+
     
 @manage_customer_account.route('/get_my_orders', methods=["GET"])
 @jwt_required()

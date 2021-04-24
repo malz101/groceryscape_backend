@@ -15,9 +15,6 @@
 5) get my orders:
     http://localhost:5000/manage_customer_account/get_my_orders
 
-6) get my pending orders:
-    http://localhost:5000/manage_customer_account/get_pending_orders
-
 7) cancel order:
     http://localhost:5000/manage_customer_account/cancel_order/<order_id>
 
