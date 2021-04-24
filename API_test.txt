@@ -19,14 +19,13 @@
     http://localhost:5000/manage_customer_account/get_pending_orders
 
 7) cancel order:
-    http://localhost:5000/manage_customer_account/cancel_order/5
+    http://localhost:5000/manage_customer_account/cancel_order/<order_id>
 
 8) get recommended groceries:
     http://localhost:5000/manage_customer_account/get_recommended_groceries
 
 9) set delivery location:
-    http://localhost:5000/manage_customer_account/set_delivery_location?order_id=207&parish=St. Mary&town=Circus
-
+    http://localhost:5000/manage_customer_account/set_delivery_location/<order_id>
 ---------------------------------------------------------------
                             Grocery
 ----------------------------------------------------------------
@@ -77,7 +76,7 @@
     http://localhost:5000/manage_cart/addToCart?quantity=3&item_id=2
 
 2) remove item from cart:
-    http://localhost:5000/manage_cart/removeFromCart?grocery_id=2
+    http://localhost:5000/manage_cart/removeFromCart/<grocery_id>
 
 3) query cart items:
     http://localhost:5000/manage_cart/get_cart_items

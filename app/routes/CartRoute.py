@@ -8,15 +8,25 @@ from ..database.db_access import grocery_access
 manage_cart = Blueprint("manage_cart", __name__)
 
 cart_manager = CartManager(cart_access, grocery_access)
-emp_login_restrict_msg = {'msg':'you account does not have a cart'}
+emp_login_restrict_msg = {'msg':'your account does not have a cart', 'error':'notfound-0001'}, 404
 
 @manage_cart.route('/addToCart', methods=['POST','GET'])
 @jwt_required()
 def addToCart():
     user = get_jwt_identity()
-    if not 'role' in user: 
-        cart = cart_manager.addToCart(request, user)
-        return cart
+    if not 'role' in user:
+        try:
+            cart = cart_manager.addToCart(request, user)
+            if cart:
+                response = {'msg':'success','data':{'cart':cart}}, 201
+            else:
+                response = {'msg':'item not added','error':'create-0001'}, 404
+        except Exception as e:
+            response = {'msg':'', 'error':'ise-0001'}, 500
+        finally:
+            return response
+
+
     else:
         return emp_login_restrict_msg
 
@@ -24,20 +34,36 @@ def addToCart():
 @jwt_required()
 def CheckOutCart():
     user = get_jwt_identity()
-    if not 'role' in user: 
-        order = cart_manager.checkoutCart(user)
-        return order
+    if not 'role' in user:
+        try:
+            order = cart_manager.checkoutCart(user)
+            if order:
+                response = {'msg':'success', 'data':order},200
+            else:
+                response = {'msg':'order was not created', 'error':'create-0001'}, 500
+        except Exception as e:
+            response = {'msg':'','error':'ise-0001'}, 500
+        finally:
+            return response 
     else:
         return emp_login_restrict_msg
     
-@manage_cart.route('/removeFromCart', methods=['POST', 'GET'])
+@manage_cart.route('/removeFromCart/<grocery_id>', methods=['POST', 'GET'])
 @jwt_required()
-def removeFromCart():
+def removeFromCart(grocery_id):
     
     user = get_jwt_identity()
     if not 'role' in user:
-        cartItems = cart_manager.removeItemFromCart(request, user)
-        return cartItems
+        try:
+            cartItems = cart_manager.removeItemFromCart(grocery_id, user)
+            if cartItems:
+                reponse = {'msg':'success', 'data':cartItems}, 200
+            else:
+                response = {'msg':'no item found', 'error':'notfound-0001'}, 404
+        except Exception as e:
+            response = {'msg':'','error':'ise-0001'}, 500
+        finally:
+            return response
     else:
         return emp_login_restrict_msg
     
@@ -46,8 +72,16 @@ def removeFromCart():
 def empty_cart():
     user = get_jwt_identity()
     if not 'role' in user:
-        cartItems = cart_manager.emptyCart(user)
-        return cartItems
+        try:
+            cartItems = cart_manager.emptyCart(user)
+            if cartItems:
+                response = {'msg':'success', 'data':cartItems},200
+            else:
+                response = {'msg':'no item found', 'error':'notfound-0001'},404
+        except Exception as e:
+            response = {'msg':'','error':'ise-0001'}, 500
+        finally:
+            return response
     else:
         return emp_login_restrict_msg
     
@@ -57,8 +91,16 @@ def empty_cart():
 def get_cart_items():
     user = get_jwt_identity()
     if not 'role' in user:
-        cartItems = cart_manager.getAllCartItems(user)
-        return cartItems
+        try:
+            cartItems = cart_manager.getAllCartItems(user)
+            if cartItems:
+                response = {'msg':'success', 'data':cartItem}
+            else:
+                response = {'msg':'no items found','error':'notfound-0001'},404
+        except Exception as e:
+            response = response = {'msg':'','error':'ise-0001'}, 500
+        finally:
+            return response
     else:
         return emp_login_restrict_msg
 

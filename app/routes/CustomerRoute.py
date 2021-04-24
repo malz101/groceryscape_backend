@@ -147,7 +147,7 @@ def get_my_orders():
     user = get_jwt_identity()
     if user and (not 'role' in user):
         try:
-            orders = customer_manager.getMyOrders(user)
+            orders = customer_manager.getMyOrders(user,request)
             if orders:
                 response = {'msg': '', 'data':{'orders':orders}}, 200
             else:
@@ -181,17 +181,18 @@ def cancel_order(order_id):
         return redirect(url_for('index'))
 
 
-@manage_customer_account.route('/set_delivery_location', methods=["GET","POST"])
+@manage_customer_account.route('/set_delivery_location/<order_id>', methods=["POST"])
 @jwt_required()
-def set_delivery_location():
+def set_delivery_location(order_id):
     user = get_jwt_identity()
     if user and (not 'role' in user):
         try:
-            order = customer_manager.setDeliveryLocation(user, request)
+            order = customer_manager.setDeliveryLocation(user, request, order_id)
+            print(order)
             if order:
-                response = {'msg':'delivery location update successful', 'data':{'order':order}}
+                response = {'msg':'delivery location update successful', 'data':{'order':order}}, 200
             else:
-                response = {'msg':'delivery loction update unsuccessful'}
+                response = {'msg':'delivery loction update unsuccessful', 'error':'create-0001'}, 404
         except Exception:
             response = response = {'msg':'', 'error':'ise-0001'}, 500
         finally:

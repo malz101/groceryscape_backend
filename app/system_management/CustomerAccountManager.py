@@ -64,12 +64,12 @@ class AccountManager:
             return self.__getCustomerDetails(customer)
         return False
 
-    def setDeliveryLocation(self, user, request):
+    def setDeliveryLocation(self, user, request, order_id):
         getParam = self.getRequestType(request)
         parish = getParam('parish')
         town = getParam('town')
-        order_id = getParam('order_id')
         cust_id = user['cust_id']
+        
 
         order = self.orderAccess.setDeliveryLocation(int(cust_id),int(order_id),parish,town)
         if order:
@@ -81,6 +81,7 @@ class AccountManager:
                 empName = 'False'
             return self.__getOrderDetails(order,empName)
         return False
+
 
     def getRecommendedGroceries(self, custId):
         groceries = ''
@@ -108,12 +109,15 @@ class AccountManager:
         return False
 
         
-    def getMyOrders(self, user):
-
+    def getMyOrders(self, user, request):
+        getParam = self.getRequestType(request)
+        print('order params',list(request.args.keys()))
+        
         cust_id = user['cust_id']
         orders = self.orderAccess.getCustomerOrders(cust_id)
-        response = {}
+        response = []
         if orders:
+            print('Orders',orders)
             for order in orders:
                 empFname = order.employee
                 empLname = order.employee
@@ -121,8 +125,13 @@ class AccountManager:
                     empName = (empFname.first_name + " " + empLname.last_name)
                 else:
                     empName = 'False'
-                response[str(order.id)] = self.__getOrderDetails(order, empName),self.__getOrderItemsDetails(order.id)
-
+                response.append(
+                    {
+                        'order_id':str(order.id),
+                        'summary':self.__getOrderDetails(order, empName),
+                        'items': self.__getOrderItemsDetails(order.id)
+                    }
+                )
         return response
 
     def getMyPendingOrders(self, user):
@@ -159,7 +168,7 @@ class AccountManager:
                                                 'total':self.orderAccess.getTotalOnOrder(order.id)}
     def __getOrderItemsDetails(self,orderId):
         orderItems = self.orderAccess.getItemsInOrder(orderId)
-        response = {}
+        response = []
         if orderItems:
             for grocery in orderItems:
                 cost_before_tax = grocery.quantity * grocery.groceries.cost_per_unit
@@ -167,12 +176,18 @@ class AccountManager:
                 SCT = self.orderAccess.getTax(grocery.grocery_id, 'SCT') * grocery.quantity
                 total = float(cost_before_tax) + float(GCT) + float(SCT)
                 total_weight = str(grocery.quantity * grocery.groceries.grams_per_unit) + " grams"
-                response[str(grocery.grocery_id)] = {'grocery_id': str(grocery.grocery_id), \
-                                                  'quantity': str(grocery.quantity), \
-                                                  'cost_before_tax': str(cost_before_tax), \
-                                                  'name': grocery.groceries.name, \
-                                                  'total_weight': total_weight, 'GCT': str(GCT), 'SCT': str(SCT), \
-                                                  'total': str(total)}
+                response.append (
+                    {
+                        'grocery_id': str(grocery.grocery_id), \
+                        'quantity': str(grocery.quantity), \
+                        'cost_before_tax': str(cost_before_tax), \
+                        'name': grocery.groceries.name, \
+                        'total_weight': total_weight,\
+                        'GCT': str(GCT),\
+                        'SCT': str(SCT), \
+                        'total': str(total)
+                    }
+                )
             return response
         else:
             return {orderId:'no groceries on order'}
