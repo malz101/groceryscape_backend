@@ -2,27 +2,27 @@
                             Customer
 ----------------------------------------------------------------
 1) sign up:
-     http://localhost:5000/manage_customer_account/signup
+     https://infinite-beach-27814.herokuapp.com/manage_customer_account/signup
 
 2) login:
-    http://localhost:5000/manage_customer_account/login
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/login
 3) update account:
-    http://localhost:5000/manage_customer_account/update_account
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/update_account
 
 4) logout: ***
-    http://localhost:5000/manage_customer_account/logout
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/logout
 
 5) get my orders:
-    http://localhost:5000/manage_customer_account/get_my_orders
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/get_my_orders
 
 7) cancel order:
-    http://localhost:5000/manage_customer_account/cancel_order/<order_id>
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/cancel_order/<order_id>
 
 8) get recommended groceries:
-    http://localhost:5000/manage_customer_account/get_recommended_groceries
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/get_recommended_groceries
 
 9) set delivery location:
-    http://localhost:5000/manage_customer_account/set_delivery_location/<order_id>
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/set_delivery_location/<order_id>
 ---------------------------------------------------------------
                             Grocery
 ----------------------------------------------------------------
