@@ -98,7 +98,7 @@ def get_cart_items():
         try:
             cartItems = cart_manager.getAllCartItems(user)
             if cartItems:
-                response = {'msg':'success', 'data':cartItem}
+                response = {'msg':'success', 'data':cartItems}
             else:
                 response = {'msg':'no items found','data':{}},200
         except Exception as e:
