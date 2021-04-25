@@ -20,7 +20,7 @@ def addToCart():
             if cart:
                 response = {'msg':'success','data':{'cart':cart}}, 201
             else:
-                response = {'msg':'item not added','error':'create-0001'}, 404
+                response = {'msg':'Item not added. Duplicate Item or Grocery Item not in database','error':'create-0001'}, 404
         except Exception as e:
             print(e)
             response = {'msg':'', 'error':'ise-0001'}, 500

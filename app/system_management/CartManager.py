@@ -48,13 +48,13 @@ class CartManager:
         except:
             return {'msg':'operation failed'}
 
-    def removeItemFromCart(self, request, user):
+    def removeItemFromCart(self, grocery_id, user):
 
-        getParam = self.getRequestType(request)
-        itemId = getParam('grocery_id')
+        # getParam = self.getRequestType(request)
+        # itemId = getParam('grocery_id')
         cartId = user['cust_id']
 
-        cartItems = self.cartAccess.removeItem(cartId, itemId)
+        cartItems = self.cartAccess.removeItem(cartId, grocery_id)
         response = {}
         if cartItems:
             for grocery in cartItems:
