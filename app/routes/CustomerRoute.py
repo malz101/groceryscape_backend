@@ -95,7 +95,7 @@ def get_customer(user_id):
             if customer:
                 response = {'msg': 'success','data': {'customer':customer}}, 200
             else:
-                response = {'msg':'user with id '+str(user_id)+' does not exist','error':'notfound-0001'}, 404
+                response = {'msg':'user with id '+str(user_id)+' does not exist','data':{}}, 200
         except Exception as e:
             # print(e)
             response = {'msg':'','error':'ise-0001'}, 500
@@ -114,7 +114,7 @@ def get_recommended_groceries():
             groceries = customer_manager.getRecommendedGroceries(user)
             reponse = {'msg': '', 'data':{'groceries':groceries}}, 200
         except NameError:
-            response = {'msg': 'customer not found', 'error': 'notfound-0001'}, 404
+            response = {'msg': 'customer not found', 'data': {}}, 200
         except Exception as e:
             response = {'msg': '', 'error': 'ise-0001'}, 500
         finally:
@@ -134,7 +134,7 @@ def get_my_orders():
             if orders:
                 response = {'msg': '', 'data':{'orders':orders}}, 200
             else:
-                response = {'msg': 'no orders found', 'error':'notfound-0001'}, 404
+                response = {'msg': 'no orders found', 'data':{}}, 200
 
         except Exception as e:
             print(e)
@@ -155,7 +155,7 @@ def cancel_order(order_id):
             if msg:
                 response = {'msg':'order successfully cancelled', 'data':{'msg':msg}}, 200
             else:
-                reponse = {'msg': 'order cancellation unsuccessful', 'error':'notfound-0001'} ,404
+                reponse = {'msg': 'order cancellation unsuccessful', 'data':{}} ,200
         except:
             response = {'msg':'', 'error':'ise-0001'}, 500
         finally:
@@ -175,7 +175,7 @@ def set_delivery_location(order_id):
             if order:
                 response = {'msg':'delivery location update successful', 'data':{'order':order}}, 200
             else:
-                response = {'msg':'delivery loction update unsuccessful', 'error':'create-0001'}, 404
+                response = {'msg':'delivery loction update unsuccessful', 'data':{}}, 200
         except Exception:
             response = response = {'msg':'', 'error':'ise-0001'}, 500
         finally:
