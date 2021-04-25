@@ -77,7 +77,7 @@ class CartManager:
         cartId = user['cust_id']
         order = self.cartAccess.checkoutCart(int(cartId))
         if order:
-            return {'order':{'order_id':str(order.id), 'order_date':order.orderDate, 'status':str(order.status), \
+            return {'order':{'order_id':str(order.id), 'order_date':order.orderdate, 'status':str(order.status), \
                     'customer_id':str(order.customer_id), 'customer':(order.customer.first_name + " "+ order.customer.last_name)}}
         return False
 

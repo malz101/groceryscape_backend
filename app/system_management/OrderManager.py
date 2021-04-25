@@ -10,10 +10,10 @@ class OrderManager:
         
         try:
             getParam = self.getRequestType(request)
-            deliveryDate = getParam('date')
+            deliverydate = getParam('date')
             orderId = getParam('order_id')
             
-            order = self.orderAccess.scheduleDelivery(orderId,deliveryDate)
+            order = self.orderAccess.scheduleDelivery(orderId,deliverydate)
             if order:
                 empFname = order.employee
                 empLname = order.employee
@@ -133,11 +133,11 @@ class OrderManager:
             return {'msg':'failed request'}
 
     def __getOrderDetails(self, order,empName):
-        return {'order_id': str(order.id), 'order_date': str(order.orderDate), \
+        return {'order_id': str(order.id), 'order_date': str(order.orderdate), \
                                                'status': str(order.status), 'customer_id': str(order.customer_id), \
                                                'customer': (order.customer.first_name + " " + \
                                                             order.customer.last_name),\
-                                               'delivery_date': str(order.deliveryDate), \
+                                               'delivery_date': str(order.deliverydate), \
                                                'delivery_town': str(order.deliveryTown), 'delivery_parish': \
                                                    str(order.deliveryParish), 'checkout_by': empName,\
                                                 'total':self.orderAccess.getTotalOnOrder(order.id),\
