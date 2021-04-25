@@ -50,13 +50,13 @@ def checkout_order():
     else:
         return {'msg':'you are not logged in as an employee', 'error':'auth-0001'}, 401
 
-@manage_order.route('/get_order', methods=['POST','GET'])
+@manage_order.route('/get_order/<order_id>', methods=['GET'])
 @jwt_required()
-def get_order():
+def get_order(order_id):
     user = get_jwt_identity()
     if user and ('role' in user):
         try:
-            order = order_manager.getOrder(request)
+            order = order_manager.getOrder(order_id)
             if order:
                 response = {'msg': 'success', 'data':{'order':order}},200
             else:

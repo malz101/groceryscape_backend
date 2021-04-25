@@ -45,9 +45,9 @@ class OrderManager:
                 return order
         return False
         
-    def getOrder(self, request):
-        getParam = self.getRequestType(request)
-        orderId = getParam('order_id')
+    def getOrder(self, orderId):
+        # getParam = self.getRequestType(request)
+        # orderId = getParam('order_id')
         
         order = self.orderAccess.getOrderById(orderId)
         if order:
