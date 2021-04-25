@@ -46,7 +46,7 @@ def login():
             }, 401
 
     except Exception as e:
-        response = {'msg':'', 'error': 'auth-0001'}, 401
+        response = {'msg':'', 'error': 'ise-0001'}, 500
     finally:
         return response
 

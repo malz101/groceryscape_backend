@@ -22,6 +22,7 @@ def addToCart():
             else:
                 response = {'msg':'item not added','error':'create-0001'}, 404
         except Exception as e:
+            print(e)
             response = {'msg':'', 'error':'ise-0001'}, 500
         finally:
             return response
@@ -42,6 +43,7 @@ def CheckOutCart():
             else:
                 response = {'msg':'order was not created', 'error':'create-0001'}, 404
         except Exception as e:
+            print(e)
             response = {'msg':'','error':'ise-0001'}, 500
         finally:
             return response 
@@ -61,6 +63,7 @@ def removeFromCart(grocery_id):
             else:
                 response = {'msg':'no item found', 'error':'notfound-0001'}, 404
         except Exception as e:
+            print(e)
             response = {'msg':'','error':'ise-0001'}, 500
         finally:
             return response
@@ -79,6 +82,7 @@ def empty_cart():
             else:
                 response = {'msg':'no item found', 'error':'notfound-0001'},404
         except Exception as e:
+            print(e)
             response = {'msg':'','error':'ise-0001'}, 500
         finally:
             return response
@@ -98,6 +102,7 @@ def get_cart_items():
             else:
                 response = {'msg':'no items found','data':{}},200
         except Exception as e:
+            print(e)
             response = {'msg':'','error':'ise-0001'}, 500
         finally:
             return response
@@ -109,8 +114,16 @@ def get_cart_items():
 def update_cart():
     user = get_jwt_identity()
     if not 'role' in user:
-        cartItem = cart_manager.updateCartItem(request, user)
-        return cartItem
+        try:
+            cartItem = cart_manager.updateCartItem(request, user)
+            if cartItem:
+                response = {'msg':'cart updated', 'data':{'cart':carItem}}, 200
+            else:
+                response = {'msg':'cart not updated', 'error':'create-0001'}, 404
+        except:
+            reponse = {'msg':'', 'error':'ise-0001'}, 500
+        finally:
+            return response
     else:
         return emp_login_restrict_msg
     

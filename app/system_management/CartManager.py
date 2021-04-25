@@ -83,29 +83,26 @@ class CartManager:
 
     def updateCartItem(self, request, user):
 
-        try:
-            getParam = self.getRequestType(request)
-            itemId = getParam('item_id')
-            quantity = getParam('quantity')
-            cartId = user['cust_id']
+        getParam = self.getRequestType(request)
+        itemId = getParam('item_id')
+        quantity = getParam('quantity')
+        cartId = user['cust_id']
 
-            grocery = self.cartAccess.updateCartItem(int(cartId),int(itemId),int(quantity))
-            if grocery:
-                cost_before_tax = grocery.quantity * grocery.cart_items.cost_per_unit
-                GCT = self.groceryAccess.getTax(grocery.item_id, 'GCT') * grocery.quantity
-                SCT = self.groceryAccess.getTax(grocery.item_id, 'SCT') * grocery.quantity
-                total = float(cost_before_tax) + float(GCT) + float(SCT)
-                total_weight = str(grocery.quantity * grocery.cart_items.grams_per_unit) + " grams"
-                return {'grocery_id': str(grocery.item_id), \
-                                                  'quantity': str(grocery.quantity), \
-                                                  'cost_before_tax': str(cost_before_tax), \
-                                                  'name': grocery.cart_items.name, \
-                                                  'total_weight': total_weight, 'GCT': str(GCT), 'SCT': str(SCT), \
-                                                  'total': str(total)}
-            else:
-                return {'msg':'not updated'}
-        except:
-            return {'msg':'failed request'}
+        grocery = self.cartAccess.updateCartItem(int(cartId),int(itemId),int(quantity))
+        if grocery:
+            cost_before_tax = grocery.quantity * grocery.cart_items.cost_per_unit
+            GCT = self.groceryAccess.getTax(grocery.item_id, 'GCT') * grocery.quantity
+            SCT = self.groceryAccess.getTax(grocery.item_id, 'SCT') * grocery.quantity
+            total = float(cost_before_tax) + float(GCT) + float(SCT)
+            total_weight = str(grocery.quantity * grocery.cart_items.grams_per_unit) + " grams"
+            return {'grocery_id': str(grocery.item_id), \
+                                                'quantity': str(grocery.quantity), \
+                                                'cost_before_tax': str(cost_before_tax), \
+                                                'name': grocery.cart_items.name, \
+                                                'total_weight': total_weight, 'GCT': str(GCT), 'SCT': str(SCT), \
+                                                'total': str(total)}
+        else:
+            return False
 
     def getAllCartItems(self, user):
 
