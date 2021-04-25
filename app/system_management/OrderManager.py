@@ -42,7 +42,7 @@ class OrderManager:
                         empName = 'False'
                     return self.__getOrderDetails(order,empName)
                 else:
-                    return False
+                    return order
             else:
                 return False
         
@@ -63,21 +63,19 @@ class OrderManager:
         return False
         
     def getOrders(self):
-        try:
-            orders = self.orderAccess.getOrders()
-            response = []
-            if orders:
-                for order in orders:
-                    empFname = order.employee
-                    empLname = order.employee
-                    if empFname:
-                        empName = (empFname.first_name + " " + empLname.last_name)
-                    else:
-                        empName = 'False'
-                    response.append(self.__getOrderDetails(order,empName))
+        orders = self.orderAccess.getOrders()
+        response = []
+        if orders:
+            for order in orders:
+                empFname = order.employee
+                empLname = order.employee
+                if empFname:
+                    empName = (empFname.first_name + " " + empLname.last_name)
+                else:
+                    empName = 'False'
+                response.append(self.__getOrderDetails(order,empName))
 
-                return response
-            return response
+        return response
 
     def getTotalOnOrder(self, order_id):
         return self.orderGroceriesAccess.getTotalOnOrder(order_id)
