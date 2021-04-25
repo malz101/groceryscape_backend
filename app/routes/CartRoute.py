@@ -59,7 +59,7 @@ def removeFromCart(grocery_id):
         try:
             cartItems = cart_manager.removeItemFromCart(grocery_id, user)
             if cartItems:
-                reponse = {'msg':'success', 'data':cartItems}, 200
+                response = {'msg':'success', 'data':cartItems}, 200
             else:
                 response = {'msg':'no item found', 'error':'notfound-0001'}, 404
         except Exception as e:

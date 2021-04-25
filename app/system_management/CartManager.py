@@ -36,10 +36,10 @@ class CartManager:
         return False
 
 
-    def emptyCart(self, session):
+    def emptyCart(self, user):
 
         try:
-            cartId = session['cust_id']
+            cartId = user['cust_id']
             isEmpty = self.cartAccess.emptyCart(int(cartId))
             if isEmpty:
                 return {'msg':'cart emptied'}
