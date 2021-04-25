@@ -26,25 +26,24 @@ class OrderManager:
 
     def checkOutOrder(self,user, request):
 
-            getParam = self.getRequestType(request)
-            orderId = getParam('order_id')
+        getParam = self.getRequestType(request)
+        orderId = getParam('order_id')
 
-            empId = user['emp_id']
-    
-            if orderId:
-                order = self.orderAccess.checkoutOrder(orderId, empId)
-                if order:
-                    empFname = order.employee
-                    empLname = order.employee
-                    if empFname:
-                        empName = (empFname.first_name + " " + empLname.last_name)
-                    else:
-                        empName = 'False'
-                    return self.__getOrderDetails(order,empName)
+        empId = user['emp_id']
+
+        if orderId:
+            order = self.orderAccess.checkoutOrder(orderId, empId)
+            if order:
+                empFname = order.employee
+                empLname = order.employee
+                if empFname:
+                    empName = (empFname.first_name + " " + empLname.last_name)
                 else:
-                    return order
+                    empName = 'False'
+                return self.__getOrderDetails(order,empName)
             else:
-                return False
+                return order
+        return False
         
     def getOrder(self, request):
         getParam = self.getRequestType(request)
@@ -121,23 +120,23 @@ class OrderManager:
 
     def __getOrderItemsDetails(self,orderId):
         orderItems = self.orderAccess.getItemsInOrder(orderId)
-        print(type(orderItems))
-        response = {}
+        # print(type(orderItems))
+        response = []
         if orderItems:
             for grocery in orderItems:
-                print(type(grocery))
+                # print(type(grocery))
                 cost_before_tax = grocery.quantity * grocery.groceries.cost_per_unit
                 GCT = self.orderAccess.getTax(grocery.grocery_id, 'GCT') * grocery.quantity
                 SCT = self.orderAccess.getTax(grocery.grocery_id, 'SCT') * grocery.quantity
                 total = float(cost_before_tax) + float(GCT) + float(SCT)
                 total_weight = str(grocery.quantity * grocery.groceries.grams_per_unit) + " grams"
-                response[str(grocery.grocery_id)] = {'grocery_id': str(grocery.grocery_id), \
+                response.append({'grocery_id': str(grocery.grocery_id), \
                                                   'quantity': str(grocery.quantity), \
                                                   'cost_before_tax': str(cost_before_tax), \
                                                   'name': grocery.groceries.name, \
                                                   'total_weight': total_weight, 'GCT': str(GCT), 'SCT': str(SCT), \
-                                                  'total': str(total)}
-        print(response)
+                                                  'total': str(total)})
+        # print(response)
         return response
 
     def getRequestType(self, request):

@@ -38,8 +38,10 @@ def checkout_order():
             order = order_manager.checkOutOrder(user, request)
             if order:
                 response = {'msg':'success','data':{'order':order}}, 200
+            elif order == {}:
+                response = {'msg':'Unsuccessful. Order not found', 'error':'create-0001'}, 404
             else:
-                response = {'msg':'Unsuccessful. Order not found or data store error', 'error':'create-0001'}, 404
+                {'msg':'Unsuccessful. No order id detected', 'error':'create-0001'}, 404
         except Exception as e:
             print(e)
             response = {'msg':'', 'error':'ise-0001'}, 500
@@ -132,7 +134,7 @@ def get_schedule():
             if orders:
                 response = {'msg':'success', 'data':{'orders':orders}}, 200
             else:
-                response = {'msg':'no orders founc', 'data':{'orders':orders}}, 200
+                response = {'msg':'no orders found', 'data':{'orders':orders}}, 200
         except Exception as e:
             print(e)
             response = {'msg':'', 'error':'ise-0001'}, 500
