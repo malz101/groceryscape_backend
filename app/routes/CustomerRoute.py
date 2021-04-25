@@ -27,7 +27,7 @@ def signup():
         else:
             response = {'msg': 'email address already exits', 'error':'create-0001'}, 404
     except Exception as e:
-        reponse = {'msg': '', 'error':'ise-0001'}, 404
+        reponse = {'msg': '', 'error':'ise-0001'}, 500
     finally:
         return reponse
 
@@ -95,7 +95,7 @@ def get_customer(user_id):
             if customer:
                 response = {'msg': 'success','data': {'customer':customer}}, 200
             else:
-                response = {'msg':'user with id '+str(user_id)+' does not exist','data':{}}, 200
+                response = {'msg':'user with id '+str(user_id)+' does not exist','error':'notfound-0001'}, 404
         except Exception as e:
             # print(e)
             response = {'msg':'','error':'ise-0001'}, 500
@@ -122,7 +122,7 @@ def get_recommended_groceries():
 
     else:
         return redirect(url_for('index'))
-
+    
     
 @manage_customer_account.route('/get_my_orders', methods=["GET"])
 @jwt_required()
@@ -155,7 +155,7 @@ def cancel_order(order_id):
             if msg:
                 response = {'msg':'order successfully cancelled', 'data':{'msg':msg}}, 200
             else:
-                reponse = {'msg': 'order cancellation unsuccessful', 'data':{}} ,200
+                reponse = {'msg': 'order cancellation unsuccessful', 'error':'notfound-0001'}, 404
         except:
             response = {'msg':'', 'error':'ise-0001'}, 500
         finally:
@@ -175,7 +175,7 @@ def set_delivery_location(order_id):
             if order:
                 response = {'msg':'delivery location update successful', 'data':{'order':order}}, 200
             else:
-                response = {'msg':'delivery loction update unsuccessful', 'data':{}}, 200
+                response = {'msg':'delivery loction update unsuccessful', 'error':'create-0001'}, 404
         except Exception:
             response = response = {'msg':'', 'error':'ise-0001'}, 500
         finally:

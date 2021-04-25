@@ -40,7 +40,7 @@ def CheckOutCart():
             if order:
                 response = {'msg':'success', 'data':order},200
             else:
-                response = {'msg':'order was not created', 'error':'create-0001'}, 500
+                response = {'msg':'order was not created', 'error':'create-0001'}, 404
         except Exception as e:
             response = {'msg':'','error':'ise-0001'}, 500
         finally:
@@ -96,9 +96,9 @@ def get_cart_items():
             if cartItems:
                 response = {'msg':'success', 'data':cartItem}
             else:
-                response = {'msg':'no items found','error':'notfound-0001'},404
+                response = {'msg':'no items found','data':{}},200
         except Exception as e:
-            response = response = {'msg':'','error':'ise-0001'}, 500
+            response = {'msg':'','error':'ise-0001'}, 500
         finally:
             return response
     else:
