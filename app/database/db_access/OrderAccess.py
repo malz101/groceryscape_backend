@@ -56,7 +56,7 @@ class OrderAccess:
         
         order = self.getOrderById(orderId)
         if order:
-            order.deliveryDate = date
+            order.deliverydate = date
             db.session.commit()
             return order
         else:

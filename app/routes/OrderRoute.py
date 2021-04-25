@@ -15,66 +15,128 @@ order_manager = OrderManager(order_access, order_groceries_access, payment_acces
 def schedule_order():
     user = get_jwt_identity()
     if user and ('role' in user):
-        order = order_manager.scheduleOrder(request)
-        return order
+        try:
+            order = order_manager.scheduleOrder(request)
+            if order:
+                response = {'msg':'success', 'data':{'order':order}}, 200
+            else:
+                {'msg':'issues with scheduling order', 'error':'create-0001'}, 404
+        except Exception as e:
+            print(e)
+            response = {'msg':'','error':'ise-0001'}, 500
+        finally:
+            return response
     else:
-        return {'msg':'you are not logged in as an employee'}
+        return {'msg':'you are not logged in as an employee', 'error':'auth-0001'}, 401
 
 @manage_order.route('/checkout_order', methods=['POST','GET'])
 @jwt_required()
 def checkout_order():
     user = get_jwt_identity()
     if user and ('role' in user):
-        order = order_manager.checkOutOrder(user, request)
-        return order
+        try:
+            order = order_manager.checkOutOrder(user, request)
+            if order:
+                response = {'msg':'success','data':{'order':order}}, 200
+            else:
+                response = {'msg':'Unsuccessful. Order not found or data store error', 'error':'create-0001'}, 404
+        except Exception as e:
+            print(e)
+            response = {'msg':'', 'error':'ise-0001'}, 500
+        finally:
+            return response
     else:
-        return {'msg':'you are not logged in as an employee'}
+        return {'msg':'you are not logged in as an employee', 'error':'auth-0001'}, 401
 
 @manage_order.route('/get_order', methods=['POST','GET'])
 @jwt_required()
 def get_order():
     user = get_jwt_identity()
     if user and ('role' in user):
-        order = order_manager.getOrder(request)
-        return order
+        try:
+            order = order_manager.getOrder(request)
+            if order:
+                response = {'msg': 'success', 'data':{'order':order}},200
+            else:
+                response = {'msg':'Order not found', 'error':'notfound-0001'}, 404
+        except Exception as e:
+            print(e)
+            response = {'msg':'', 'error':'ise-0001'}, 500
+        finally:
+            return response
+
     else:
-        return {'msg':'you are not logged in as an employee'}
+        return {'msg':'you are not logged in as an employee', 'error':'auth-0001'}, 401
 
 @manage_order.route('/get_orders', methods=['POST','GET'])
 @jwt_required()
 def get_orders():
     user = get_jwt_identity()
     if user and ('role' in user):
-        orders = order_manager.getOrders()
-        return orders
+        try:
+            orders = order_manager.getOrders()
+            if orders:
+                response = {'msg':'success', 'data':{'orders':orders}}, 200
+            else:
+                response = {'msg':'no orders found', 'data':{}},200
+        except Exception as e:
+            print(e)
+            response = {'msg':'', 'error':'ise-0001'}, 500
+        finally:
+            return reponse
     else:
-        return {'msg':'you are not logged in as an employee'}
+        return {'msg':'you are not logged in as an employee', 'error':'auth-0001'}, 401
 
 @manage_order.route('/get_total', methods=['POST','GET'])
 @jwt_required()
 def get_total():
     user = get_jwt_identity()
     if user and ('role' in user):
-        return str(order_manager.getTotalOnOrder())
+        try:
+            order_total = str(order_manager.getTotalOnOrder())
+            response = {'msg':'success', 'data':{'order_total': order_total}}
+        except Exception as e:
+            print(e)
+            response = {'msg':'', 'error':'ise-0001'}, 500
+        finally:
+            return response
     else:
-        return {'msg':'you are not logged in as an employee'}
+        return {'msg':'you are not logged in as an employee', 'error':'auth-0001'}, 401
 
 @manage_order.route('/record_payment', methods=['POST','GET'])
 @jwt_required()
 def record_payment():
     user = get_jwt_identity()
     if user and ('role' in user):
-        payment = order_manager.recordPayment(user,request)
-        return payment
+        try:
+            payment = order_manager.recordPayment(user,request)
+            if payment:
+                response = {'msg':'success', 'data':{'payment':payment}}, 200
+            else:
+                response = {'msg':'payment unsuccessful', 'error':'create-0001'}, 404
+        except Exception as e:
+            response = {'msg':'', 'error':'ise-0001'}, 500
+        finally:
+            return response
+
     else:
-        return {'msg':'you are not logged in as an employee'}
+        return {'msg':'you are not logged in as an employee', 'error':'auth-0001'}, 401
 
 @manage_order.route('/get_schedule', methods=['POST','GET'])
 @jwt_required()
 def get_schedule():
     user = get_jwt_identity()
     if user and ('role' in user):
-        orders = order_manager.getSchedule()
-        return orders
+        try:
+            orders = order_manager.getSchedule()
+            if orders:
+                response = {'msg':'success', 'data':{'orders':orders}}, 200
+            else:
+                response = {'msg':'no orders founc', 'data':{'orders':orders}}, 200
+        except Exception as e:
+            print(e)
+            response = {'msg':'', 'error':'ise-0001'}, 500
+        finally:
+            return response
     else:
-        return {'msg':'you are not logged in as an employee'}
+        return {'msg':'you are not logged in as an employee', 'error':'auth-0001'}, 401
