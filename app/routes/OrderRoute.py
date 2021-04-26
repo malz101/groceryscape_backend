@@ -14,8 +14,8 @@ order_manager = OrderManager(order_access, order_groceries_access, payment_acces
 @jwt_required()
 def schedule_order():
     user = get_jwt_identity()
-    if user and ('role' in user):
-        order = order_manager.scheduleOrder(request)
+    if user and (not 'role' in user):
+        order = order_manager.scheduleOrder(request, user)
         return order
     else:
         return {'msg':'you are not logged in as an employee'}

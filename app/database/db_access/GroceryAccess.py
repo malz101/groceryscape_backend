@@ -6,9 +6,10 @@ from sqlalchemy import and_, or_, not_
 
 class GroceryAccess:
 
-    def create_grocery(self, name, description, quantity, units, price, grams_per_unit):
+    def create_grocery(self, name, description, quantity, units, price, grams_per_unit,category):
 
-        grocery = Grocery(name=name, description=description, quantity=quantity, units=units, cost_per_unit=price, grams_per_unit=grams_per_unit)
+        grocery = Grocery(name=name, description=description, quantity=quantity, units=units, cost_per_unit=price,\
+                          grams_per_unit=grams_per_unit,category=category)
         db.session.add(grocery)
         db.session.commit()
         return self.searchForGrocery(grocery.id)
@@ -41,6 +42,10 @@ class GroceryAccess:
                 grocery.grams_per_unit = float(value)
                 db.session.commit()
                 return self.searchForGrocery(groceryId)
+            if attribute == 'category':
+                grocery.category = value
+                db.session.commit()
+                return self.searchForGrocery(groceryId)
         return False
 
     def searchForGrocery(self, grocery_id):
@@ -55,6 +60,14 @@ class GroceryAccess:
 
     def getGroceries(self):
         groceries = Grocery.query.filter_by().all()
+        try:
+            if groceries[0].name:
+                return groceries
+        except:
+            return False
+
+    def getGroceriesByCategory(self,category):
+        groceries = Grocery.query.filter_by(category=category).all()
         try:
             if groceries[0].name:
                 return groceries
@@ -87,4 +100,6 @@ class GroceryAccess:
             return float(taxOnItem.tax_type.rate) * float(taxOnItem.grocery.cost_per_unit)
         else:
             return 0
+
+
 

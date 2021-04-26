@@ -12,11 +12,12 @@ class GroceryManager:
             price = getParam('price')
             units = getParam('units')
             grams_per_unit = getParam('grams_per_unit')
+            category = getParam('category')
 
             """validate the data"""
 
             """add grocery item to stock"""
-            grocery = self.grocery_access.create_grocery(name, description, int(quantity), units, float(price), float(grams_per_unit))
+            grocery = self.grocery_access.create_grocery(name, description, int(quantity), units, float(price), float(grams_per_unit),category)
             if grocery:
                 return self.__getGroceryDetails(grocery)
             else:
@@ -77,6 +78,23 @@ class GroceryManager:
         except:
             return {'msg':'request failed'}
 
+    def getGroceriesByCategory(self, request):
+
+        try:
+            getParam = self.getRequestType(request)
+            category = getParam('category')
+
+            groceries = self.grocery_access.getGroceriesByCategory(category)
+            response = {}
+            if groceries:
+                for grocery in groceries:
+                    response[str(grocery.id)] = self.__getGroceryDetails(grocery)
+                return response
+            else:
+                return {'msg':'no grocery found'}
+        except:
+            return {'msg':'request failed'}
+
     def getGrocery(self, request):
 
         try:
@@ -95,7 +113,8 @@ class GroceryManager:
 
         return {'id': str(grocery.id), 'name': grocery.name, 'description': grocery.description, \
                         'quantity': str(grocery.quantity), 'units': grocery.units, \
-                        'cost_per_unit': str(grocery.cost_per_unit), 'grams_per_unit':str(grocery.grams_per_unit)}
+                        'cost_per_unit': str(grocery.cost_per_unit), 'grams_per_unit':str(grocery.grams_per_unit),\
+                'category':grocery.category}
 
 
     def getRequestType(self, request):

@@ -51,13 +51,16 @@ class OrderAccess:
         except:
             return False
 
-    def scheduleDelivery(self, orderId, date):
+    def scheduleDelivery(self, orderId, date,custId):
         
         order = self.getOrderById(orderId)
         if order:
-            order.deliveryDate = date
-            db.session.commit()
-            return order
+            if order.customer_id == custId:
+                order.deliveryDate = date
+                db.session.commit()
+                return order
+            else:
+                return False
         else:
             return False
             

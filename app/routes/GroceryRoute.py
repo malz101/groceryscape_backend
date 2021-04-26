@@ -56,6 +56,12 @@ def get_groceries():
     groceries = grocery_manager.getGroceries(request)
     return groceries
 
+
+@manage_groceries.route('/get_groceries_by_category', methods=['POST','GET'])
+def get_groceries_by_category():
+    groceries = grocery_manager.getGroceriesByCategory(request)
+    return groceries
+
 @manage_groceries.route('/get_grocery', methods=['POST','GET'])
 def get_grocery():
     grocery = grocery_manager.getGrocery(request)
