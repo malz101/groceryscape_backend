@@ -26,8 +26,8 @@ class OrderGroceriesAccess:
         total = 0
         if items:
             for item in items:
-                # print(item.orders.deliveryParish)
-                delivery_cost = float(self.getParish(str(item.orders.deliveryParish)).delivery_rate)
+                # print(item.orders.deliveryparish)
+                delivery_cost = float(self.getParish(str(item.orders.deliveryparish)).delivery_rate)
                 cost_before_tax = item.quantity * item.groceries.cost_per_unit
                 GCT = self.groceryAccess.getTax(item.grocery_id, 'GCT') * item.quantity
                 SCT = self.groceryAccess.getTax(item.grocery_id, 'SCT') * item.quantity
@@ -44,7 +44,7 @@ class OrderGroceriesAccess:
     def getDeliveryCost(self,orderId):
         order = self.orderAccess.getOrderById(orderId)
         if order:
-            return float(self.getParish(str(order.deliveryParish)).delivery_rate)
+            return float(self.getParish(str(order.deliveryparish)).delivery_rate)
         else:
             return False
 

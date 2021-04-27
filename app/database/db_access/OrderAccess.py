@@ -1,5 +1,5 @@
 from ... import db
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from ..Models import Order
 from ..Models import OrderGroceries
 from .OrderGroceriesAccess import OrderGroceriesAccess
@@ -7,6 +7,7 @@ from .CustomerAccess import CustomerAccess
 from .GroceryAccess import GroceryAccess
 from ..Models import Cart
 from sqlalchemy import and_, or_, not_
+import time
 
 class OrderAccess:
 
@@ -60,7 +61,7 @@ class OrderAccess:
                 db.session.commit()
                 return order
             else:
-                return False
+                return False #raise an exception error here to indicate auth error
         else:
             return False
             
@@ -75,15 +76,68 @@ class OrderAccess:
             return False
 
     def getSchedule(self):
-        orders = Order.query.filter(or_(Order.status.like('PENDING'),Order.status.like('CHECKED OUT'))).all()
+        orders = Order.query.filter(or_(Order.status=='PENDING',Order.status=='CHECKED OUT')).all()
         try:
             if orders[0].id:
                 return orders
         except:
             return False
 
-    def getCustomerOrders(self,custId):
-        orders = Order.query.filter_by(customer_id=custId).all()
+    def getCustomerOrders(self,custId, status=None, min_order_timestamp=None,\
+                            max_order_timestamp=None, min_delivery_timestamp=None,\
+                            max_delivery_timestamp=None, delivery_town=None,delivery_parish=None):
+
+        if status is None:
+            status = ''
+        status = '%{}%'.format(status)
+
+        if min_order_timestamp is None:
+            min_order_timestamp = datetime(1970, 1, 1,tzinfo=timezone.utc)
+        
+        if min_delivery_timestamp is None:
+            min_delivery_timestamp = datetime(1970, 1, 1,tzinfo=timezone.utc)
+
+        current_time = datetime.utcnow() # get current date and time
+        # min_order_timestamp =  '%{}%'.format(min_order_timestamp)
+        if max_order_timestamp is None:
+            max_order_timestamp = current_time#.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            max_order_timestamp = datetime.strptime(max_order_timestamp, '%Y-%m-%d %H:%M:%S')
+
+        delivery_range_provided = datetime.strptime('0001-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
+        if max_delivery_timestamp is None:
+            max_delivery_timestamp =  current_time + timedelta(days=2)
+            delivery_range_provided = None
+        else:
+            max_delivery_timestamp = datetime.strptime(max_delivery_timestamp, '%Y-%m-%d %H:%M:%S')
+
+
+        town_provided = ''
+        if delivery_town is None:
+            town_provided = None
+            delivery_town = ''
+        delivery_town = '%{}%'.format(delivery_town)
+
+        parish_provided = ''
+        if delivery_parish is None:
+            parish_provided = None
+            delivery_parish = ''
+        delivery_parish = '%{}%'.format(delivery_parish)
+
+        orders = Order.query.filter(
+            and_(
+                Order.customer_id==custId,\
+                Order.status.like(status),\
+                or_(Order.deliverytown.like(delivery_town), Order.deliverytown == town_provided),\
+                or_(Order.deliveryparish.like(delivery_parish), Order.deliveryparish == parish_provided),\
+                and_(Order.orderdate >= min_order_timestamp, Order.orderdate <= max_order_timestamp),\
+                or_(
+                    and_(Order.deliverydate >= min_delivery_timestamp, Order.deliverydate <= max_delivery_timestamp),\
+                    Order.deliverydate == delivery_range_provided\
+                )
+            )
+        ).all()
+        
         try:
             if orders[0].id:
                 return orders
@@ -91,7 +145,8 @@ class OrderAccess:
             return False
 
     def getCustomerPendingOrder(self,custId):
-        orders = Order.query.filter(and_(or_(Order.status.like('PENDING'),Order.status.like('CHECKED OUT')),Order.customer_id.like(custId))).all()
+        orders = Order.query.filter(and_(Order.customer_id==int(custId),\
+                                            or_(Order.status=='PENDING',Order.status=='CHECKED OUT'))).all()
         try:
             if orders[0].id:
                 # orders = [order for order in orders if order.customer_id == custId]
@@ -123,8 +178,8 @@ class OrderAccess:
         order = self.getOrderById(orderId)
         if order:
             if order.customer_id == custId:
-                order.deliveryParish = parish
-                order.deliveryTown = town
+                order.deliveryparish = parish
+                order.deliverytown = town
                 db.session.commit()
                 return order
             else:

@@ -40,4 +40,4 @@ def index():
     if user and (not 'role' in user):
         return user
     else:
-        return {'msg': 'you are not logged in as a customer'}
+        return {'msg': 'you are not logged in as a customer', 'error': 'auth-0001'}, 401

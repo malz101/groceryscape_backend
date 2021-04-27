@@ -85,7 +85,7 @@ class GroceryAccess:
     def getTaxType(self, groceryId, type):
         grocery = self.searchForGrocery(groceryId)
         if grocery:
-            tax = Taxes_on_goods.query.filter(and_(Taxes_on_goods.tax.like(type), Taxes_on_goods.grocery_id.like(groceryId))).first()
+            tax = Taxes_on_goods.query.filter(and_(Taxes_on_goods.tax.like(type), Taxes_on_goods.grocery_id==groceryId)).first()
             try:
                 if tax.grocery_id:
                     return tax

@@ -2,7 +2,7 @@ from ... import db
 from ..Models import Cart
 from ..Models import Grocery
 from datetime import datetime
-
+from sqlalchemy.exc import IntegrityError
 
 class CartAccess:
 
@@ -12,25 +12,28 @@ class CartAccess:
         self.customerAccess = customerAccess
 
     def addToCart(self, itemId, cartId, quantity):
+        try:
+            # 1) get both get both customer and grocery from the db to ensure that they are valid
+            grocery = self.groceryAccess.searchForGrocery(itemId)
+            customer = self.customerAccess.getCustomerById(cartId)
 
-        # 1) get both get both customer and grocery from the db to ensure that they are valid
-        grocery = self.groceryAccess.searchForGrocery(itemId)
-        customer = self.customerAccess.getCustomerById(cartId)
-
-        if grocery and customer:
-            
-            if (grocery.quantity > 0) and (quantity <= grocery.quantity):
-                self.groceryAccess.updateGrocery(grocery.id,'quantity', grocery.quantity - quantity)
-                cart = Cart(cart_id=customer.id, quantity=quantity)
-                cart.cart_items = grocery
-                customer.cart_items.append(cart)
-                db.session.add(cart)
-                db.session.commit()
-                return self.getAllCartItems(cartId)
+            if grocery and customer:
+                
+                if (grocery.quantity > 0) and (quantity <= grocery.quantity):
+                    self.groceryAccess.updateGrocery(grocery.id,'quantity', grocery.quantity - quantity)
+                    cart = Cart(cart_id=customer.id, quantity=quantity)
+                    cart.cart_items = grocery
+                    customer.cart_items.append(cart)
+                    db.session.add(cart)
+                    db.session.commit()
+                    return self.getAllCartItems(cartId)
+                else:
+                    return False
+            # 3) if grocery or customer is not valid, abort the operation
             else:
                 return False
-        # 3) if grocery or customer is not valid, abort the operation
-        else:
+        except IntegrityError as e:
+            db.session.rollback()
             return False
 
     def emptyCart(self, cartId):

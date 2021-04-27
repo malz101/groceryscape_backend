@@ -11,5 +11,4 @@ CORS(app)
 app.config.from_object(Config)
 jwt = JWTManager(app)
 db = SQLAlchemy(app)
-
 from app import routes

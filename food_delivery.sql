@@ -1,99 +1,93 @@
-DROP DATABASE IF EXISTS food_delivery;
-
-CREATE DATABASE food_delivery;
-
-USE  food_delivery;
-
-CREATE TABLE `employee` (
-  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `first_name` varchar(45) NOT NULL,
-  `last_name` varchar(45) NOT NULL,
-  `email` varchar(45) NOT NULL UNIQUE,
-  `password` varchar(45) NOT NULL,
-  `address` varchar(200) NOT NULL,
-  `role` varchar(20) NOT NULL,
-  `salary` decimal(10,2) DEFAULT NULL
+CREATE TABLE employee  (
+   id  SERIAL NOT NULL PRIMARY KEY,
+   first_name  varchar(45) NOT NULL,
+   last_name  varchar(45) NOT NULL,
+   email  varchar(45) NOT NULL UNIQUE,
+   password  varchar(45) NOT NULL,
+   address  varchar(200) NOT NULL,
+   role  varchar(20) NOT NULL,
+   salary  decimal(10,2) DEFAULT NULL
 );
 
-CREATE TABLE `customer` (
-  `id` int NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `first_name` varchar(45) NOT NULL,
-  `last_name` varchar(45) NOT NULL,
-  `telephone` int NOT NULL,
-  `email` varchar(45) NOT NULL UNIQUE,
-  `gender` varchar(45) NOT NULL,
-  `password` varchar(45) NOT NULL,
-  `town` varchar(45) NOT NULL,
-  `parish` varchar(45) NOT NULL
+CREATE TABLE  customer  (
+   id  SERIAL NOT NULL PRIMARY KEY ,
+   first_name  varchar(45) NOT NULL,
+   last_name  varchar(45) NOT NULL,
+   telephone  varchar(11) NOT NULL,
+   email  varchar(45) NOT NULL UNIQUE,
+   gender  varchar(45) NOT NULL,
+   password  varchar(45) NOT NULL,
+   town  varchar(45) NOT NULL,
+   parish  varchar(45) NOT NULL
 );
 
-CREATE TABLE `grocery` (
-  `id` int NOT NULL PRIMARY KEY,
-  `name` varchar(50) NOT NULL,
-  `description` varchar(1000) NOT NULL,
-  `quantity` int NOT NULL,
-  `units` varchar(100) NOT NULL,
-  `cost_per_unit` decimal(10,2) NOT NULL
+CREATE TABLE grocery  (
+   id  integer NOT NULL PRIMARY KEY,
+   name  varchar(50) NOT NULL,
+   description  varchar(1000) NOT NULL,
+   quantity  integer NOT NULL,
+   units  varchar(100) NOT NULL,
+   cost_per_unit  decimal(10,2) NOT NULL
 );
 
-CREATE TABLE `order` (
-  `id` int NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `orderDate` datetime NOT NULL,
-  `status` varchar(40) NOT NULL,
-  `deliveryDate` datetime DEFAULT NULL,
-  `deliveryTown` varchar(45) DEFAULT NULL,
-  `deliveryParish` varchar(45) DEFAULT NULL,
-  `customer_id` int,
-  `checkout_by` int DEFAULT NULL,
+CREATE TABLE orders  (
+   id  SERIAL NOT NULL PRIMARY KEY,
+   orderDate  timestamp NOT NULL,
+   status  varchar(40) NOT NULL,
+   deliveryDate  datetime DEFAULT NULL,
+   deliveryTown  varchar(45) DEFAULT NULL,
+   deliveryParish  varchar(45) DEFAULT NULL,
+   customer_id  integer,
+   checkout_by  integer DEFAULT NULL,
 
-  FOREIGN KEY(`customer_id`) REFERENCES `customer`(`id`) ON DELETE SET NULL,
-  FOREIGN KEY(`checkout_by`) REFERENCES `employee`(`id`) ON DELETE SET NULL
+  FOREIGN KEY( customer_id ) REFERENCES  customer ( id ) ON DELETE SET NULL,
+  FOREIGN KEY( checkout_by ) REFERENCES  employee ( id ) ON DELETE SET NULL
 ) ;
 
-CREATE TABLE `order_groceries` (
-  `order_id` int NOT NULL,
-  `grocery_id` int NOT NULL,
-  `quantity` int DEFAULT NULL,
+CREATE TABLE  order_groceries  (
+   order_id  integer NOT NULL,
+   grocery_id  integer NOT NULL,
+   quantity  integer DEFAULT NULL,
 
-  PRIMARY KEY (`order_id`,`grocery_id`),
-  FOREIGN KEY(`grocery_id`) REFERENCES `grocery`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY(`order_id`) REFERENCES `order`(`id`) ON DELETE CASCADE
+  PRIMARY KEY ( order_id , grocery_id ),
+  FOREIGN KEY( grocery_id ) REFERENCES  grocery ( id ) ON DELETE CASCADE,
+  FOREIGN KEY( order_id ) REFERENCES  orders ( id ) ON DELETE CASCADE
 );
 
-CREATE TABLE `cart` (
-  `cart_id` int NOT NULL,
-  `item_id` int NOT NULL,
-  `quantity` int NOT NULL,
+CREATE TABLE  cart  (
+   cart_id  integer NOT NULL,
+   item_id  integer NOT NULL,
+   quantity  integer NOT NULL,
 
-  PRIMARY KEY (`cart_id`,`item_id`),
-  FOREIGN KEY(`cart_id`) REFERENCES `customer`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY(`item_id`) REFERENCES `grocery`(`id`) ON DELETE CASCADE
+  PRIMARY KEY ( cart_id , item_id ),
+  FOREIGN KEY( cart_id ) REFERENCES  customer ( id ) ON DELETE CASCADE,
+  FOREIGN KEY( item_id ) REFERENCES  grocery ( id ) ON DELETE CASCADE
 );
 
-CREATE TABLE `payment` (
-  `order_id` int NOT NULL PRIMARY KEY,
-  `recorded_by` int DEFAULT NULL,
-  `payment_date` datetime DEFAULT NULL,
-  `amount_tendered` decimal(10,2) NOT NULL,
-  `change` decimal(10,2) DEFAULT NULL,
+CREATE TABLE  payment  (
+   order_id  integer NOT NULL PRIMARY KEY,
+   recorded_by  integer DEFAULT NULL,
+   payment_date  timestamp DEFAULT NULL,
+   amount_tendered  decimal(10,2) NOT NULL,
+   change  decimal(10,2) DEFAULT NULL,
 
-  FOREIGN KEY(`order_id`) REFERENCES `order`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY(`recorded_by`) REFERENCES `employee`(`id`) ON DELETE SET NULL
+  FOREIGN KEY( order_id ) REFERENCES  orders ( id ) ON DELETE CASCADE,
+  FOREIGN KEY( recorded_by ) REFERENCES  employee ( id ) ON DELETE SET NULL
 );
 
-CREATE TABLE `rating` (
-  `cust_id` int NOT NULL,
-  `item_id` int NOT NULL,
-  `rating` int NOT NULL,
+CREATE TABLE  rating  (
+   cust_id  integer NOT NULL,
+   item_id  integer NOT NULL,
+   rating  integer NOT NULL,
 
-  PRIMARY KEY (`cust_id`,`item_id`),
-  FOREIGN KEY(`cust_id`) REFERENCES `customer`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY(`item_id`) REFERENCES `grocery`(`id`) ON DELETE CASCADE
+  PRIMARY KEY ( cust_id , item_id ),
+  FOREIGN KEY( cust_id ) REFERENCES  customer ( id ) ON DELETE CASCADE,
+  FOREIGN KEY( item_id ) REFERENCES  grocery ( id ) ON DELETE CASCADE
 );
 
 
 
-INSERT INTO `employee` (`id`, `first_name`, `last_name`, `email`, `password`, `address`, `role`, `salary`) VALUES
+INSERT INTO  employee  ( id ,  first_name ,  last_name ,  email ,  password ,  address ,  role ,  salary ) VALUES
 (1, 'Chayna', 'Gordon', 'chay@gmail.com', '0000', 'home', 'admin', '607.00'),
 (5, 'Emily', 'Smith', 'jordanchristine@example.org', '1234', 'PSC 5786, Box 1805\nAPO AA 39998', 'staff', '150752.75'),
 (6, 'Kayla', 'Lewis', 'brianthomas@example.org', '_p%rM)I5z8', '6948 Gray Hollow Apt. 639\nSouth Brentton, HI 74869', 'staff', '144664.42'),
@@ -108,7 +102,7 @@ INSERT INTO `employee` (`id`, `first_name`, `last_name`, `email`, `password`, `a
 
 
 
-INSERT INTO `customer` (`id`, `first_name`, `last_name`, `telephone`, `email`, `gender`, `password`, `town`, `parish`) VALUES
+INSERT INTO  customer  ( id ,  first_name ,  last_name ,  telephone ,  email ,  gender ,  password ,  town ,  parish ) VALUES
 (1, 'Milton', 'Francis', 1234, 'francismilton19410@gmail.com', 'Male', '1111', 'Change Hill', 'Kingston'),
 (3, 'Lisa', 'Brown', 2147483647, 'lisabrown@yahoo.com', 'male', '123', 'Change Hill', 'Kingston'),
 (4, 'Michael', 'Garner', 2147483647, 'beltrananthony@example.com', 'Male', '$43Zj5p)kO', 'Hansonfort', 'St. Catherine'),
@@ -167,7 +161,7 @@ INSERT INTO `customer` (`id`, `first_name`, `last_name`, `telephone`, `email`, `
 
 
 
-INSERT INTO `grocery` (`id`, `name`, `description`, `quantity`, `units`, `cost_per_unit`) VALUES
+INSERT INTO  grocery  ( id ,  name ,  description ,  quantity ,  units ,  cost_per_unit ) VALUES
 (5, 'bannan', 'brown', 34, 'finger', '444.00'),
 (6, 'cheese', 'cheddar', 6, 'slice', '34.00'),
 (7, 'bannana', 'ripe', 3, 'finger', '444.00'),
@@ -676,7 +670,7 @@ INSERT INTO `grocery` (`id`, `name`, `description`, `quantity`, `units`, `cost_p
 
 
 
-INSERT INTO `order` (`id`, `orderDate`, `status`, `deliveryDate`, `deliveryTown`, `deliveryParish`, `customer_id`, `checkout_by`) VALUES
+INSERT INTO  orders  ( id ,  orderDate ,  status ,  deliveryDate ,  deliveryTown ,  deliveryParish ,  customer_id ,  checkout_by ) VALUES
 (3, '2021-03-20 14:50:12', 'PENDING', '2021-04-20 15:30:00', 'UWI', 'St. Andrew', 3, 1),
 (4, '2021-03-20 14:51:35', 'PENDING', NULL, NULL, NULL, 3, NULL),
 (5, '2021-03-20 15:09:37', 'CANCELLED', NULL, NULL, NULL, 3, NULL),
@@ -885,7 +879,7 @@ INSERT INTO `order` (`id`, `orderDate`, `status`, `deliveryDate`, `deliveryTown`
 
 
 
-INSERT INTO `order_groceries` (`order_id`, `grocery_id`, `quantity`) VALUES
+INSERT INTO  order_groceries  ( order_id ,  grocery_id ,  quantity ) VALUES
 (3, 81, 6),
 (3, 91, 2),
 (3, 141, 8),
@@ -2287,11 +2281,11 @@ INSERT INTO `order_groceries` (`order_id`, `grocery_id`, `quantity`) VALUES
 (202, 447, 9),
 (202, 459, 4);
 
-INSERT INTO `payment` (`order_id`, `recorded_by`, `payment_date`, `amount_tendered`, `change`) VALUES
+INSERT INTO  payment  ( order_id ,  recorded_by ,  payment_date ,  amount_tendered ,  change ) VALUES
 (5, 1, '2021-04-03 03:34:26', '5000.00', '3368.00');
 
 
-INSERT INTO `rating` (`cust_id`, `item_id`, `rating`) VALUES
+INSERT INTO  rating  ( cust_id ,  item_id ,  rating ) VALUES
 (3, 5, 10),
 (3, 6, 1),
 (3, 7, 9),
@@ -6783,7 +6777,7 @@ INSERT INTO `rating` (`cust_id`, `item_id`, `rating`) VALUES
 (12, 11, 7),
 (12, 12, 10),
 (12, 13, 7);
-INSERT INTO `rating` (`cust_id`, `item_id`, `rating`) VALUES
+INSERT INTO  rating  ( cust_id ,  item_id ,  rating ) VALUES
 (12, 14, 6),
 (12, 15, 10),
 (12, 16, 8),
@@ -10984,7 +10978,8 @@ INSERT INTO `rating` (`cust_id`, `item_id`, `rating`) VALUES
 (20, 227, 5),
 (20, 228, 3),
 (20, 229, 9);
-INSERT INTO `rating` (`cust_id`, `item_id`, `rating`) VALUES
+
+INSERT INTO  rating  ( cust_id ,  item_id ,  rating ) VALUES
 (20, 230, 2),
 (20, 231, 7),
 (20, 232, 2),
@@ -15175,7 +15170,8 @@ INSERT INTO `rating` (`cust_id`, `item_id`, `rating`) VALUES
 (28, 433, 10),
 (28, 434, 6),
 (28, 435, 9);
-INSERT INTO `rating` (`cust_id`, `item_id`, `rating`) VALUES
+
+INSERT INTO  rating  ( cust_id ,  item_id ,  rating ) VALUES
 (28, 436, 5),
 (28, 437, 6),
 (28, 438, 1),
@@ -19376,7 +19372,8 @@ INSERT INTO `rating` (`cust_id`, `item_id`, `rating`) VALUES
 (37, 151, 7),
 (37, 152, 8),
 (37, 153, 9);
-INSERT INTO `rating` (`cust_id`, `item_id`, `rating`) VALUES
+
+INSERT INTO  rating  ( cust_id ,  item_id ,  rating ) VALUES
 (37, 154, 1),
 (37, 155, 1),
 (37, 156, 6),
@@ -23572,7 +23569,8 @@ INSERT INTO `rating` (`cust_id`, `item_id`, `rating`) VALUES
 (45, 362, 6),
 (45, 363, 5),
 (45, 364, 4);
-INSERT INTO `rating` (`cust_id`, `item_id`, `rating`) VALUES
+
+INSERT INTO  rating  ( cust_id ,  item_id ,  rating ) VALUES
 (45, 365, 4),
 (45, 366, 3),
 (45, 367, 6),
