@@ -6,13 +6,14 @@ class OrderManager:
         self.orderGroceriesAccess = orderGroceries
         self.paymentAccess = paymentAccess
     
-    def scheduleOrder(self, request):
+    def scheduleOrder(self, request, user):
         
         getParam = self.getRequestType(request)
         deliverydate = getParam('date')
         orderId = getParam('order_id')
+        custId = user['cust_id']
         
-        order = self.orderAccess.scheduleDelivery(orderId,deliverydate)
+        order = self.orderAccess.scheduleDelivery(orderId,deliverydate,int(custId))
         if order:
             empFname = order.employee
             empLname = order.employee

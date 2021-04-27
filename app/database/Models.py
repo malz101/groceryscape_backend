@@ -69,6 +69,7 @@ class Grocery(db.Model):
     units = db.Column(db.String(100), nullable=False)
     cost_per_unit = db.Column(db.Numeric(10,2), nullable=False)
     grams_per_unit = db.Column(db.Numeric(10,2), nullable=False)
+    category = db.Column(db.String(100), nullable=False)
 
     #order associated many to many
     orders = db.relationship("OrderGroceries", back_populates="groceries", cascade="all,delete")

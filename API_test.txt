@@ -26,8 +26,10 @@
 ---------------------------------------------------------------
                             Grocery
 ----------------------------------------------------------------
-1) create grocery: will be changed to post only
-    https://infinite-beach-27814.herokuapp.com/manage_groceries/submit_grocery?grocery_name=biscuit&description=butterkiss&quantity=12&price=90&units=bag&grams_per_unit=0.67
+
+1) create grocery:
+    http://localhost:5000/manage_groceries/submit_grocery?grocery_name=biscuit&description=butterkiss&quantity=12&price=90&units=bag&grams_per_unit=0.67&category=MEAT
+
 
 2) update grocery: will be changed to post only
     http://localhost:5000/manage_groceries/update_grocery?grocery_id=2&attribute=name&value=apple
@@ -41,6 +43,8 @@
 5) query all groceries:
     http://localhost:5000/manage_groceries/get_groceries
 
+5) query groceries by category:
+    http://localhost:5000/manage_groceries/get_groceries_by_category?category=MEAT
 
 ---------------------------------------------------------------
                             Employee
