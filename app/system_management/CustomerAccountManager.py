@@ -38,7 +38,14 @@ class AccountManager:
         """get the customer's account"""
         customer = self.customer_access.login(email, password)
         if customer:
-            return {"cust_id": str(customer.id), 'first_name': customer.first_name, 'last_name': customer.last_name}
+            return {
+                "cust_id": str(customer.id),
+                'first_name': customer.first_name,
+                'last_name': customer.last_name,
+                'telephone': customer.telephone,
+                'town': customer.town,
+                'parish': customer.parish
+            }
         return False
 
     def getCustomer(self, customerId):
