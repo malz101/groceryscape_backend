@@ -87,13 +87,13 @@ def update_account():
             return response
     return redirect(url_for('index'))
 
-@manage_customer_account.route('/get_customer/<user_id>', methods=["GET"])
+@manage_customer_account.route('/get_customer', methods=["GET"])
 @jwt_required()
-def get_customer(user_id):
+def get_customer():
     user = get_jwt_identity()
-    if user:
+    if user and (not 'role' in user):
         try:
-            customer = customer_manager.get_customer(user_id)
+            customer = customer_manager.get_customer(user['cust_id'])
             if customer:
                 response = {'msg': 'success','data': {'customer':customer}}, 200
             else:
