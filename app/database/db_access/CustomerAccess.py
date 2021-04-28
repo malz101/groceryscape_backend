@@ -7,9 +7,9 @@ class CustomerAccess:
     """retrieve a customer record from the database given their email and password"""
     def login(self, email, password):
         customer = Customer.query.filter_by(email=email).first()
-
-        if customer.email == email and customer.password == password:
-            return customer
+        if customer:
+            if customer.email == email and customer.password == password:
+                return customer
         else:
             return False
 
