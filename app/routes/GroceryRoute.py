@@ -53,16 +53,44 @@ def delete_grocery():
 
 @manage_groceries.route('/get_groceries', methods=['POST','GET'])
 def get_groceries():
-    groceries = grocery_manager.getGroceries(request)
-    return groceries
+    try:
+        groceries = grocery_manager.getGroceries(request)
+        if groceries:
+            response = {'msg':'success', 'data':{'groceries':groceries}}, 200
+        else:
+            response = {'msg':'No groceries Found', 'data':{'groceries':{}}}, 200
+    except Exception as e:
+        print(e)
+        response = {'msg': 'sorry request failed', 'error':'ise-0001'}, 500
+    finally:
+        return response
+
 
 
 @manage_groceries.route('/get_groceries_by_category', methods=['POST','GET'])
 def get_groceries_by_category():
-    groceries = grocery_manager.getGroceriesByCategory(request)
-    return groceries
+    try:
+        groceries = grocery_manager.getGroceriesByCategory(request)
+        if groceries:
+            response = {'msg':'success', 'data':{'groceries':groceries}}, 200
+        else:
+            response = {'msg':'No groceries of that category found', 'data':{'groceries':{}}}, 200
+    except Exception as e:
+        print(e)
+        response = {'msg': 'sorry request failed', 'error':'ise-0001'}, 500
+    finally:
+        return response
 
 @manage_groceries.route('/get_grocery', methods=['POST','GET'])
 def get_grocery():
-    grocery = grocery_manager.getGrocery(request)
-    return grocery
+    try:
+        grocery = grocery_manager.getGrocery(request)
+        if grocery:
+            reponse = {'msg':'success', 'data': {'grocery':grocery}}, 200
+        else:
+            response = {'msg':'Grocery not found', 'data': {'grocery':{}}}, 200
+    except Exception as e:
+        print(e)
+        response = {'msg':'', 'error':'ise-0001'}, 500
+    finally:
+        return response
