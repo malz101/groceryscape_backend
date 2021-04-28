@@ -10,7 +10,8 @@ class Config(object):
             'JWT_SECRET_KEY': 'Som3$ec5etK*y', \
             'JWT_ACCESS_TOKEN_EXPIRES': 1, \
             'SQLALCHEMY_DATABASE_URI': 'mysql+mysqlconnector://root:@localhost/food_delivery', \
-            'SQLALCHEMY_TRACK_MODIFICATIONS': False}
+            'SQLALCHEMY_TRACK_MODIFICATIONS': False, \
+            'UPLOAD_FOLDER': './uploads'}
 
     try:
         fptr = open('./app/groceryscape.conf')
@@ -35,6 +36,7 @@ class Config(object):
         JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=int(configs['JWT_ACCESS_TOKEN_EXPIRES']))
         SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or configs['SQLALCHEMY_DATABASE_URI']
         SQLALCHEMY_TRACK_MODIFICATIONS = bool(configs['SQLALCHEMY_TRACK_MODIFICATIONS'])
+        UPLOAD_FOLDER = configs['UPLOAD_FOLDER']
     except ValueError:
         raise Exception('One of the configurations has an invalid value')
 
