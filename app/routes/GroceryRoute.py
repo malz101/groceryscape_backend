@@ -24,80 +24,39 @@ def create_grocery():
 def submit_grocery():
     user = get_jwt_identity()
     if user and ('role' in user):
-        newGrocery = grocery_manager.addGrocery(request)
-        return newGrocery
+        reponse = grocery_manager.addGrocery(request)
+        return reponse
     else:
         return redirect(url_for('manage_employee_account.index'))
 
-@manage_groceries.route('/update_grocery', methods=['POST','GET'])
+@manage_groceries.route('/update_grocery/<grocery_id>', methods=['POST','GET'])
 @jwt_required()
-def update_grocery():
+def update_grocery(grocery_id):
 
     user = get_jwt_identity()
     if user and ('role' in user):
-        updatedGrocery = grocery_manager.updateGrocery(request)
-        return updatedGrocery
+        response = grocery_manager.updateGrocery(grocery_id,request)
+        return response
     else:
         return redirect(url_for('manage_employee_account.index'))
 
-@manage_groceries.route('/delete_grocery', methods=['POST','GET'])
+@manage_groceries.route('/delete_grocery/<grocery_id>', methods=['GET'])
 @jwt_required()
-def delete_grocery():
+def delete_grocery(grocery_id):
 
     user = get_jwt_identity()
     if user and ('role' in user):
-        try:
-            groceries = grocery_manager.deleteGrocery(request)
-            if groceries:
-                respose = {'msg':'success', 'data':{}}
-        except Exception as e:
-            print(e)
-            response = {'msg': 'sorry request failed', 'error':'ise-0001'}, 500
-        finally:
-            return response
+        response = grocery_manager.deleteGrocery(grocery_id)
+        return reponse
     else:
         return redirect(url_for('manage_employee_account.index'))
 
 @manage_groceries.route('/get_groceries', methods=['POST','GET'])
 def get_groceries():
-    try:
-        groceries = grocery_manager.getGroceries(request)
-        if groceries:
-            response = {'msg':'success', 'data':{'groceries':groceries}}, 200
-        else:
-            response = {'msg':'No groceries Found', 'data':{}}, 200
-    except Exception as e:
-        print(e)
-        response = {'msg': 'sorry request failed', 'error':'ise-0001'}, 500
-    finally:
-        return response
-
-
-
-@manage_groceries.route('/get_groceries_by_category', methods=['POST','GET'])
-def get_groceries_by_category():
-    try:
-        groceries = grocery_manager.getGroceriesByCategory(request)
-        if groceries:
-            response = {'msg':'success', 'data':{'groceries':groceries}}, 200
-        else:
-            response = {'msg':'No groceries of that category found', 'data':{}}, 200
-    except Exception as e:
-        print(e)
-        response = {'msg': 'sorry request failed', 'error':'ise-0001'}, 500
-    finally:
-        return response
+    response = grocery_manager.getGroceries(request)
+    return response
 
 @manage_groceries.route('/get_grocery', methods=['POST','GET'])
 def get_grocery():
-    try:
-        grocery = grocery_manager.getGrocery(request)
-        if grocery:
-            reponse = {'msg':'success', 'data': {'grocery':grocery}}, 200
-        else:
-            response = {'msg':'Grocery not found', 'data': {}}, 200
-    except Exception as e:
-        print(e)
-        response = {'msg':'', 'error':'ise-0001'}, 500
-    finally:
-        return response
+    response = grocery_manager.getGrocery(request)
+    return response

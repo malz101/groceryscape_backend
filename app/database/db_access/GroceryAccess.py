@@ -58,21 +58,33 @@ class GroceryAccess:
         except:
             return False
 
-    def getGroceries(self):
-        groceries = Grocery.query.filter_by().all()
+    def getGroceries(self, name=None, description=None, category=None):
+        if name is None:
+            name =''
+        name = '%{}%'.format(name)
+
+        if description is None:
+            description = ''
+        description = '%{}%'.format(description)
+
+        if category is None:
+            category = ''
+        category = '%{}%'.format(category)
+
+        groceries = Grocery.query.filter(
+            and_(
+                Grocery.name.ilike(name), 
+                Grocery.description.ilike(description), 
+                Grocery.category.ilike(category)
+            )
+        ).all()
         # try:
-        if groceries[0].name:
+        if groceries:
             return groceries
+        return False
         # except:
         #     return False
 
-    def getGroceriesByCategory(self,category):
-        groceries = Grocery.query.filter_by(category=category).all()
-        try:
-            if groceries[0].name:
-                return groceries
-        except:
-            return False
 
     def removeGroceryItem(self, groceryId):
 
@@ -85,7 +97,7 @@ class GroceryAccess:
     def getTaxType(self, groceryId, type):
         grocery = self.searchForGrocery(groceryId)
         if grocery:
-            tax = Taxes_on_goods.query.filter(and_(Taxes_on_goods.tax.like(type), Taxes_on_goods.grocery_id==groceryId)).first()
+            tax = Taxes_on_goods.query.filter(and_(Taxes_on_goods.tax.ilike(type), Taxes_on_goods.grocery_id==groceryId)).first()
             try:
                 if tax.grocery_id:
                     return tax

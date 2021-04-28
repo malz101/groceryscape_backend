@@ -76,7 +76,7 @@ def get_orders():
     user = get_jwt_identity()
     if user and ('role' in user):
         try:
-            orders = order_manager.getOrders()
+            orders = order_manager.getOrders(request)
             if orders:
                 response = {'msg':'success', 'data':{'orders':orders}}, 200
             else:

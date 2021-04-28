@@ -141,7 +141,7 @@ class AccountManager:
         
         cust_id = user['cust_id']
 
-        orders = self.orderAccess.getCustomerOrders(cust_id, status, order_start_date, order_end_date,\
+        orders = self.orderAccess.getOrders(cust_id, status, order_start_date, order_end_date,\
                                                     delivery_start_date, delivery_end_date, delivery_town,\
                                                     delivery_parish)
         response = []

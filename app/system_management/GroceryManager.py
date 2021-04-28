@@ -36,18 +36,18 @@ class GroceryManager:
             print(e)
             return {'msg':'request failed', 'error':'ise-0001'}, 500
 
-    def updateGrocery(self, request):
+    def updateGrocery(self,grocery_id,request):
 
         try:
             getParam = self.getRequestType(request)
-            groceryId = getParam('grocery_id')
+            # groceryId = getParam('grocery_id')
             attribute = getParam('attribute')
             value = getParam('value')
 
             '''validate and sanitize data'''
 
             '''perform update'''
-            grocery = self.grocery_access.updateGrocery(groceryId, attribute, value)
+            grocery = self.grocery_access.updateGrocery(grocery_id, attribute, value)
             if grocery:
                 return {'msg':'success', 'data':{'grocery':self.__getGroceryDetails(grocery)}}, 200
             else:
@@ -56,21 +56,21 @@ class GroceryManager:
             print(e)
             return {'msg':'request failed', 'error':'ise-0001'}, 500
 
-    def deleteGrocery(self, request):
+    def deleteGrocery(self, grocery_id):
 
         try:
-            getParam = self.getRequestType(request)
-            groceryId = getParam('grocery_id')
+            # getParam = self.getRequestType(request)
+            # groceryId = getParam('grocery_id')
 
             '''validate and sanitize data'''
 
             '''remove grocery from db'''
-            groceries = self.grocery_access.removeGroceryItem(int(groceryId))
+            groceries = self.grocery_access.removeGroceryItem(int(grocery_id))
             response = []
             if groceries:
                 for grocery in groceries:
-                    {'msg':'success', 'data':{'groceries':response.append(self.__getGroceryDetails(grocery))}}, 200
-                return response
+                    response.append(self.__getGroceryDetails(grocery))
+                return {'msg':'success', 'data':{'groceries':response}}, 200
             else:
                 return {'msg':'no groceries in stock', 'data':{}}, 200
         except Exception as e:
@@ -80,7 +80,12 @@ class GroceryManager:
     def getGroceries(self, request):
 
         try:
-            groceries = self.grocery_access.getGroceries()
+            getParam = self.getRequestType(request)
+            category = getParam('category')
+            description = getParam('description')
+            name = getParam('name')
+
+            groceries = self.grocery_access.getGroceries(name, description, category)
             response = []
             if groceries:
                 for grocery in groceries:
@@ -92,23 +97,6 @@ class GroceryManager:
             print (e)
             return {'msg':'request failed', 'error':'ise-0001'}, 500
 
-    def getGroceriesByCategory(self, request):
-
-        try:
-            getParam = self.getRequestType(request)
-            category = getParam('category')
-
-            groceries = self.grocery_access.getGroceriesByCategory(category)
-            response = []
-            if groceries:
-                for grocery in groceries:
-                    response.append(self.__getGroceryDetails(grocery))
-                return {'msg':'success', 'data':{'groceries':response}}, 200
-            else:
-                return {'msg':'no grocery found', 'data':{}}, 200
-        except Exception as e:
-            print(e)
-            return {'msg':'request failed', 'error':'ise-0001'}, 500
 
     def getGrocery(self, request):
 
