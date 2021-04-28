@@ -27,6 +27,7 @@ def signup():
         else:
             response = {'msg': 'email address already exits', 'error':'create-0001'}, 404
     except Exception as e:
+        print(e)
         reponse = {'msg': '', 'error':'ise-0001'}, 500
     finally:
         return reponse
@@ -46,6 +47,7 @@ def login():
             }, 401
 
     except Exception as e:
+        print(e)
         response = {'msg':'', 'error': 'ise-0001'}, 500
     finally:
         return response
@@ -63,7 +65,7 @@ def logout():
         return {'msg': 'user cannot be identified', 'error': 'jwt-0001'}, 401
 
     except Exception as e:
-        # print(e)
+        print(e)
         return {'msg': '', 'error':'internal server error'}, 500
 
 @manage_customer_account.route('/update_account', methods=["POST"])
@@ -79,7 +81,7 @@ def update_account():
             else:
                 response = {'msg':'account does not exist', 'error':'notfound-0001'}, 404
         except Exception as e:
-            # print(e)
+            print(e)
             response = {'msg': '', 'error':'internal server error'}, 500
         finally:
             return response
@@ -97,7 +99,7 @@ def get_customer(user_id):
             else:
                 response = {'msg':'user with id '+user_id+' does not exist','error':'notfound-0001'}, 404
         except Exception as e:
-            # print(e)
+            print(e)
             response = {'msg':'','error':'ise-0001'}, 500
         finally:
             return response
@@ -116,6 +118,7 @@ def get_recommended_groceries():
         except NameError:
             response = {'msg': 'customer not found', 'data': {}}, 200
         except Exception as e:
+            print(e)
             response = {'msg': '', 'error': 'ise-0001'}, 500
         finally:
             return reponse
@@ -156,7 +159,8 @@ def cancel_order(order_id):
                 response = {'msg':'order successfully cancelled', 'data':{'msg':msg}}, 200
             else:
                 reponse = {'msg': 'order cancellation unsuccessful', 'error':'notfound-0001'}, 404
-        except:
+        except Exception as e:
+            print(e)
             response = {'msg':'', 'error':'ise-0001'}, 500
         finally:
             return response
@@ -176,7 +180,8 @@ def set_delivery_location(order_id):
                 response = {'msg':'delivery location update successful', 'data':{'order':order}}, 200
             else:
                 response = {'msg':'delivery loction update unsuccessful', 'error':'create-0001'}, 404
-        except Exception:
+        except Exception as e:
+            print(e)
             response = response = {'msg':'', 'error':'ise-0001'}, 500
         finally:
             return response
