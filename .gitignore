@@ -13,4 +13,4 @@ venv/
 .idea
 
 commands.md
-
+app/groceryscape.conf
