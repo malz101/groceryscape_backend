@@ -38,7 +38,14 @@ class AccountManager:
         """get the customer's account"""
         customer = self.customer_access.login(email, password)
         if customer:
-            return {"cust_id": str(customer.id), 'first_name': customer.first_name, 'last_name': customer.last_name}
+            return {
+                "cust_id": str(customer.id),
+                'first_name': customer.first_name,
+                'last_name': customer.last_name,
+                'telephone': customer.telephone,
+                'town': customer.town,
+                'parish': customer.parish
+            }
         return False
 
     def getCustomer(self, customerId):
@@ -134,7 +141,7 @@ class AccountManager:
         
         cust_id = user['cust_id']
 
-        orders = self.orderAccess.getCustomerOrders(cust_id, status, order_start_date, order_end_date,\
+        orders = self.orderAccess.getOrders(cust_id, status, order_start_date, order_end_date,\
                                                     delivery_start_date, delivery_end_date, delivery_town,\
                                                     delivery_parish)
         response = []

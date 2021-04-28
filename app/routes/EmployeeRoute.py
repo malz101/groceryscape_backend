@@ -19,7 +19,7 @@ def index():
     if employee:
         return employee
     else:
-        return {'msg':'you are not logged in!'} 
+        return {'msg':'you are not logged in!', 'error':'auth-001'}, 401
 
 @manage_employee_account.route('/login', methods=["POST", "GET"])
 def login():

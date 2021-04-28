@@ -6,13 +6,14 @@ class OrderManager:
         self.orderGroceriesAccess = orderGroceries
         self.paymentAccess = paymentAccess
     
-    def scheduleOrder(self, request):
+    def scheduleOrder(self, request, user):
         
         getParam = self.getRequestType(request)
         deliverydate = getParam('date')
         orderId = getParam('order_id')
+        custId = user['cust_id']
         
-        order = self.orderAccess.scheduleDelivery(orderId,deliverydate)
+        order = self.orderAccess.scheduleDelivery(orderId,deliverydate,int(custId))
         if order:
             empFname = order.employee
             empLname = order.employee
@@ -61,8 +62,38 @@ class OrderManager:
             return {'summary':self.__getOrderDetails(order,empName), 'groceries':self.__getOrderItemsDetails(order.id)}
         return False
         
-    def getOrders(self):
-        orders = self.orderAccess.getOrders()
+    def getOrders(self, request, cust_id=None):
+        getParam = self.getRequestType(request)
+
+        if cust_id is None:
+            cust_id = getParam('cust_id')
+            
+        status = getParam('status')
+
+        order_start_date = getParam('order_start_date')
+        if order_start_date is not None:
+            order_start_date = order_start_date + " 00:00:00"
+        
+        order_end_date = getParam('order_end_date')
+        if order_end_date is not None:
+            order_end_date = order_end_date+" 23:59:59"
+
+        delivery_start_date = getParam('delivery_start_date')
+        if delivery_start_date is not None:
+            delivery_start_date = delivery_start_date + " 00:00:00"
+        
+        delivery_end_date = getParam('delivery_end_date')
+        if delivery_end_date is not None:
+            delivery_end_date = delivery_end_date + " 23:59:59"
+
+        delivery_town = getParam('delivery_town')
+        delivery_parish = getParam('delivery_parish')
+
+
+        orders = self.orderAccess.getOrders(cust_id, status, order_start_date, order_end_date,\
+                                                    delivery_start_date, delivery_end_date, delivery_town,\
+                                                    delivery_parish)
+
         response = []
         if orders:
             for order in orders:

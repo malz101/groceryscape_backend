@@ -44,21 +44,17 @@ class OrderAccess:
         else:
             return  False
 
-    def getOrders(self):
-        orders = Order.query.filter_by().all()
-        try:
-            if orders[0].id:
-                return orders
-        except:
-            return False
 
-    def scheduleDelivery(self, orderId, date):
+    def scheduleDelivery(self, orderId, date,custId):
         
         order = self.getOrderById(orderId)
         if order:
-            order.deliverydate = date
-            db.session.commit()
-            return order
+            if order.customer_id == custId:
+                order.deliveryDate = date
+                db.session.commit()
+                return order
+            else:
+                return False #raise an exception error here to indicate auth error
         else:
             return False
             
@@ -80,10 +76,10 @@ class OrderAccess:
         except:
             return False
 
-    def getCustomerOrders(self,custId, status=None, min_order_timestamp=None,\
+    def getOrders(self,custId=None, status=None, min_order_timestamp=None,\
                             max_order_timestamp=None, min_delivery_timestamp=None,\
                             max_delivery_timestamp=None, delivery_town=None,delivery_parish=None):
-
+        
         if status is None:
             status = ''
         status = '%{}%'.format(status)
@@ -121,25 +117,40 @@ class OrderAccess:
             delivery_parish = ''
         delivery_parish = '%{}%'.format(delivery_parish)
 
-        orders = Order.query.filter(
-            and_(
-                Order.customer_id==custId,\
-                Order.status.like(status),\
-                or_(Order.deliverytown.like(delivery_town), Order.deliverytown == town_provided),\
-                or_(Order.deliveryparish.like(delivery_parish), Order.deliveryparish == parish_provided),\
-                and_(Order.orderdate >= min_order_timestamp, Order.orderdate <= max_order_timestamp),\
-                or_(
-                    and_(Order.deliverydate >= min_delivery_timestamp, Order.deliverydate <= max_delivery_timestamp),\
-                    Order.deliverydate == delivery_range_provided\
+        if custId is not None:
+            orders = Order.query.filter(
+                and_(
+                    Order.customer_id==custId,\
+                    Order.status.ilike(status),\
+                    or_(Order.deliverytown.ilike(delivery_town), Order.deliverytown == town_provided),\
+                    or_(Order.deliveryparish.ilike(delivery_parish), Order.deliveryparish == parish_provided),\
+                    and_(Order.orderdate >= min_order_timestamp, Order.orderdate <= max_order_timestamp),\
+                    or_(
+                        and_(Order.deliverydate >= min_delivery_timestamp, Order.deliverydate <= max_delivery_timestamp),\
+                        Order.deliverydate == delivery_range_provided\
+                    )
                 )
-            )
-        ).all()
+            ).all()
+        else:
+            orders = Order.query.filter(
+                and_(
+                    Order.status.ilike(status),\
+                    or_(Order.deliverytown.ilike(delivery_town), Order.deliverytown == town_provided),\
+                    or_(Order.deliveryparish.ilike(delivery_parish), Order.deliveryparish == parish_provided),\
+                    and_(Order.orderdate >= min_order_timestamp, Order.orderdate <= max_order_timestamp),\
+                    or_(
+                        and_(Order.deliverydate >= min_delivery_timestamp, Order.deliverydate <= max_delivery_timestamp),\
+                        Order.deliverydate == delivery_range_provided\
+                    )
+                )
+            ).all()            
         
-        try:
-            if orders[0].id:
-                return orders
-        except:
-            return False
+        # try:
+        if orders:
+            return orders
+        # except:
+        return False
+
 
     def getCustomerPendingOrder(self,custId):
         orders = Order.query.filter(and_(Order.customer_id==int(custId),\

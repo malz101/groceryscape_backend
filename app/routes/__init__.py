@@ -1,5 +1,6 @@
+import os
 from app import app
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask import session
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
@@ -41,3 +42,8 @@ def index():
         return user
     else:
         return {'msg': 'you are not logged in as a customer', 'error': 'auth-0001'}, 401
+
+@app.route('/uploads/<filename>')
+def get_image(filename):
+    root_dir = os.getcwd()
+    return send_from_directory(os.path.join(root_dir,app.config['UPLOAD_FOLDER']), filename)
