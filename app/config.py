@@ -9,6 +9,7 @@ class Config(object):
     JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=1)
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'mysql+mysqlconnector://root:''@localhost/food_delivery'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    UPLOAD_FOLDER = './uploads'
 
 
 class DevelopmentConfig(Config):

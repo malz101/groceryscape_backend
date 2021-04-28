@@ -19,7 +19,7 @@ def create_grocery():
     else:
         return redirect(url_for('manage_employee_account.index'))
 
-@manage_groceries.route('/submit_grocery', methods=['POST','GET'])
+@manage_groceries.route('/submit_grocery', methods=['POST'])
 @jwt_required()
 def submit_grocery():
     user = get_jwt_identity()

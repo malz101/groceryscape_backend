@@ -1,3 +1,6 @@
+from app import uploaddir
+import os
+from werkzeug.utils import secure_filename
 class GroceryManager:
     def __init__(self, grocery_access):
         self.grocery_access = grocery_access
@@ -13,11 +16,18 @@ class GroceryManager:
             units = getParam('units')
             grams_per_unit = getParam('grams_per_unit')
             category = getParam('category')
+            photo = getParam('photo')
+
+            filename = secure_filename(photo.filename)
+            photo.save(os.path.join(
+                uploaddir, filename
+            ))
+
 
             """validate the data"""
 
             """add grocery item to stock"""
-            grocery = self.grocery_access.create_grocery(name, description, int(quantity), units, float(price), float(grams_per_unit),category)
+            grocery = self.grocery_access.create_grocery(name, description, int(quantity), units, float(price), float(grams_per_unit),category, filename)
             if grocery:
                 return {'msg':'success', 'data':{'grocery':self.__getGroceryDetails(grocery)}}, 200
             else:
@@ -120,7 +130,7 @@ class GroceryManager:
         return {'id': str(grocery.id), 'name': grocery.name, 'description': grocery.description, \
                         'quantity': str(grocery.quantity), 'units': grocery.units, \
                         'cost_per_unit': str(grocery.cost_per_unit), 'grams_per_unit':str(grocery.grams_per_unit),\
-                'category':grocery.category}
+                'category':grocery.category, 'photo':grocery.photo}
 
 
     def getRequestType(self, request):
