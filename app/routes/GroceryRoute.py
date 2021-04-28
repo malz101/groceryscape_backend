@@ -46,8 +46,15 @@ def delete_grocery():
 
     user = get_jwt_identity()
     if user and ('role' in user):
-        groceries = grocery_manager.deleteGrocery(request)
-        return groceries
+        try:
+            groceries = grocery_manager.deleteGrocery(request)
+            if groceries:
+                respose = {'msg':'success', 'data':{}}
+        except Exception as e:
+            print(e)
+            response = {'msg': 'sorry request failed', 'error':'ise-0001'}, 500
+        finally:
+            return response
     else:
         return redirect(url_for('manage_employee_account.index'))
 
@@ -58,7 +65,7 @@ def get_groceries():
         if groceries:
             response = {'msg':'success', 'data':{'groceries':groceries}}, 200
         else:
-            response = {'msg':'No groceries Found', 'data':{'groceries':{}}}, 200
+            response = {'msg':'No groceries Found', 'data':{}}, 200
     except Exception as e:
         print(e)
         response = {'msg': 'sorry request failed', 'error':'ise-0001'}, 500
@@ -74,7 +81,7 @@ def get_groceries_by_category():
         if groceries:
             response = {'msg':'success', 'data':{'groceries':groceries}}, 200
         else:
-            response = {'msg':'No groceries of that category found', 'data':{'groceries':{}}}, 200
+            response = {'msg':'No groceries of that category found', 'data':{}}, 200
     except Exception as e:
         print(e)
         response = {'msg': 'sorry request failed', 'error':'ise-0001'}, 500
@@ -88,7 +95,7 @@ def get_grocery():
         if grocery:
             reponse = {'msg':'success', 'data': {'grocery':grocery}}, 200
         else:
-            response = {'msg':'Grocery not found', 'data': {'grocery':{}}}, 200
+            response = {'msg':'Grocery not found', 'data': {}}, 200
     except Exception as e:
         print(e)
         response = {'msg':'', 'error':'ise-0001'}, 500
