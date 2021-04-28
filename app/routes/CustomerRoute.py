@@ -97,7 +97,7 @@ def get_customer():
             if customer:
                 response = {'msg': 'success','data': {'customer':customer}}, 200
             else:
-                response = {'msg':'user with id '+user_id+' does not exist','error':'notfound-0001'}, 404
+                response = {'msg':'user with id '+user['cust_id']+' does not exist','error':'notfound-0001'}, 404
         except Exception as e:
             print(e)
             response = {'msg':'','error':'ise-0001'}, 500
