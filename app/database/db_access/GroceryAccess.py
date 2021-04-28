@@ -60,11 +60,11 @@ class GroceryAccess:
 
     def getGroceries(self):
         groceries = Grocery.query.filter_by().all()
-        try:
-            if groceries[0].name:
-                return groceries
-        except:
-            return False
+        # try:
+        if groceries[0].name:
+            return groceries
+        # except:
+        #     return False
 
     def getGroceriesByCategory(self,category):
         groceries = Grocery.query.filter_by(category=category).all()
