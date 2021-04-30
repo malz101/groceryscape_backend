@@ -12,13 +12,23 @@ class RatingManager:
 
             rating = self.rating_access.rateGrocery(int(custId),int(itemId), int(rating))
             if rating:
-                return {'customer_id':str(rating.cust_id),'customer_name':(rating.customer_ratings.first_name+" "+\
-                        rating.customer_ratings.last_name), 'grocery_name':rating.grocery_ratings.name,\
-                        'grocery_id':str(rating.item_id),'rating':str(rating.rating)}
+                return {
+                    'msg': 'success', 
+                    'data':{
+                        'rating':{
+                            'customer_id':str(rating.cust_id),
+                            'customer_name':(rating.customer_ratings.first_name+" "+rating.customer_ratings.last_name),
+                            'grocery_name':rating.grocery_ratings.name,
+                            'grocery_id':str(rating.item_id),
+                            'rating':str(rating.rating)
+                        }
+                    }
+                }, 200
             else:
-                return {'msg':'operation could not be completed because customer or grocery does not exist'}
-        except:
-            return {'msg':'failed request'}
+                return {'msg':'operation could not be completed because customer or grocery does not exist', 'error':'create-0001'}, 404
+        except Exception as e:
+            print(e)
+            return {'msg':'failed request', 'error':'ise-0001'}, 500
         
     def getDataFrame(self):
         return self.rating_access.getDataFrame()

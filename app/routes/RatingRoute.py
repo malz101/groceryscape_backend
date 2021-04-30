@@ -14,8 +14,8 @@ rating_manager = RatingManager(rating_access)
 def rate_grocery():
     user = get_jwt_identity()
     if user and (not 'role' in user):
-        rating = rating_manager.rateGrocery(user, request)
-        return rating
+        response = rating_manager.rateGrocery(user, request)
+        return response
     else:
         return redirect(url_for('index'))
 
