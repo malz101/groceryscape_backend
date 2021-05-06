@@ -53,7 +53,7 @@ def login():
         return response
 
 
-@manage_customer_account.route('/logout', methods=["GET"])
+@manage_customer_account.route('/logout', methods=["GET","POST"])
 @jwt_required()
 def logout():
     user = get_jwt_identity()
