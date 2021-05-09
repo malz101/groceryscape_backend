@@ -118,7 +118,7 @@ class GroceryManager:
         return {'id': str(grocery.id), 'name': grocery.name, 'description': grocery.description, \
                         'quantity': str(grocery.quantity), 'units': grocery.units, \
                         'cost_per_unit': str(grocery.cost_per_unit), 'grams_per_unit':str(grocery.grams_per_unit),\
-                'category':grocery.category, 'photo':grocery.photo}
+                'category':grocery.category, 'photo':grocery.photo, 'sku':grocery.sku}
 
 
     def getRequestType(self, request):

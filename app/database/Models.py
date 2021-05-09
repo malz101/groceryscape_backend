@@ -30,7 +30,9 @@ class Employee(db.Model):
     last_name = db.Column(db.String(45), nullable=False)
     email = db.Column(db.String(45), nullable=False, unique=True)
     password = db.Column(db.String(45), nullable=False)
-    address = db.Column(db.String(200), nullable=False)
+    street = db.Column(db.String(200), nullable=False)
+    town = db.Column(db.String(200), nullable=False)
+    parish = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), nullable=False)
     salary = db.Column(db.Numeric(10,2), nullable=True)
 
@@ -42,7 +44,7 @@ class Order(db.Model):
     __tablename__ = 'orders'
     id = db.Column(db.Integer, primary_key=True)
     orderdate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    status = db.Column(db.String, nullable=False, default='PENDING')
+    status = db.Column(db.String, nullable=False, default='pending')
     deliverydate = db.Column(db.DateTime)
     deliverytown = db.Column(db.String(45))
     deliveryparish = db.Column(db.String(45),db.ForeignKey('delivery_parish.parish'))
@@ -64,13 +66,14 @@ class Grocery(db.Model):
     __tablename__ = 'grocery'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    description = db.Column(db.String(1000), nullable=False)# unique=True)
+    description = db.Column(db.UnicodeText(), nullable=False)# unique=True)
     quantity = db.Column(db.Integer, nullable=False)
     units = db.Column(db.String(100), nullable=False)
     cost_per_unit = db.Column(db.Numeric(10,2), nullable=False)
     grams_per_unit = db.Column(db.Numeric(10,2), nullable=False)
     category = db.Column(db.String(100), nullable=False)
-    photo = db.Column(db.String(100), nullable=True)
+    photo = db.Column(db.String(100), default='grocery.jpg')
+    sku = db.Column(db.String(50), unique=True, nullable=True)
 
     #order associated many to many
     orders = db.relationship("OrderGroceries", back_populates="groceries", cascade="all,delete")

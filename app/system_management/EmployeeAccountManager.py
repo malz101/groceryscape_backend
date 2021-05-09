@@ -114,7 +114,8 @@ class EmployeeAccountManager:
 
         return {"emp_id": employee.id, 'first_name': employee.first_name, 'last_name': employee.last_name, \
                          'email': employee.email,'password': employee.password, 'role': employee.role,\
-                        'salary': float(employee.salary), 'address':employee.address}
+                        'salary': float(employee.salary), 'street':employee.street, 'town':employee.town,
+                        'parish':employee.parish}
             
     def getRequestType(self, request):
         if request.method == 'GET':
