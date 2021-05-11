@@ -30,7 +30,7 @@
 9) set delivery location:
     https://infinite-beach-27814.herokuapp.com/manage_customer_account/set_delivery_location/<order_id>
 
-10) get payment key: POST
+10) get payment key: GET
     https://infinite-beach-27814.herokuapp.com/manage_customer_account/get_pay_key
 
 11) pay for order: POST

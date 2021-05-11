@@ -39,5 +39,6 @@ pandas==1.2.3
 PyJWT==2.0.1
 pymysql
 pytz==2021.1
-
+blinker==1.4 
+flask-mail==0.9.1
 

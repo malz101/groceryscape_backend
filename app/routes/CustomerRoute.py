@@ -228,7 +228,7 @@ def pay():
         return redirect(url_for('index'))
 
 
-@manage_customer_account.route('/get_pay_key', methods=['POST'])
+@manage_customer_account.route('/get_pay_key', methods=['GET'])
 @jwt_required()
 def get_payment_key():
     user = get_jwt_identity()

@@ -177,6 +177,7 @@ class AccountManager:
     def make_payment(self, user, request):
         getParam = self.getRequestType(request)
         payment_method_id = getParam('payment_method_id')
+        payment_intent_id = getParam('payment_intent_id')
         order_id = getParam('order_id')
         intent = None
 
@@ -190,8 +191,8 @@ class AccountManager:
                     confirmation_method = 'manual',
                     confirm = True,
                 )
-            elif 'payment_intent_id' in data:
-                intent = stripe.PaymentIntent.confirm(getParam('payment_intent_id'))
+            elif payment_intent_id:
+                intent = stripe.PaymentIntent.confirm(payment_intent_id)
         except stripe.error.CardError as e:
             print(e)
             # Display error on client
