@@ -2,24 +2,14 @@ from ... import db
 from ..Models import OrderGroceries
 from ..Models import DeliveryParish
 
-class OrderGroceriesAccess:
+class DeliveryParishAccess:
 
-    def __init__(self, orderAccess, groceryAccess, customerAccess):
-        self.orderAccess = orderAccess
-        self.groceryAccess = groceryAccess
-        self.customerAccess = customerAccess
+    def getDeliveryParish(self,parish):
 
-    def getAllItemsOnOrder(self, orderId):
+        parish = DeliveryParish.query.filter_by(parish=parish).first()
+        return parish
+        
 
-        order = self.orderAccess.getOrderById(orderId)
-        if order:
-            items = OrderGroceries.query.filter_by(order_id=orderId).all()
-
-            try:
-                if items[0].order_id:
-                    return items
-            except:
-                return False
 
     # def getTotalOnOrder(self, orderId):
     #     items = self.getAllItemsOnOrder(orderId)

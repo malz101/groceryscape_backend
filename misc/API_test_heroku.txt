@@ -12,7 +12,10 @@
 4) logout: ***
     https://infinite-beach-27814.herokuapp.com/manage_customer_account/logout
 
-5) get my orders:
+5) get order:
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/get_order/<order_id>
+
+6) get my orders:
     https://infinite-beach-27814.herokuapp.com/manage_customer_account/get_my_orders
     can be filtered by:
     status, order_start_date, order_end_date, delivery_start_date,
@@ -26,6 +29,13 @@
 
 9) set delivery location:
     https://infinite-beach-27814.herokuapp.com/manage_customer_account/set_delivery_location/<order_id>
+
+10) get payment key: POST
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/get_pay_key
+
+11) pay for order: POST
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/pay
+    body: order_id, payment_method_id, payment_intent_id
 ---------------------------------------------------------------
                             Grocery
 ----------------------------------------------------------------
@@ -128,3 +138,13 @@
 
 6) record payment: Will be changed to post only
     https://infinite-beach-27814.herokuapp.com/manage_order/record_payment?order_id=5&amount_tendered=5000
+
+
+---------------------------------------------------------------
+                            APP 
+---------------------------------------------------------------
+1) get parish
+    https://infinite-beach-27814.herokuapp.com/get_parish/<parish>
+
+2) get image
+    https://infinite-beach-27814.herokuapp.com/uploads/<filename>

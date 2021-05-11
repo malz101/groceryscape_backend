@@ -24,6 +24,14 @@ class OrderAccess:
                 return order
         except:
             return False
+    
+    def getOrderByIdCustomer(self, orderId, cust_id):
+        order = Order.query.filter(and_(Order.customer_id==cust_id, Order.id==orderId)).first()
+        try:
+            if order.id:
+                return order
+        except:
+            return False
 
     def dumpCart(self, cartItems):
 
@@ -201,9 +209,10 @@ class OrderAccess:
     def getTax(self,groceryId, type):
         return GroceryAccess().getTax(groceryId,type)
 
-    def getTotalOnOrder(self, orderId):
-        return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getTotalOnOrder(orderId)
-
+    # def getTotalOnOrder(self, orderId):
+    #     return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getTotalOnOrder(orderId)
+    
+    
     def getDeliveryCost(self,orderId):
         return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getDeliveryCost(orderId)
 

@@ -47,7 +47,7 @@ CREATE TABLE grocery  (
    cost_per_unit  decimal(10,2) NOT NULL,
    grams_per_unit decimal(10,2) NOT NULL,
    category varchar(50),
-   photo varchar(100),
+   photo varchar(100) DEFAULT 'grocery.jpg',
    sku  varchar(50)
 );
 
@@ -265,7 +265,6 @@ INSERT INTO grocery (name, description, quantity, units, cost_per_unit, grams_pe
 ('Sweet Pepper Local, 1/2lb', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.', 97, 'pound', '200.00', '227.00', 'Vegetable', 'sweet-pepper.jpg', 'TSH-000-WHI-044'),
 ('Sweet Pepper Imported, 1/2lb', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.', 7, 'pound', '230.00', '227.00', 'Vegetable', 'sweet-pepper.jpg', 'TSH-000-WHI-045'),
 ('Pak Choi, 0.5lb', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.', 45, 'pound', '505.23', '227.00', 'Vegetable', 'pak-choi.jpg', 'TSH-000-WHI-047'),
-('Erica Sullivan', 'How himself media step.', 9, 'staff', '13.79', '2.00', NULL, NULL, NULL),
 ('Juiciful Orange Juice, 450ml', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.', 430, 'box', '160.00', '450.00', 'Beverage', 'Juciful_Orange_Juice_450ml_tagged__81682_zoom.jpg', 'TSH-000-WHI-048'),
 ('Juiciful Fruit Punch, 450 ml', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.', 304, 'box', '120.00', '450.00', 'Beverage', 'Juciful_Fruit_Punch_450ml_tagged__38593_zoom.jpg', 'TSH-000-WHI-049'),
 ('Juiciful Pineapple Drink, 450 ml', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.', 430, 'box', '120.00', '450.00', 'Beverage', 'Juciful_Pineapple_Drink_450ml_tagged__76129_zoom.jpg', 'TSH-000-WHI-050'),
@@ -318,8 +317,8 @@ INSERT INTO grocery (name, description, quantity, units, cost_per_unit, grams_pe
 ('Lettuce', 'Lettuce (Lactuca sativa) is an annual plant of the daisy family, Asteraceae. It is most often grown as a leaf vegetable, but sometimes for its stem and seeds', 84, 'pound', '167.00', '16.00', 'Vegetable', 'lettuce.jpg', 'TSH-000-WHI-097'),
 ('Orange', 'Orange is the fruit of various citrus species in the family Rutaceae (see list of plants known as orange); it primarily refers to Citrus × sinensis, which is also called sweet orange, to distinguish it from the related Citrus × aurantium, referred to as bitter orange.', 36, 'pound', '34.00', '256.00', 'Friut', 'orange.jpg', 'TSH-000-WHI-098'),
 ('Grapes', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.', 36, 'pound', '34.00', '256.00', 'Friut', 'Grapes.jpg', 'TSH-000-WHI-099'),
-('Canteloupe', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.', 36, 'pound', '34.00', '256.00', 'Friut', 'cateloupe.jpg', 'TSH-000-WHI-100');
-
+('Canteloupe', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.', 36, 'pound', '34.00', '256.00', 'Friut', 'cateloupe.jpg', 'TSH-000-WHI-100'),
+('Strawberries', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.', 36, 'pound', '34.00', '256.00', 'Friut', 'grocery.jpg', 'TSH-000-WHI-101');
 
 
 

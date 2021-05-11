@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint
 from flask import redirect, url_for, session, request, render_template
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
@@ -147,6 +148,27 @@ def get_my_orders():
     
     else:
         return redirect(url_for('index'))
+
+
+@manage_customer_account.route('/get_order/<order_id>', methods=['GET'])
+@jwt_required()
+def get_order(order_id):
+    user = get_jwt_identity()
+    if user and (not 'role' in user):
+        try:
+            order = customer_manager.getOrder(user,order_id)
+            if order:
+                response = {'msg': 'success', 'data':{'order':order}},200
+            else:
+                response = {'msg':'Order not found', 'error':'notfound-0001'}, 404
+        except Exception as e:
+            print(e)
+            response = {'msg':'', 'error':'ise-0001'}, 500
+        finally:
+            return response
+
+    else:
+        return redirect(url_for('index'))
     
 @manage_customer_account.route('/cancel_order/<order_id>', methods=["GET","POST"])
 @jwt_required()
@@ -183,6 +205,39 @@ def set_delivery_location(order_id):
         except Exception as e:
             print(e)
             response = response = {'msg':'', 'error':'ise-0001'}, 500
+        finally:
+            return response
+    else:
+        return redirect(url_for('index'))
+
+# AJAX endpoint when `/pay` is called from client
+@manage_customer_account.route('/pay', methods=['POST'])
+@jwt_required()
+def pay():
+    user = get_jwt_identity()
+    if user and (not 'role' in user):
+        try:
+            reponse = customer_manager.make_payment(user, request)
+       
+        except Exception as e:
+            print(e)
+            response = {'msg':'', 'error':'ise-0001'}, 500
+        finally:
+            return response
+    else:
+        return redirect(url_for('index'))
+
+
+@manage_customer_account.route('/get_pay_key', methods=['POST'])
+@jwt_required()
+def get_payment_key():
+    user = get_jwt_identity()
+    if user and (not 'role' in user):
+        try:
+            response = {'msg':'success', 'data':{'payment_key':os.environ.get('STRIPE_PUBLIC_KEY')}}, 200
+        except Exception as e:
+            print(e)
+            response = {'msg':'', 'error':'ise-0001'}, 500
         finally:
             return response
     else:
