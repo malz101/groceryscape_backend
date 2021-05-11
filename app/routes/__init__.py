@@ -10,13 +10,11 @@ from .CustomerRoute import manage_customer_account
 from .EmployeeRoute import manage_employee_account
 from .GroceryRoute import manage_groceries
 from .CartRoute import manage_cart
-from ..database.db_access import customer_access
 from .RatingRoute import manage_rating
 from .OrderRoute import manage_order
 from app.system_management.MLManager import MLManager
-from app.database.db_access import rating_access
-from app.database.db_access import grocery_access
-from app.database.db_access import order_access
+from app.database.db_access import customer_access,rating_access,grocery_access,order_access,delivery_parish_access
+
 
 from ..system_management.CustomerAccountManager import AccountManager
 account_manager = AccountManager(customer_access, MLManager(rating_access,grocery_access),order_access)
@@ -42,6 +40,24 @@ def index():
         return user
     else:
         return {'msg': 'you are not logged in as a customer', 'error': 'auth-0001'}, 401
+
+
+@app.route('/get_parish/<parish>', methods=['GET'])
+@jwt_required()
+def get_parish(parish):
+    try:
+        parish = delivery_parish_access.getDeliveryParish(parish)
+        if parish:
+            # print('Parish',parish.parish)
+            response = {'msg':'success', 'data':{'parish':{'name':str(parish.parish), 'delivery_fee':float(parish.delivery_rate)}}}, 200
+        else:
+            response = {'msg':'unsuccessful', 'error':'notfound-0001'}, 404
+    except Exception as e:
+        print(e)
+        reponse = {'msg':'', 'error':'ise-0001'}, 500
+    finally:
+        return response
+
 
 @app.route('/uploads/<filename>')
 def get_image(filename):

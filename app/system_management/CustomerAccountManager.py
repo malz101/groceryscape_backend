@@ -1,4 +1,4 @@
-
+import stripe
 class AccountManager:
 
     def __init__(self, customer_access, MLManager, orderAccess):
@@ -115,6 +115,23 @@ class AccountManager:
             return self.__getOrderDetails(cancelled_order, empName)
         return False
 
+
+    def getOrder(self,user, orderId):
+        # getParam = self.getRequestType(request)
+        # orderId = getParam('order_id')
+        cust_id = user['cust_id']
+        
+        order = self.orderAccess.getOrderByIdCustomer(orderId, cust_id)
+        if order:
+            empFname = order.employee
+            empLname = order.employee
+            if empFname:
+                empName = ( empFname.first_name+ " " +empLname.last_name )
+            else:
+                empName = 'False'
+
+            return self.__getOrderDetails(order,empName)
+        return False
         
     def getMyOrders(self, user, request):
         getParam = self.getRequestType(request)
@@ -148,36 +165,58 @@ class AccountManager:
         if orders:
             print('Orders',orders)
             for order in orders:
-                empFname = order.employee
-                empLname = order.employee
-                if empFname:
-                    empName = (empFname.first_name + " " + empLname.last_name)
+                emp = order.employee
+                if emp:
+                    empName = (emp.first_name + " " + emp.last_name)
                 else:
                     empName = 'False'
-                response.append(
-                    {
-                        'order_id':str(order.id),
-                        'summary':self.__getOrderDetails(order, empName),
-                        'items': self.__getOrderItemsDetails(order.id)
-                    }
-                )
+                response.append(self.__getOrderDetails(order, empName))
         return response
+    
 
-    def getMyPendingOrders(self, user):
-        cust_id = user['cust_id']
-        response = {}
-        orders = self.orderAccess.getCustomerPendingOrder(cust_id)
-        if orders:
-            for order in orders:
-                empFname = order.employee
-                empLname = order.employee
-                if empFname:
-                    empName = (empFname.first_name + " " + empLname.last_name)
-                else:
-                    empName = 'False'
-                response[str(order.id)] = self.__getOrderDetails(order, empName), self.__getOrderItemsDetails(order.id)
-            return response
-        return response
+    def make_payment(self, user, request):
+        getParam = self.getRequestType(request)
+        payment_method_id = getParam('payment_method_id')
+        order_id = getParam('order_id')
+        intent = None
+
+        try:
+            if  payment_method_id:
+                # Create the PaymentIntent
+                intent = stripe.PaymentIntent.create(
+                    payment_method = payment_method_id,
+                    amount = self.getOrder(user,order_id)['total'],
+                    currency = 'jmd',
+                    confirmation_method = 'manual',
+                    confirm = True,
+                )
+            elif 'payment_intent_id' in data:
+                intent = stripe.PaymentIntent.confirm(getParam('payment_intent_id'))
+        except stripe.error.CardError as e:
+            print(e)
+            # Display error on client
+            return {'error': e.user_message}, 200
+
+        return self.__generate_response(intent)
+
+
+    def __generate_response(intent):
+        # Note that if your API version is before 2019-02-11, 'requires_action'
+        # appears as 'requires_source_action'.
+        if intent.status == 'requires_action' and intent.next_action.type == 'use_stripe_sdk':
+            # Tell the client to handle the action
+            return {
+                'requires_action': True,
+                'payment_intent_client_secret': intent.client_secret,
+            }, 200
+        elif intent.status == 'succeeded':
+            # The payment didn’t need any additional actions and completed!
+            # Handle post-payment fulfillment
+            return {'success': True}, 200
+        else:
+            # Invalid status
+            return {'error': 'Invalid PaymentIntent status'}, 500
+
 
 
     def __getCustomerDetails(self, customer):
@@ -185,42 +224,55 @@ class AccountManager:
         return {"cust_id": str(customer.id), 'first_name': customer.first_name, 'last_name': customer.last_name, \
                         'telephone': customer.telephone, 'email': customer.email, 'gender': customer.gender, \
                         'town': customer.town, 'parish': customer.parish}
+    
 
     def __getOrderDetails(self, order,empName):
-        return {'order_id': str(order.id), 'order_date': str(order.orderdate), \
-                                               'status': str(order.status), 'customer_id': str(order.customer_id), \
-                                               'customer': (order.customer.first_name + " " + \
-                                                            order.customer.last_name),\
-                                               'delivery_date': str(order.deliverydate), \
-                                               'delivery_town': str(order.deliverytown), 'delivery_parish': \
-                                                   str(order.deliveryparish), 'checkout_by': empName,\
-                                                'total':self.orderAccess.getTotalOnOrder(order.id)}
-    def __getOrderItemsDetails(self,orderId):
-        orderItems = self.orderAccess.getItemsInOrder(orderId)
-        response = []
-        if orderItems:
-            for grocery in orderItems:
-                cost_before_tax = grocery.quantity * grocery.groceries.cost_per_unit
-                GCT = self.orderAccess.getTax(grocery.grocery_id, 'GCT') * grocery.quantity
-                SCT = self.orderAccess.getTax(grocery.grocery_id, 'SCT') * grocery.quantity
-                total = float(cost_before_tax) + float(GCT) + float(SCT)
-                total_weight = str(grocery.quantity * grocery.groceries.grams_per_unit) + " grams"
-                response.append (
-                    {
-                        'grocery_id': str(grocery.grocery_id), \
-                        'quantity': str(grocery.quantity), \
-                        'cost_before_tax': str(cost_before_tax), \
-                        'name': grocery.groceries.name, \
-                        'total_weight': total_weight,\
-                        'GCT': str(GCT),\
-                        'SCT': str(SCT), \
-                        'total': str(total)
-                    }
-                )
-            return response
-        else:
-            return {orderId:'no groceries on order'}
+        order_items = []
+        order_total_before_delivery_cost = 0
 
+        def getOrderItems(orderId):
+            # print(type(orderId))
+            orderItems = self.orderAccess.getItemsInOrder(orderId)
+            nonlocal order_total_before_delivery_cost
+            if orderItems:
+                for grocery in orderItems:
+                    # print(type(grocery))
+                    cost_before_tax = grocery.quantity * grocery.groceries.cost_per_unit
+                    GCT = self.orderAccess.getTax(grocery.grocery_id, 'GCT') * grocery.quantity
+                    SCT = self.orderAccess.getTax(grocery.grocery_id, 'SCT') * grocery.quantity
+                    item_total = float(cost_before_tax) + float(GCT) + float(SCT)
+                    order_total_before_delivery_cost += item_total
+                    total_weight = str(grocery.quantity * grocery.groceries.grams_per_unit) + " grams"
+                    order_items.append({
+                        'grocery_id': str(grocery.grocery_id),
+                        'quantity': str(grocery.quantity),
+                        'cost_before_tax': str(cost_before_tax),
+                        'name': grocery.groceries.name,
+                        'total_weight': total_weight,
+                        'GCT': str(GCT), 
+                        'SCT': str(SCT),
+                        'total': str(item_total)
+                    })
+
+        result = {
+            'order_id': str(order.id), 
+            'order_date': str(order.orderdate),
+            'status': str(order.status), 'customer_id': str(order.customer_id),
+            'customer': (order.customer.first_name + " " + order.customer.last_name),
+            'delivery_date': str(order.deliverydate),
+            'delivery_town': str(order.deliverytown), 
+            'delivery_parish': str(order.deliveryparish), 
+            'checkout_by': empName
+        }
+        getOrderItems(order.id)
+        result['order_items'] = order_items
+        delivery_cost = order.parish.delivery_rate
+        result['subtotal'] = order_total_before_delivery_cost
+        result['delivery_cost'] = str(delivery_cost)
+        result['total'] = order_total_before_delivery_cost + float(delivery_cost)
+        return result
+
+                
     def getRequestType(self, request):
         if request.method == 'GET':
             return request.args.get

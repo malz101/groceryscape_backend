@@ -8,6 +8,7 @@ from .OrderAccess import OrderAccess
 from .OrderGroceriesAccess import OrderGroceriesAccess
 from .PaymentAccess import PaymentAccess
 from .RatingAccess import RatingAccess
+from .DeliveryParishAccess import DeliveryParishAccess
 
 cart_access = CartAccess(GroceryAccess(), OrderAccess(), CustomerAccess())
 customer_access = CustomerAccess()
@@ -17,4 +18,5 @@ order_access = OrderAccess()
 order_groceries_access = OrderGroceriesAccess(order_access,grocery_access,customer_access)
 payment_access = PaymentAccess(order_access,order_groceries_access,employee_access)
 rating_access = RatingAccess(grocery_access,customer_access)
+delivery_parish_access = DeliveryParishAccess()
 

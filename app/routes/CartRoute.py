@@ -2,8 +2,7 @@ from flask import Blueprint
 from flask import redirect, url_for, session, request
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from ..system_management.CartManager import CartManager
-from ..database.db_access import cart_access
-from ..database.db_access import grocery_access
+from ..database.db_access import cart_access, grocery_access, delivery_parish_access
 
 manage_cart = Blueprint("manage_cart", __name__)
 
@@ -109,6 +108,7 @@ def get_cart_items():
     else:
         return emp_login_restrict_msg
 
+
 @manage_cart.route('/update_cart', methods=['POST','GET'])
 @jwt_required()
 def update_cart():
@@ -127,4 +127,5 @@ def update_cart():
     else:
         return emp_login_restrict_msg
     
+
 

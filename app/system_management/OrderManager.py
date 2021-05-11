@@ -59,7 +59,7 @@ class OrderManager:
             else:
                 empName = 'False'
 
-            return {'summary':self.__getOrderDetails(order,empName), 'groceries':self.__getOrderItemsDetails(order.id)}
+            return self.__getOrderDetails(order,empName)
         return False
         
     def getOrders(self, request, cust_id=None):
@@ -106,9 +106,6 @@ class OrderManager:
                 response.append(self.__getOrderDetails(order,empName))
 
         return response
-
-    def getTotalOnOrder(self, order_id):
-        return self.orderGroceriesAccess.getTotalOnOrder(order_id)
     
     def recordPayment(self,user,request):
         getParam = self.getRequestType(request)
@@ -139,36 +136,51 @@ class OrderManager:
 
 
     def __getOrderDetails(self, order,empName):
-        return {'order_id': str(order.id), 'order_date': str(order.orderdate), \
-                                               'status': str(order.status), 'customer_id': str(order.customer_id), \
-                                               'customer': (order.customer.first_name + " " + \
-                                                            order.customer.last_name),\
-                                               'delivery_date': str(order.deliverydate), \
-                                               'delivery_town': str(order.deliveryTown), 'delivery_parish': \
-                                                   str(order.deliveryParish), 'checkout_by': empName,\
-                                                'total':self.orderAccess.getTotalOnOrder(order.id),\
-                                                'delivery_cost':self.orderAccess.getDeliveryCost(int(order.id))}
+        order_items = []
+        order_total_before_delivery_cost = 0
 
-    def __getOrderItemsDetails(self,orderId):
-        orderItems = self.orderAccess.getItemsInOrder(orderId)
-        # print(type(orderItems))
-        response = []
-        if orderItems:
-            for grocery in orderItems:
-                # print(type(grocery))
-                cost_before_tax = grocery.quantity * grocery.groceries.cost_per_unit
-                GCT = self.orderAccess.getTax(grocery.grocery_id, 'GCT') * grocery.quantity
-                SCT = self.orderAccess.getTax(grocery.grocery_id, 'SCT') * grocery.quantity
-                total = float(cost_before_tax) + float(GCT) + float(SCT)
-                total_weight = str(grocery.quantity * grocery.groceries.grams_per_unit) + " grams"
-                response.append({'grocery_id': str(grocery.grocery_id), \
-                                                  'quantity': str(grocery.quantity), \
-                                                  'cost_before_tax': str(cost_before_tax), \
-                                                  'name': grocery.groceries.name, \
-                                                  'total_weight': total_weight, 'GCT': str(GCT), 'SCT': str(SCT), \
-                                                  'total': str(total)})
-        # print(response)
-        return response
+        def getOrderItems(orderId):
+            # print(type(orderId))
+            orderItems = self.orderAccess.getItemsInOrder(orderId)
+            nonlocal order_total_before_delivery_cost
+            if orderItems:
+                for grocery in orderItems:
+                    # print(type(grocery))
+                    cost_before_tax = grocery.quantity * grocery.groceries.cost_per_unit
+                    GCT = self.orderAccess.getTax(grocery.grocery_id, 'GCT') * grocery.quantity
+                    SCT = self.orderAccess.getTax(grocery.grocery_id, 'SCT') * grocery.quantity
+                    item_total = float(cost_before_tax) + float(GCT) + float(SCT)
+                    order_total_before_delivery_cost += item_total
+                    total_weight = str(grocery.quantity * grocery.groceries.grams_per_unit) + " grams"
+                    order_items.append({
+                        'grocery_id': str(grocery.grocery_id),
+                        'quantity': str(grocery.quantity),
+                        'cost_before_tax': str(cost_before_tax),
+                        'name': grocery.groceries.name,
+                        'total_weight': total_weight,
+                        'GCT': str(GCT), 
+                        'SCT': str(SCT),
+                        'total': str(item_total)
+                    })
+
+        result = {
+            'order_id': str(order.id), 
+            'order_date': str(order.orderdate),
+            'status': str(order.status), 'customer_id': str(order.customer_id),
+            'customer': (order.customer.first_name + " " + order.customer.last_name),
+            'delivery_date': str(order.deliverydate),
+            'delivery_town': str(order.deliverytown), 
+            'delivery_parish': str(order.deliveryparish), 
+            'checkout_by': empName
+        }
+        getOrderItems(order.id)
+        result['order_items'] = order_items
+        delivery_cost = order.parish.delivery_rate
+        result['subtotal'] = order_total_before_delivery_cost
+        result['delivery_cost'] = str(delivery_cost)
+        result['total'] = order_total_before_delivery_cost + float(delivery_cost)
+        return result
+
 
     def getRequestType(self, request):
         if request.method == 'GET':
