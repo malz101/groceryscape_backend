@@ -201,7 +201,7 @@ class AccountManager:
         return self.__generate_response(intent)
 
 
-    def __generate_response(intent):
+    def __generate_response(self,intent):
         # Note that if your API version is before 2019-02-11, 'requires_action'
         # appears as 'requires_source_action'.
         if intent.status == 'requires_action' and intent.next_action.type == 'use_stripe_sdk':
