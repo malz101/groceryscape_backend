@@ -184,13 +184,17 @@ class AccountManager:
         try:
             if  payment_method_id:
                 # Create the PaymentIntent
-                intent = stripe.PaymentIntent.create(
-                    payment_method = payment_method_id,
-                    amount = self.getOrder(user,order_id)['total'],
-                    currency = 'jmd',
-                    confirmation_method = 'manual',
-                    confirm = True,
-                )
+                order = self.getOrder(user,order_id)
+                if order:
+                    intent = stripe.PaymentIntent.create(
+                        payment_method = payment_method_id,
+                        amount = order['total'],
+                        currency = 'jmd',
+                        confirmation_method = 'manual',
+                        confirm = True,
+                    )
+                else:
+                    return {'msg':'order does not exist','error':'notfound-0001'}, 200
             elif payment_intent_id:
                 intent = stripe.PaymentIntent.confirm(payment_intent_id)
         except stripe.error.CardError as e:
