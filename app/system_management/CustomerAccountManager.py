@@ -192,7 +192,7 @@ class AccountManager:
                     print('Order TotalA',int(round(order['total'])))
                     intent = stripe.PaymentIntent.create(
                         payment_method = payment_method_id,
-                        amount = int(round(order['total'])),
+                        amount = int(round(order['total']*100)),
                         currency = 'jmd',
                         confirmation_method = 'manual',
                         confirm = True,
