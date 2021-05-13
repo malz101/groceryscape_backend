@@ -146,5 +146,8 @@
 1) get parish
     https://infinite-beach-27814.herokuapp.com/get_parish/<parish>
 
-2) get image
+2) get all parishes
+    https://infinite-beach-27814.herokuapp.com/get_parishes
+
+3) get image
     https://infinite-beach-27814.herokuapp.com/uploads/<filename>

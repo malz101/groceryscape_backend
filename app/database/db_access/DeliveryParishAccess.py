@@ -9,8 +9,10 @@ class DeliveryParishAccess:
         parish = DeliveryParish.query.filter_by(parish=parish).first()
         return parish
         
-
-
+    def getDeliveryParishes(self):
+        parishes = DeliveryParish.query.all()
+        return parishes
+        
     # def getTotalOnOrder(self, orderId):
     #     items = self.getAllItemsOnOrder(orderId)
     #     total = 0

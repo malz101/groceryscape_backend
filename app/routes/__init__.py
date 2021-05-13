@@ -59,6 +59,24 @@ def get_parish(parish):
         return response
 
 
+@app.route('/get_parishes', methods=['GET'])
+@jwt_required()
+def get_parishes():
+    try:
+        parishes = delivery_parish_access.getDeliveryParishes()
+        if parishes:
+            result=[]
+            for parish in parishes:
+                result.append({'name':str(parish.parish), 'delivery_fee':float(parish.delivery_rate)})
+            response = {'msg':'success', 'data':{'parishes':result}}, 200
+        else:
+            response = {'msg':'unsuccessful', 'error':'notfound-0001'}, 404
+    except Exception as e:
+        print(e)
+        reponse = {'msg':'', 'error':'ise-0001'}, 500
+    finally:
+        return response
+
 @app.route('/uploads/<filename>')
 def get_image(filename):
     root_dir = os.getcwd()
