@@ -183,8 +183,8 @@ class AccountManager:
 
         try:
             if  payment_method_id:
-                # Create the PaymentIntent
                 order = self.getOrder(user,order_id)
+                # Create the PaymentIntent
                 if order:
                     intent = stripe.PaymentIntent.create(
                         payment_method = payment_method_id,
