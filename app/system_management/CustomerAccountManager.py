@@ -1,4 +1,5 @@
 import stripe
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 class AccountManager:
 
     def __init__(self, customer_access, MLManager, orderAccess):
