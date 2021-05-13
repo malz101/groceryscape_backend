@@ -190,7 +190,7 @@ class AccountManager:
                 if order:
                     intent = stripe.PaymentIntent.create(
                         payment_method = payment_method_id,
-                        amount = order['total'],
+                        amount = int(round(order['total'])),
                         currency = 'jmd',
                         confirmation_method = 'manual',
                         confirm = True,
