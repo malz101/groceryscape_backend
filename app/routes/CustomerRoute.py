@@ -217,7 +217,7 @@ def pay():
     user = get_jwt_identity()
     if user and (not 'role' in user):
         try:
-            reponse = customer_manager.make_payment(user, request)
+            response = customer_manager.make_payment(user, request)
        
         except Exception as e:
             print(e)
