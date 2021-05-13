@@ -188,6 +188,7 @@ class AccountManager:
                 order = self.getOrder(user,order_id)
                 # Create the PaymentIntent
                 if order:
+                    print(order['total'])
                     intent = stripe.PaymentIntent.create(
                         payment_method = payment_method_id,
                         amount = int(round(order['total'])),
