@@ -1,4 +1,18 @@
 ---------------------------------------------------------------
+                            APP 
+---------------------------------------------------------------
+1) get parish
+    https://infinite-beach-27814.herokuapp.com/get_parish/<parish>
+
+2) get all parishes
+    https://infinite-beach-27814.herokuapp.com/get_parishes
+
+3) get image
+    https://infinite-beach-27814.herokuapp.com/uploads/<filename>
+
+
+
+---------------------------------------------------------------
                             Customer
 ----------------------------------------------------------------
 1) sign up:
@@ -138,16 +152,3 @@
 
 6) record payment: Will be changed to post only
     https://infinite-beach-27814.herokuapp.com/manage_order/record_payment?order_id=5&amount_tendered=5000
-
-
----------------------------------------------------------------
-                            APP 
----------------------------------------------------------------
-1) get parish
-    https://infinite-beach-27814.herokuapp.com/get_parish/<parish>
-
-2) get all parishes
-    https://infinite-beach-27814.herokuapp.com/get_parishes
-
-3) get image
-    https://infinite-beach-27814.herokuapp.com/uploads/<filename>

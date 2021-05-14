@@ -44,10 +44,10 @@ class Order(db.Model):
     __tablename__ = 'orders'
     id = db.Column(db.Integer, primary_key=True, index=True)
     orderdate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    status = db.Column(db.String, nullable=False, default='pending')
+    status = db.Column(db.String, default='pending')
     deliverydate = db.Column(db.DateTime)
     deliverytown = db.Column(db.String(45))
-    deliveryparish = db.Column(db.String(45),db.ForeignKey('delivery_parish.parish'))
+    deliveryparish = db.Column(db.String(45),db.ForeignKey('delivery_parish.parish'), default='None')
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id'))# represents a one to many-to-many relationship between employee and orders
 

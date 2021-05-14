@@ -15,10 +15,9 @@ class OrderManager:
         
         order = self.orderAccess.scheduleDelivery(orderId,deliverydate,int(custId))
         if order:
-            empFname = order.employee
-            empLname = order.employee
-            if empFname:
-                empName = (empFname.first_name + " " + empLname.last_name)
+            emp = order.employee
+            if emp:
+                empName = (emp.first_name + " " + emp.last_name)
             else:
                 empName = 'False'
             return self.__getOrderDetails(order,empName)
