@@ -13,7 +13,8 @@ from .CartRoute import manage_cart
 from .RatingRoute import manage_rating
 from .OrderRoute import manage_order
 from app.system_management.MLManager import MLManager
-from app.database.db_access import customer_access,rating_access,grocery_access,order_access,delivery_parish_access
+from app.database.db_access import customer_access,rating_access,grocery_access,order_access,\
+                                    delivery_access
 
 
 from ..system_management.CustomerAccountManager import AccountManager
@@ -46,7 +47,7 @@ def index():
 @jwt_required()
 def get_parish(parish):
     try:
-        parish = delivery_parish_access.getDeliveryParish(parish)
+        parish = delivery_access.getDeliveryParish(parish)
         if parish:
             # print('Parish',parish.parish)
             response = {'msg':'success', 'data':{'parish':{'name':str(parish.parish), 'delivery_fee':float(parish.delivery_rate)}}}, 200
@@ -59,11 +60,33 @@ def get_parish(parish):
         return response
 
 
+@app.route('/get_delivery_timeslots', methods=['GET'])
+@jwt_required()
+def get_delivery_timeslots():
+    try:
+        timeslots = delivery_access.getDeliveryTimeSlots()
+        if timeslots:
+            result=[]
+            for timeslot in timeslots:
+                result.append({
+                    'id':str(timeslot.id),
+                    'start_time':str(timeslot.start_time),
+                    'end_time':str(timeslot.end_time)
+                })
+            response = {'msg':'success', 'data':{'timeslots':result}}, 200
+        else:
+            response = {'msg':'unsuccessful', 'error':'notfound-0001'}, 404
+    except Exception as e:
+        print(e)
+        response = {'msg':'', 'error':'ise-0001'}, 500
+    finally:
+        return response
+
 @app.route('/get_parishes', methods=['GET'])
 @jwt_required()
 def get_parishes():
     try:
-        parishes = delivery_parish_access.getDeliveryParishes()
+        parishes = delivery_access.getDeliveryParishes()
         if parishes:
             result=[]
             for parish in parishes:
@@ -76,6 +99,7 @@ def get_parishes():
         reponse = {'msg':'', 'error':'ise-0001'}, 500
     finally:
         return response
+
 
 @app.route('/uploads/<filename>')
 def get_image(filename):

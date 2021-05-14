@@ -134,9 +134,11 @@ class AccountManager:
 
             return self.__getOrderDetails(order,empName)
         return False
+     
         
     def getMyOrders(self, user, request):
         getParam = self.getRequestType(request)
+            
         status = getParam('status')
 
         order_start_date = getParam('order_start_date')
@@ -148,16 +150,16 @@ class AccountManager:
             order_end_date = order_end_date+" 23:59:59"
 
         delivery_start_date = getParam('delivery_start_date')
-        if delivery_start_date is not None:
-            delivery_start_date = delivery_start_date + " 00:00:00"
+        # if delivery_start_date is not None:
+        #     delivery_start_date = delivery_start_date + " 00:00:00"
         
         delivery_end_date = getParam('delivery_end_date')
-        if delivery_end_date is not None:
-            delivery_end_date = delivery_end_date + " 23:59:59"
+        # if delivery_end_date is not None:
+        #     delivery_end_date = delivery_end_date + " 23:59:59"
 
         delivery_town = getParam('delivery_town')
         delivery_parish = getParam('delivery_parish')
-        
+
         cust_id = user['cust_id']
 
         orders = self.orderAccess.getOrders(cust_id, status, order_start_date, order_end_date,\

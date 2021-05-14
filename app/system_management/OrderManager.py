@@ -9,11 +9,12 @@ class OrderManager:
     def scheduleOrder(self, request, user):
         
         getParam = self.getRequestType(request)
+        deliverytimeslot = getParam('timeslot')
         deliverydate = getParam('date')
         orderId = getParam('order_id')
         custId = user['cust_id']
         
-        order = self.orderAccess.scheduleDelivery(orderId,deliverydate,int(custId))
+        order = self.orderAccess.scheduleDelivery(orderId,int(deliverytimeslot),deliverydate,int(custId))
         if order:
             emp = order.employee
             if emp:
@@ -78,12 +79,12 @@ class OrderManager:
             order_end_date = order_end_date+" 23:59:59"
 
         delivery_start_date = getParam('delivery_start_date')
-        if delivery_start_date is not None:
-            delivery_start_date = delivery_start_date + " 00:00:00"
+        # if delivery_start_date is not None:
+        #     delivery_start_date = delivery_start_date + " 00:00:00"
         
         delivery_end_date = getParam('delivery_end_date')
-        if delivery_end_date is not None:
-            delivery_end_date = delivery_end_date + " 23:59:59"
+        # if delivery_end_date is not None:
+        #     delivery_end_date = delivery_end_date + " 23:59:59"
 
         delivery_town = getParam('delivery_town')
         delivery_parish = getParam('delivery_parish')

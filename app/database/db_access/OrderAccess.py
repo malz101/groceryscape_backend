@@ -1,5 +1,5 @@
 from ... import db
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, date
 from ..Models import Order
 from ..Models import OrderGroceries
 from .OrderGroceriesAccess import OrderGroceriesAccess
@@ -53,11 +53,12 @@ class OrderAccess:
             return  False
 
 
-    def scheduleDelivery(self, orderId, date,custId):
+    def scheduleDelivery(self, orderId,timeslot, date,custId):
         
         order = self.getOrderById(orderId)
         if order:
             if order.customer_id == custId:
+                order.deliverytimeslot = timeslot
                 order.deliveryDate = date
                 db.session.commit()
                 return order
@@ -85,8 +86,8 @@ class OrderAccess:
             return False
 
     def getOrders(self,custId=None, status=None, min_order_timestamp=None,\
-                            max_order_timestamp=None, min_delivery_timestamp=None,\
-                            max_delivery_timestamp=None, delivery_town=None,delivery_parish=None):
+                            max_order_timestamp=None, min_delivery_date=None,\
+                            max_delivery_date=None, delivery_town=None,delivery_parish=None):
         
         if status is None:
             status = ''
@@ -95,8 +96,8 @@ class OrderAccess:
         if min_order_timestamp is None:
             min_order_timestamp = datetime(1970, 1, 1,tzinfo=timezone.utc)
         
-        if min_delivery_timestamp is None:
-            min_delivery_timestamp = datetime(1970, 1, 1,tzinfo=timezone.utc)
+        if min_delivery_date is None:
+            min_delivery_date = date(1970, 1, 1)
 
         current_time = datetime.utcnow() # get current date and time
         # min_order_timestamp =  '%{}%'.format(min_order_timestamp)
@@ -105,12 +106,13 @@ class OrderAccess:
         else:
             max_order_timestamp = datetime.strptime(max_order_timestamp, '%Y-%m-%d %H:%M:%S')
 
-        delivery_range_provided = datetime.strptime('0001-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
-        if max_delivery_timestamp is None:
-            max_delivery_timestamp =  current_time + timedelta(days=2)
+        # delivery_range_provided = datestrptime('0001-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
+        delivery_range_provided = date(1,1,1)
+        if max_delivery_date is None:
+            max_delivery_date =  date.today() + timedelta(days=2)
             delivery_range_provided = None
         else:
-            max_delivery_timestamp = datetime.strptime(max_delivery_timestamp, '%Y-%m-%d %H:%M:%S')
+            max_delivery_date = datetime.strptime(max_delivery_date, '%Y-%m-%d')
 
 
         town_provided = ''
@@ -134,7 +136,7 @@ class OrderAccess:
                     or_(Order.deliveryparish.ilike(delivery_parish), Order.deliveryparish == parish_provided),\
                     and_(Order.orderdate >= min_order_timestamp, Order.orderdate <= max_order_timestamp),\
                     or_(
-                        and_(Order.deliverydate >= min_delivery_timestamp, Order.deliverydate <= max_delivery_timestamp),\
+                        and_(Order.deliverydate >= min_delivery_date, Order.deliverydate <= max_delivery_date),\
                         Order.deliverydate == delivery_range_provided\
                     )
                 )
@@ -147,7 +149,7 @@ class OrderAccess:
                     or_(Order.deliveryparish.ilike(delivery_parish), Order.deliveryparish == parish_provided),\
                     and_(Order.orderdate >= min_order_timestamp, Order.orderdate <= max_order_timestamp),\
                     or_(
-                        and_(Order.deliverydate >= min_delivery_timestamp, Order.deliverydate <= max_delivery_timestamp),\
+                        and_(Order.deliverydate >= min_delivery_date, Order.deliverydate <= max_delivery_date),\
                         Order.deliverydate == delivery_range_provided\
                     )
                 )

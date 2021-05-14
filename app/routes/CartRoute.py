@@ -2,7 +2,7 @@ from flask import Blueprint
 from flask import redirect, url_for, session, request
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from ..system_management.CartManager import CartManager
-from ..database.db_access import cart_access, grocery_access, delivery_parish_access
+from ..database.db_access import cart_access, grocery_access
 
 manage_cart = Blueprint("manage_cart", __name__)
 

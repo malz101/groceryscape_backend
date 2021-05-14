@@ -1,6 +1,7 @@
 from .. import db
 from flask import Flask 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import func
 from datetime import datetime
 
 class Customer(db.Model):
@@ -44,10 +45,12 @@ class Order(db.Model):
     __tablename__ = 'orders'
     id = db.Column(db.Integer, primary_key=True, index=True)
     orderdate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    status = db.Column(db.String, default='pending')
-    deliverydate = db.Column(db.DateTime)
-    deliverytown = db.Column(db.String(45))
-    deliveryparish = db.Column(db.String(45),db.ForeignKey('delivery_parish.parish'), default='None')
+    status = db.Column(db.String(40),nullable=False, default='pending')
+    deliverytimeslot = db.Column(db.Integer, db.ForeignKey('delivery_time_slot.id'), nullable=False)
+    deliverydate = db.Column(db.Date)
+    deliverystreet = db.Column(db.String(100))
+    deliverytown = db.Column(db.String(100))
+    deliveryparish = db.Column(db.String(100),db.ForeignKey('delivery_parish.parish'), default='None')
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id'))# represents a one to many-to-many relationship between employee and orders
 
@@ -61,6 +64,9 @@ class Order(db.Model):
     parish = db.relationship("DeliveryParish", back_populates="orders_in_parish")
 
     employee = db.relationship('Employee', back_populates='checkouts')
+
+    timeslot = db.relationship('DeliveryTimeSlot', back_populates='orders')
+
 
 class Grocery(db.Model):
     __tablename__ = 'grocery'
@@ -121,7 +127,7 @@ class Payment(db.Model):
     __tablename__ = 'payment'
     order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), primary_key=True)
     recorded_by = db.Column(db.Integer, db.ForeignKey('employee.id'))
-    payment_date = db.Column(db.DateTime(),default=datetime.utcnow)
+    payment_date = db.Column(db.DateTime,default=datetime.utcnow)
     amount_tendered = db.Column(db.Numeric(10,2), nullable=False)
     change = db.Column(db.Numeric(10,2), nullable=True)
 
@@ -142,7 +148,24 @@ class DeliveryParish(db.Model):
     delivery_rate = db.Column(db.Numeric(10,2), nullable=False)
 
     orders_in_parish = db.relationship("Order", back_populates="parish")
+
+
+class DeliveryTimeSlot(db.Model):
+    __tablename__ = 'delivery_time_slot'
+    id = db.Column(db.Integer, primary_key=True, index=True)
+    start_time = db.Column(db.Time, nullable=False)
+    end_time = db.Column(db.Time, nullable=False)
+    status = db.Column(db.Boolean,nullable=False, default='true')
+
+    orders = db.relationship("Order", back_populates="timeslot")
+
+    def __init__(self,start_time, end_time):
+        self.start_time = start_time
+        self.end_time = end_time
     
+class MaxDeliveriesPerSlot(db.Model):
+    __tablename__ = 'max_deliveries_per_slot'
+    max_deliveries_per_time_slot = db.Column(db.Integer,primary_key=True, nullable=False)
 
 class Taxes(db.Model):
     __tablename__ = 'taxes'

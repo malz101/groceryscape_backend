@@ -7,6 +7,9 @@
 2) get all parishes
     https://infinite-beach-27814.herokuapp.com/get_parishes
 
+3) get all delivery timeslots
+    https://infinite-beach-27814.herokuapp.com/get_delivery_timeslots
+
 3) get image
     https://infinite-beach-27814.herokuapp.com/uploads/<filename>
 
@@ -132,8 +135,9 @@
 ---------------------------------------------------------------
                             Order
 ---------------------------------------------------------------
-1) schedule delivery: will be changed to post only
-    https://infinite-beach-27814.herokuapp.com/manage_order/schedule_order?order_id=3&date=2021-04-20 15:30:00
+1) schedule delivery: POST
+    https://infinite-beach-27814.herokuapp.com/manage_order/schedule_order
+    body: order_id=3, date=2021-04-20, timeslot=2
 
 2) checkout order:
     https://infinite-beach-27814.herokuapp.com/manage_order/checkout_order?order_id=3

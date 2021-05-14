@@ -17,7 +17,7 @@ class CartManager:
 
         '''add item to cart and return all cart items for customer'''
         cart = self.cartAccess.addToCart(int(itemId), int(cartId), int(quantity))
-        response = []
+        groceries = []
         if cart:
             for grocery in cart:
                 cost_before_tax = grocery.quantity * grocery.cart_items.cost_per_unit
@@ -25,14 +25,19 @@ class CartManager:
                 SCT = self.groceryAccess.getTax(grocery.item_id, 'SCT') * grocery.quantity
                 total = float(cost_before_tax) + float(GCT) + float(SCT)
                 total_weight = str(grocery.quantity * grocery.cart_items.grams_per_unit) + " grams"
-                response.append({'grocery_id': str(grocery.item_id),\
-                                                    'quantity': str(grocery.quantity), \
-                                                    'cost_before_tax': str(cost_before_tax),\
-                                                    'name': grocery.cart_items.name, \
-                                                    'total_weight': total_weight, 'GCT': str(GCT), 'SCT': str(SCT),\
-                                                    'total': str(total)})
+                groceries.append({
+                    'grocery_id': str(grocery.item_id),
+                    'photo' : grocery.photo,
+                    'quantity': str(grocery.quantity),
+                    'cost_before_tax': str(cost_before_tax),
+                    'name': grocery.cart_items.name, 
+                    'total_weight': total_weight, 
+                    'GCT': str(GCT), 
+                    'SCT': str(SCT),
+                    'total': str(total)
+                })
 
-            return {'items':response, 'sub_total':self.cartAccess.getTotalOnCart(cartId)}
+            return {'items':groceries, 'sub_total':self.cartAccess.getTotalOnCart(cartId)}
         return False
 
 
