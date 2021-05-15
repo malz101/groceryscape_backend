@@ -117,7 +117,7 @@ def update_cart():
         try:
             cartItem = cart_manager.updateCartItem(request, user)
             if cartItem:
-                response = {'msg':'cart updated', 'data':{'cart':carItem}}, 200
+                response = {'msg':'cart updated', 'data':{'cart':cartItem}}, 200
             else:
                 response = {'msg':'cart not updated', 'error':'create-0001'}, 404
         except Exception as e:
