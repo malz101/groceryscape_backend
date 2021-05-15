@@ -36,9 +36,9 @@ def signup():
             response = {'msg': 'email address already exits', 'error':'create-0001'}, 404
     except Exception as e:
         print(e)
-        reponse = {'msg': '', 'error':'ise-0001'}, 500
+        response = {'msg': '', 'error':'ise-0001'}, 500
     finally:
-        return reponse
+        return response
 
 @manage_customer_account.route('/login', methods=["POST"])
 def login():
