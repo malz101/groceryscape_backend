@@ -18,7 +18,7 @@ from app.database.db_access import customer_access,rating_access,grocery_access,
 
 
 from ..system_management.CustomerAccountManager import AccountManager
-account_manager = AccountManager(customer_access, MLManager(rating_access,grocery_access),order_access)
+account_manager = AccountManager(customer_access, MLManager(rating_access,grocery_access))
 
 
 """register blueprints"""
@@ -81,6 +81,7 @@ def get_delivery_timeslots():
         response = {'msg':'', 'error':'ise-0001'}, 500
     finally:
         return response
+
 
 @app.route('/get_parishes', methods=['GET'])
 @jwt_required()

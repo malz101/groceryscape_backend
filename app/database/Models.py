@@ -46,7 +46,7 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True, index=True)
     orderdate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     status = db.Column(db.String(40),nullable=False, default='pending')
-    deliverytimeslot = db.Column(db.Integer, db.ForeignKey('delivery_time_slot.id'), nullable=False)
+    deliverytimeslot = db.Column(db.Integer, db.ForeignKey('delivery_time_slot.id'), nullable=True)
     deliverydate = db.Column(db.Date)
     deliverystreet = db.Column(db.String(100))
     deliverytown = db.Column(db.String(100))

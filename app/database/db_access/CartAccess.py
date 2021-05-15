@@ -26,7 +26,8 @@ class CartAccess:
                     customer.cart_items.append(cart)
                     db.session.add(cart)
                     db.session.commit()
-                    return self.getAllCartItems(cartId)
+                    return True
+                    # return self.getAllCartItems(cartId)
                 else:
                     return False
             # 3) if grocery or customer is not valid, abort the operation
@@ -70,19 +71,20 @@ class CartAccess:
             return False
 
 
-    def checkoutCart(self, custId):
+    # def checkoutCart(self, custId):
 
-        # 1) check if customer exits
-        customer = self.customerAccess.getCustomerById(custId)
-        if customer:
-            # 2) get all cart items
-            cartItems = self.getAllCartItems(customer.id)
-            if cartItems:
-                orderId = self.orderAccess.dumpCart(cartItems)
-                # self.emptyCart(custId)
-                return self.orderAccess.getOrderById(orderId)
-            return False
-        return False
+    #     # 1) check if customer exits
+    #     customer = self.customerAccess.getCustomerById(custId)
+    #     if customer:
+    #         # 2) get all cart items
+    #         cartItems = self.getAllCartItems(customer.id)
+    #         if cartItems:
+    #             orderId = self.orderAccess.addItemsToOrder(cartItems,cust_id)
+                
+    #             # self.emptyCart(custId)
+    #             return self.orderAccess.getOrderById(orderId)
+    #         return False
+    #     return False
 
     def getCartItem(self, cartId, itemId):
 

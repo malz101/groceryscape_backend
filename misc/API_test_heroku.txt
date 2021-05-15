@@ -53,6 +53,17 @@
 11) pay for order: POST
     https://infinite-beach-27814.herokuapp.com/manage_customer_account/pay
     body: order_id, payment_method_id, payment_intent_id
+
+12) get order preview: GET/POST
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/get_order_preview?parish=<name of parish>
+
+13) create order: GET/POST
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/create_order
+
+14) get valid delivery timeslots
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/get_delivery_timeslots
+
+
 ---------------------------------------------------------------
                             Grocery
 ----------------------------------------------------------------

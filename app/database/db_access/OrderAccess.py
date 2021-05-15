@@ -6,7 +6,7 @@ from .OrderGroceriesAccess import OrderGroceriesAccess
 from .CustomerAccess import CustomerAccess
 from .GroceryAccess import GroceryAccess
 from ..Models import Cart
-from sqlalchemy import and_, or_, not_
+from sqlalchemy import and_, or_, not_, func
 import time
 
 class OrderAccess:
@@ -15,7 +15,8 @@ class OrderAccess:
         order = Order(customer_id=custId)
         db.session.add(order)
         db.session.commit()
-        return self.getOrderById(order.id)
+        # return self.getOrderById(order.id)
+        return order
 
     def getOrderById(self, orderId):
         order = Order.query.filter_by(id=orderId).first()
@@ -33,16 +34,17 @@ class OrderAccess:
         except:
             return False
 
-    def dumpCart(self, cartItems):
+    def addItemsToOrder(self, cart_summary,cust_id):
+        '''add items to created order'''
+        order = self.createOrder(cust_id)
 
-        order = self.createOrder(cartItems[0].cart_id)
-
-        for item in cartItems:
-            orderGroceries = OrderGroceries(order_id=order.id, grocery_id=item.item_id, quantity=item.quantity)
+        for item in cart_summary['items']:
+            orderGroceries = OrderGroceries(order_id=order.id, grocery_id=int(item['grocery_id']), quantity=item['quantity'])
             db.session.add(orderGroceries)
             db.session.commit()
-        return order.id
+        return order
     
+
     def updateStatus(self,orderId, status):
         order = self.getOrderById(orderId)
         if order:
@@ -53,20 +55,28 @@ class OrderAccess:
             return  False
 
 
-    def scheduleDelivery(self, orderId,timeslot, date,custId):
+    def scheduleDelivery(self, orderId,timeslot, deliverydate,custId):
         
         order = self.getOrderById(orderId)
         if order:
             if order.customer_id == custId:
+                date_obj = datetime.strptime(deliverydate,'%Y-%m-%d').date()
                 order.deliverytimeslot = timeslot
-                order.deliveryDate = date
+                order.deliverydate = date_obj
                 db.session.commit()
                 return order
             else:
                 return False #raise an exception error here to indicate auth error
         else:
             return False
-            
+    
+
+    def getDeliveryTimeSlotCount(self, deliverytimeslot, deliverydate):
+        date_obj = datetime.strptime('2020-02-02','%Y-%m-%d').date()
+        count = db.session.query(func.count(Order.deliverytimeslot)).filter(and_(
+            Order.deliverytimeslot==deliverytimeslot,Order.deliverydate==date_obj)).first()[0]
+        return count
+
     def checkoutOrder(self, orderId, employee):
         order = self.getOrderById(orderId)
         if order:
@@ -78,7 +88,7 @@ class OrderAccess:
             return False
 
     def getSchedule(self):
-        orders = Order.query.filter(or_(Order.status=='PENDING',Order.status=='CHECKED OUT')).all()
+        orders = Order.query.filter(or_(Order.status.ilike('PENDING'),Order.status.ilike('CHECKED OUT'))).all()
         try:
             if orders[0].id:
                 return orders
@@ -192,10 +202,11 @@ class OrderAccess:
         else:
             return False
 
-    def setDeliveryLocation(self, custId, orderId, parish, town):
+    def setDeliveryLocation(self, custId, orderId, street, parish, town):
         order = self.getOrderById(orderId)
         if order:
             if order.customer_id == custId:
+                order.deliverystreet = street
                 order.deliveryparish = parish
                 order.deliverytown = town
                 db.session.commit()

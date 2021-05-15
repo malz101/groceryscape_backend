@@ -30,24 +30,24 @@ def addToCart():
     else:
         return emp_login_restrict_msg
 
-@manage_cart.route('/CheckOutCart', methods=['POST', 'GET'])
-@jwt_required()
-def CheckOutCart():
-    user = get_jwt_identity()
-    if not 'role' in user:
-        try:
-            order = cart_manager.checkoutCart(user)
-            if order:
-                response = {'msg':'success', 'data':order},200
-            else:
-                response = {'msg':'order was not created', 'error':'create-0001'}, 404
-        except Exception as e:
-            print(e)
-            response = {'msg':'','error':'ise-0001'}, 500
-        finally:
-            return response 
-    else:
-        return emp_login_restrict_msg
+# @manage_cart.route('/CheckOutCart', methods=['POST', 'GET'])
+# @jwt_required()
+# def CheckOutCart():
+#     user = get_jwt_identity()
+#     if not 'role' in user:
+#         try:
+#             order = cart_manager.checkoutCart(user)
+#             if order:
+#                 response = {'msg':'success', 'data':order},200
+#             else:
+#                 response = {'msg':'order was not created', 'error':'create-0001'}, 404
+#         except Exception as e:
+#             print(e)
+#             response = {'msg':'','error':'ise-0001'}, 500
+#         finally:
+#             return response 
+#     else:
+#         return emp_login_restrict_msg
     
 @manage_cart.route('/removeFromCart/<grocery_id>', methods=['POST', 'GET'])
 @jwt_required()
@@ -77,9 +77,9 @@ def empty_cart():
         try:
             cartItems = cart_manager.emptyCart(user)
             if cartItems:
-                response = {'msg':'success', 'data':cartItems},200
+                response = {'msg':'success', 'data':{}},200
             else:
-                response = {'msg':'no item found', 'error':'notfound-0001'},404
+                response = {'msg':'no item found', 'error':'notfound-0001'},200
         except Exception as e:
             print(e)
             response = {'msg':'','error':'ise-0001'}, 500

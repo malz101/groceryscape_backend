@@ -4,24 +4,30 @@ from ..Models import DeliveryTimeSlot, MaxDeliveriesPerSlot,DeliveryParish, Orde
 class DeliveryAccess:
 
     def getDeliveryTimeSlot(self,id):
-
+        '''returns a delivery time specified by id'''
         timeslot = DeliveryTimeSlot.query.filter_by(id=id).first()
         return timeslot
         
     def getDeliveryTimeSlots(self):
+        '''return all valid delivery time slots in the database'''
         timeslots = DeliveryTimeSlot.query.all()
         return timeslots
 
-
     def getDeliveryParish(self,parish):
-
+        '''return a delivery parish specified by id'''
         parish = DeliveryParish.query.filter_by(parish=parish).first()
         return parish
         
     def getDeliveryParishes(self):
+        '''return all delivery parishes in the database'''
         parishes = DeliveryParish.query.all()
         return parishes
-        
+    
+    def getMaxDeliveriesPerTimeSlot(self):
+        '''returns maximum allowed deliveries perslot'''
+        max_deliveries_per_slot = MaxDeliveriesPerSlot.query.first()
+        return max_deliveries_per_slot.max_deliveries_per_time_slot
+
     # def getTotalOnOrder(self, orderId):
     #     items = self.getAllItemsOnOrder(orderId)
     #     total = 0
@@ -42,9 +48,9 @@ class DeliveryAccess:
     #     par = DeliveryParish.query.filter_by(parish=parish).first()
     #     return par
 
-    def getDeliveryCost(self,orderId):
-        order = self.orderAccess.getOrderById(orderId)
-        if order:
-            return float(self.getParish(str(order.deliveryparish)).delivery_rate)
-        else:
-            return False
+    # def getDeliveryCost(self,orderId):
+    #     order = self.orderAccess.getOrderById(orderId)
+    #     if order:
+    #         return float(self.getParish(str(order.deliveryparish)).delivery_rate)
+    #     else:
+    #         return False
