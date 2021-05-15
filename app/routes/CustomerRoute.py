@@ -5,7 +5,6 @@ from ..system_management.CustomerAccountManager import AccountManager
 from ..database.db_access import customer_access
 from ..system_management.MLManager import MLManager
 from ..database.db_access import rating_access
-from ..database.db_access import order_groceries_access
 from ..database.db_access import order_access
 from ..database.db_access import cart_access
 
@@ -14,7 +13,7 @@ manage_customer_account = Blueprint("manage_customer_account", __name__)
 
 """create an object that manages all operations on a customer's account"""
 customer_manager = AccountManager(customer_access, \
-    MLManager(customer_access, order_groceries_access, rating_access, cart_access), \
+    MLManager(customer_access, order_access, rating_access, cart_access), \
     order_access)
 
 """handles customers' account requests"""

@@ -2,10 +2,10 @@
 import numpy as np
 class MLManager:
 
-    def __init__(self, customerAccess, orderGroceriesAccess, \
+    def __init__(self, customerAccess, orderAccess, \
                 ratingAccess, cartAccess):
         self.customerAccess = customerAccess
-        self.orderGroceriesAccess = orderGroceriesAccess
+        self.orderAccess = orderAccess
         self.ratingAccess = ratingAccess
         self.cartAccess = cartAccess
 
@@ -139,7 +139,7 @@ class MLManager:
                 groceries.update(quantityDict[custId].keys())
             groceries = [g for g in groceries]
 
-            pairDict = self.orderGroceriesAccess.getGroceryPairFreq(groceries)
+            pairDict = self.orderAccess.getGroceryPairFreq(groceries)
             pairFreq = []
             for g1, pairCnt in pairDict.items():
                 for g2 in pairCnt.keys():

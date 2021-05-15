@@ -17,13 +17,12 @@ from .RatingRoute import manage_rating
 from .OrderRoute import manage_order
 from app.system_management.MLManager import MLManager
 from app.database.db_access import rating_access
-from app.database.db_access import order_groceries_access
 from app.database.db_access import order_access
 from app.database.db_access import cart_access
 
 from ..system_management.CustomerAccountManager import AccountManager
 account_manager = AccountManager(customer_access, \
-    MLManager(customer_access, order_groceries_access, rating_access, cart_access), \
+    MLManager(customer_access, order_access, rating_access, cart_access), \
     order_access)
 
 
