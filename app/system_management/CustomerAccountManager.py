@@ -1,5 +1,6 @@
 import stripe
 import os
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 class AccountManager:
 
@@ -7,7 +8,7 @@ class AccountManager:
         self.MLManager = MLManager
         self.customer_access = customer_access
 
-    def createAccount(self, request):
+    def createAccount(self, request, mail, key):
 
         """extract details from the request"""
         getParam = self.getRequestType(request)
@@ -17,16 +18,48 @@ class AccountManager:
         email = getParam('email')
         gender = getParam('gender')
         password = getParam('password')
+        street = getParam('street')
         town = getParam('town')
         parish = getParam('parish')
 
         """sanitize and verify details"""
 
         """create account with sanitized data"""
-        customer = self.customer_access.registerCustomer(firstName, lastName, telephone, email, gender, password, town, parish)
+        customer = self.customer_access.registerCustomer(firstName, lastName, telephone, email, gender, password, street, town, parish)
         if customer:
+            self.__sendConfirmationEmail(firstName,email, mail, key)
             return True
         return False
+
+    def __sendConfirmationEmail(self,fname,email,mail, key):
+        '''sends a confirmation email to user'''
+        s = URLSafeTimedSerializer(key)
+        salt = os.environ.get('EMAIL_CONFIRM_KEY')
+        token = s.dumps(email, salt=salt)
+        link = url_for('manage_customer_account/confirm_email', token=token, _external=True)
+
+        msg = Message(recipients=email)
+        msg.subject = "Confirm Email"
+        msg.body=""" Dear {},
+                     Please click the link below or copy and paste in address bar of browser.
+                     {}""".format(fname,link)
+        mail.send(msg)
+
+    
+    def confirmEmail(self,token,key):
+        s = URLSafeTimedSerializer(key)
+        salt = os.environ.get('EMAIL_CONFIRM_KEY')
+        try:
+            email = s.loads(token, salt=salt)
+            result = self.customer_access.confirmEmail(email)
+            
+            if not result:
+                return '<h1>Account Does not exist</h1>', 404
+            return True
+        except SignatureExpired:
+            return '<h1>The token is expired!</h1>', 403
+        except BadTimeSignature:
+            '<h1>Token tampered with</h1>', 401
 
     def login(self, request):
 
@@ -45,6 +78,7 @@ class AccountManager:
                 'last_name': customer.last_name,
                 'telephone': customer.telephone,
                 'town': customer.town,
+                'email_confirmed': customer.email_confirmed,
                 'parish': customer.parish
             }
         return False

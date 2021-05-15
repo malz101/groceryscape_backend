@@ -17,7 +17,7 @@ class CustomerAccess:
     def registerCustomer(self, firstName, lastName, telephone, email, gender, password, town, parish):
         customer = {}
         try:
-            customer = Customer(first_name=firstName, last_name=lastName, telephone=telephone, email=email, gender=gender, password=password, town=town, parish=parish)
+            customer = Customer(first_name=firstName, last_name=lastName, telephone=telephone, email=email, gender=gender, password=password,street=street, town=town, parish=parish)
             db.session.add(customer)
             db.session.commit()
             customer = self.getCustomerById(customer.id)
@@ -25,6 +25,14 @@ class CustomerAccess:
         except IntegrityError as e:
             db.session.rollback()
             return False
+        
+    def confirmEmail(email):
+        customer = Customer.query.filter_by(email=email).first()
+        if customer:
+            customer.email_confirmed = 'true'
+            db.session.commit()
+            return True
+        return False
 
     def getCustomerById(self, id):
         customer = Customer.query.filter_by(id=id).first()

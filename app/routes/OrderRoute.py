@@ -2,12 +2,12 @@ from flask import Blueprint
 from flask import redirect, url_for, session, request, abort
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from ..system_management.OrderManager import OrderManager
-from ..database.db_access import order_access,order_groceries_access,payment_access,delivery_access
-import stripe
+from ..database.db_access import order_access,payment_access,delivery_access
+from app import mail
 
 manage_order = Blueprint("manage_order", __name__)
 
-order_manager = OrderManager(order_access, order_groceries_access, payment_access, delivery_access)
+order_manager = OrderManager(order_access, payment_access, delivery_access)
 
 @manage_order.route('/schedule_order', methods=['POST','GET'])
 @jwt_required()
@@ -86,21 +86,6 @@ def get_orders():
     else:
         return {'msg':'you are not logged in as an employee', 'error':'auth-0001'}, 401
 
-# @manage_order.route('/get_total', methods=['POST','GET'])
-# @jwt_required()
-# def get_total():
-#     user = get_jwt_identity()
-#     if user and ('role' in user):
-#         try:
-#             order_total = str(order_manager.getTotalOnOrder())
-#             response = {'msg':'success', 'data':{'order_total': order_total}}
-#         except Exception as e:
-#             print(e)
-#             response = {'msg':'', 'error':'ise-0001'}, 500
-#         finally:
-#             return response
-#     else:
-#         return {'msg':'you are not logged in as an employee', 'error':'auth-0001'}, 401
 
 @manage_order.route('/get_schedule', methods=['POST','GET'])
 @jwt_required()
@@ -128,7 +113,7 @@ def record_payment():
     user = get_jwt_identity()
     if user and ('role' in user):
         try:
-            payment = order_manager.recordPayment(user,request)
+            payment = order_manager.recordCashPayment(user,request,mail)
             if payment:
                 response = {'msg':'success', 'data':{'payment':payment}}, 200
             else:

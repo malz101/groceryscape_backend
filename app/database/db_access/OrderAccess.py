@@ -2,7 +2,7 @@ from ... import db
 from datetime import datetime, timedelta, timezone, date
 from ..Models import Order
 from ..Models import OrderGroceries
-from .OrderGroceriesAccess import OrderGroceriesAccess
+# from .OrderGroceriesAccess import OrderGroceriesAccess
 from .CustomerAccess import CustomerAccess
 from .GroceryAccess import GroceryAccess
 from ..Models import Cart
@@ -217,13 +217,13 @@ class OrderAccess:
         else:
             return False
 
-    def getItemsInOrder(self, orderId):
-        return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getAllItemsOnOrder(orderId)
+    # def getItemsInOrder(self, orderId):
+    #     return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getAllItemsOnOrder(orderId)
 
     def getTax(self,groceryId, type):
         return GroceryAccess().getTax(groceryId,type)
 
     
-    def getDeliveryCost(self,orderId):
-        return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getDeliveryCost(orderId)
+    # def getDeliveryCost(self,orderId):
+    #     return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getDeliveryCost(orderId)
 

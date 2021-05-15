@@ -1,9 +1,13 @@
 from datetime import datetime, timedelta
+from flask import render_template, url_for
+from flask_weasyprint import HTML, render_pdf
+from flask_mail import Message
+
+
 class OrderManager:
     
-    def __init__(self, orderAccess, orderGroceries, paymentAccess, deliveryAccess):
+    def __init__(self, orderAccess, paymentAccess, deliveryAccess):
         self.orderAccess = orderAccess
-        self.orderGroceriesAccess = orderGroceries
         self.paymentAccess = paymentAccess
         self.deliveryAccess = deliveryAccess
 
@@ -67,7 +71,7 @@ class OrderManager:
         custId = user['cust_id']
         
         if custId and deliverydate and deliverytimeslot and orderId:
-            if datetime.strptime(deliverydate,'%Y-%m-%d').date()>(datetime.now().date()+timedelta(days=2)):
+            if datetime.strptime(deliverydate,'%Y-%m-%d').date() < (datetime.now().date()+timedelta(days=2)):
                 if self.validSlot(deliverytimeslot, deliverydate):
                     order = self.orderAccess.scheduleDelivery(orderId,int(deliverytimeslot),deliverydate,int(custId))
                     if order:
@@ -224,15 +228,15 @@ class OrderManager:
         return response
 
     def getOrder(self, orderId):
+        '''returns an order with the specified order id'''
         # getParam = self.getRequestType(request)
         # orderId = getParam('order_id')
         
         order = self.orderAccess.getOrderById(orderId)
         if order:
-            empFname = order.employee
-            empLname = order.employee
+            emp = order.employee
             if empFname:
-                empName = ( empFname.first_name+ " " +empLname.last_name )
+                empName = ( emp.first_name+ " " +emp.last_name )
             else:
                 empName = 'False'
 
@@ -278,55 +282,89 @@ class OrderManager:
 
         return response
     
-    def recordPayment(self,user,request):
+
+    def recordCashPayment(self,user,request, mail):
+        '''employee records cash payment'''
         getParam = self.getRequestType(request)
         orderId = int(getParam('order_id'))
         amountTendered = float(getParam('amount_tendered'))
         empId = user['emp_id']
-        payment = self.paymentAccess.recordPayment(orderId, empId, amountTendered)
-        if payment:
-            return {'order_id': payment.order_id,'collected_by':payment.recorded_by, 'payment_date': str(payment.payment_date),\
-                    'amount_tendered':str(payment.amount_tendered),'change':str(payment.change), 'customer':(payment.order.customer.first_name + " "+ \
-                    payment.order.customer.last_name) }
+        order = self.getOrder(orderId)
+        
+        if order:
+            payment = self.paymentAccess.recordCashPayment(order['total'], empId, amountTendered)
+            if payment:
+                self.orderAccess.updateStatus(orderId,'served')
+                self.__sendEmail(order_id, mail)
 
+                return {'order_id': payment.order_id,'collected_by':payment.recorded_by, 'payment_date': str(payment.payment_date),\
+                        'amount_tendered':str(payment.amount_tendered),'change':str(payment.change), 'customer':(payment.order.customer.first_name + " "+ \
+                        payment.order.customer.last_name) }
+            return False
         return False
 
 
-    def make_payment(self, user, request):
+    def processCardPayment(self, user, request,mail):
         '''processes credit card payment'''
         getParam = self.getRequestType(request)
         payment_method_id = getParam('payment_method_id')
         payment_intent_id = getParam('payment_intent_id')
         order_id = getParam('order_id')
         intent = None
-
         try:
             if  payment_method_id:
                 order = self.getOrderCustomer(user,order_id)
-                # Create the PaymentIntent
+                
                 if order:
                     print('Order Total',order['total'])
                     print('Order TotalA',int(round(order['total'],2)*100))
+                    
+                    # Create the PaymentIntent
                     intent = stripe.PaymentIntent.create(
                         payment_method = payment_method_id,
                         amount = int(round(order['total'],2)*100),
                         currency = 'jmd',
                         confirmation_method = 'manual',
                         confirm = True,
+                        metadata={
+                            'order_id': order['order_id'],
+                        }
                     )
                 else:
                     return {'msg':'order does not exist','error':'notfound-0001'}, 200
             elif payment_intent_id:
                 intent = stripe.PaymentIntent.confirm(payment_intent_id)
         except stripe.error.CardError as e:
-            print(e)
+            # Since it's a decline, stripe.error.CardError will be caught
+            print(e.message)
             # Display error on client
-            return {'error': e.user_message}, 200
+            return {'msg': e.user_message, 'error':e.code}, 200
+        except stripe.error.APIConnectionError as e:
+            # Network communication with Stripe failed
+            print(e.message)
+            return {'msg':e.user_message, 'error':e.code}, 200
+        except stripe.error.InvalidRequestError as e:
+            # Invalid parameters were supplied to Stripe's API
+            print(e.message)
+            return {'msg':e.user_message, 'error':e.code}, 200
+        except stripe.error.AuthenticationError as e:
+            # Authentication with Stripe's API failed
+            # (maybe you changed API keys recently)
+            print(e.message)
+            return {'msg':e.user_message, 'error':e.code}, 200
+        except stripe.error.StripeError as e:
+            # Display a very generic error to the user, and maybe send
+            # yourself an email
+            print(e.message)
+            return {'msg':e.user_message, 'error':e.code}, 200
 
-        return self.__generate_response(intent)
+        return self.__generate_response(intent,mail)
 
 
-    def __generate_response(self,intent):
+    def __generate_response(self,intent,mail):
+        '''helper function for processCardPayment. It decides what action to do or response to return
+        to the customer based on status of the payment intent'''
+
         # Note that if your API version is before 2019-02-11, 'requires_action'
         # appears as 'requires_source_action'.
         if intent.status == 'requires_action' and intent.next_action.type == 'use_stripe_sdk':
@@ -338,10 +376,36 @@ class OrderManager:
         elif intent.status == 'succeeded':
             # The payment didn’t need any additional actions and completed!
             # Handle post-payment fulfillment
-            return {'success': True}, 200
+            order_id = int(intent.metadata['order_id'])
+            self.paymentAccess.recordCardPayment(order_id, intent.amount/100, intent_id)
+            self.orderAccess.updateStatus(order_id,'served')
+
+            self.__sendEmail(order_id,mail)
+
+            return {'msg':'success','data':{}}, 200
         else:
             # Invalid status
-            return {'error': 'Invalid PaymentIntent status'}, 500
+            return {'msg': 'Invalid PaymentIntent status', 'error':'ise-0001'}, 500
+
+
+    def __sendEmail(self,order_id,mail):
+        '''send invoice to customer for completed payment'''
+        order = self.orderAccess.getOrderById(order_id)
+        order_details = self.__getOrderDetails(order,'')
+        customer = order.customer
+
+        msg = Message(recipients=[str(customer.email)])
+        msg.subject = "Payment Confirmation for Order "+str(order_id)
+        if order:
+            html = render_template('invoice.html', order=order_details, customer=customer)
+            pdf = render_pdf(HTML(string=html))
+            msg.attach(filename="invoice_"+order['order_id']+".pdf",disposition="attachment",content_type="application/pdf",data=pdf)
+            msg.body=""" Dear {},
+                        your order has been completed and payment received for {}, please find the attachment for the same""".format(customer.first_name,order['order_id'])
+        else:
+            msg.body=""" Dear {},
+                        Your order has been completed and payment received for {}. An error has occured while generating pdf, please contact customer service""".format(customer.first_name,order['order_id'])
+        mail.send(msg)
 
 
     def getSchedule(self):
@@ -365,7 +429,8 @@ class OrderManager:
         order_total_before_delivery_cost = 0
 
         def getOrderItems(orderId):
-            orderItems = self.orderAccess.getItemsInOrder(orderId)
+            # orderItems = self.orderAccess.getItemsInOrder(orderId)
+            orderItems = order.groceries
             nonlocal order_total_before_delivery_cost
             if orderItems:
                 for grocery in orderItems:
@@ -377,6 +442,7 @@ class OrderManager:
                     total_weight = str(grocery.quantity * grocery.groceries.grams_per_unit) + " grams"
                     order_items.append({
                         'grocery_id': str(grocery.grocery_id),
+                        'sku': str(grocery.sku),
                         'quantity': str(grocery.quantity),
                         'cost_before_tax': str(cost_before_tax),
                         'name': grocery.groceries.name,
@@ -391,12 +457,13 @@ class OrderManager:
             'order_date': str(order.orderdate),
             'status': str(order.status), 'customer_id': str(order.customer_id),
             'customer': (order.customer.first_name + " " + order.customer.last_name),
+            'formatted_delivery_date': order.deliverydate.strftime("%B %d %Y"),
             'delivery_date': str(order.deliverydate),
             'delivery_town': str(order.deliverytown), 
             'delivery_parish': str(order.deliveryparish), 
             'checkout_by': empName
         }
-        getOrderItems(order.id)
+        getOrderItems(order)
         result['order_items'] = order_items
         result['subtotal'] = order_total_before_delivery_cost
         delivery_cost = order.parish.delivery_rate
