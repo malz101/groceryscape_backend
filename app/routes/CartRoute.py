@@ -121,7 +121,7 @@ def update_cart():
             else:
                 response = {'msg':'cart not updated', 'error':'create-0001'}, 404
         except:
-            reponse = {'msg':'', 'error':'ise-0001'}, 500
+            response = {'msg':'', 'error':'ise-0001'}, 500
         finally:
             return response
     else:

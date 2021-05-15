@@ -76,6 +76,7 @@ def logout():
         print(e)
         return {'msg': '', 'error':'internal server error'}, 500
 
+
 @manage_customer_account.route('/update_account', methods=["POST"])
 @jwt_required()
 def update_account():
