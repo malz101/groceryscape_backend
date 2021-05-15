@@ -7,6 +7,7 @@ class OrderManager:
         self.paymentAccess = paymentAccess
         self.deliveryAccess = deliveryAccess
 
+
     def getOrderPreview(self,request,order_preview):
         '''returns a preview or the order details from item in cart'''
         getParam = self.getRequestType(request)
@@ -148,7 +149,7 @@ class OrderManager:
 
 
     def checkOutOrder(self,user, request):
-
+        '''used to attached employee that packaged the order to the order'''
         getParam = self.getRequestType(request)
         orderId = getParam('order_id')
 
@@ -201,13 +202,7 @@ class OrderManager:
             order_end_date = order_end_date+" 23:59:59"
 
         delivery_start_date = getParam('delivery_start_date')
-        # if delivery_start_date is not None:
-        #     delivery_start_date = delivery_start_date + " 00:00:00"
-        
         delivery_end_date = getParam('delivery_end_date')
-        # if delivery_end_date is not None:
-        #     delivery_end_date = delivery_end_date + " 23:59:59"
-
         delivery_town = getParam('delivery_town')
         delivery_parish = getParam('delivery_parish')
 
@@ -261,13 +256,7 @@ class OrderManager:
             order_end_date = order_end_date+" 23:59:59"
 
         delivery_start_date = getParam('delivery_start_date')
-        # if delivery_start_date is not None:
-        #     delivery_start_date = delivery_start_date + " 00:00:00"
-        
         delivery_end_date = getParam('delivery_end_date')
-        # if delivery_end_date is not None:
-        #     delivery_end_date = delivery_end_date + " 23:59:59"
-
         delivery_town = getParam('delivery_town')
         delivery_parish = getParam('delivery_parish')
 
@@ -354,7 +343,9 @@ class OrderManager:
             # Invalid status
             return {'error': 'Invalid PaymentIntent status'}, 500
 
+
     def getSchedule(self):
+        '''returns the delivery schedule'''
         orders = self.orderAccess.getSchedule()
         response = []
         if orders:
@@ -374,12 +365,10 @@ class OrderManager:
         order_total_before_delivery_cost = 0
 
         def getOrderItems(orderId):
-            # print(type(orderId))
             orderItems = self.orderAccess.getItemsInOrder(orderId)
             nonlocal order_total_before_delivery_cost
             if orderItems:
                 for grocery in orderItems:
-                    # print(type(grocery))
                     cost_before_tax = grocery.quantity * grocery.groceries.cost_per_unit
                     GCT = self.orderAccess.getTax(grocery.grocery_id, 'GCT') * grocery.quantity
                     SCT = self.orderAccess.getTax(grocery.grocery_id, 'SCT') * grocery.quantity

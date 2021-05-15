@@ -24,6 +24,7 @@ class Customer(db.Model):
     #ratings associated many to many
     grocery_ratings = db.relationship("Rating", back_populates="customer_ratings", cascade="all,delete")
 
+
 class Employee(db.Model):
     __tablename__ = 'employee'
     id = db.Column(db.Integer, primary_key=True)
@@ -40,6 +41,7 @@ class Employee(db.Model):
     # represent the payment collected an employee (many to one relationship)
     payments_collected = db.relationship('Payment', back_populates='employee', cascade="all,delete")
     checkouts = db.relationship('Order', back_populates='employee', cascade="all,delete")
+
 
 class Order(db.Model):
     __tablename__ = 'orders'

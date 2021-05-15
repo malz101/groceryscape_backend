@@ -34,6 +34,7 @@ class OrderAccess:
         except:
             return False
 
+
     def addItemsToOrder(self, cart_summary,cust_id):
         '''add items to created order'''
         order = self.createOrder(cust_id)
@@ -222,9 +223,6 @@ class OrderAccess:
     def getTax(self,groceryId, type):
         return GroceryAccess().getTax(groceryId,type)
 
-    # def getTotalOnOrder(self, orderId):
-    #     return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getTotalOnOrder(orderId)
-    
     
     def getDeliveryCost(self,orderId):
         return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getDeliveryCost(orderId)
