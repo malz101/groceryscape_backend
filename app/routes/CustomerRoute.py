@@ -5,16 +5,17 @@ from ..system_management.CustomerAccountManager import AccountManager
 from ..database.db_access import customer_access
 from ..system_management.MLManager import MLManager
 from ..database.db_access import rating_access
-from ..database.db_access import grocery_access
+from ..database.db_access import order_groceries_access
 from ..database.db_access import order_access
-
+from ..database.db_access import cart_access
 
 """All requests that are related to the management of a customer's account should come to this route"""
 manage_customer_account = Blueprint("manage_customer_account", __name__)
 
 """create an object that manages all operations on a customer's account"""
-customer_manager = AccountManager(customer_access, MLManager(rating_access,grocery_access),order_access)
-
+customer_manager = AccountManager(customer_access, \
+    MLManager(customer_access, order_groceries_access, rating_access, cart_access), \
+    order_access)
 
 """handles customers' account requests"""
 @manage_customer_account.route('/signup', methods=['POST'])
@@ -113,16 +114,15 @@ def get_recommended_groceries():
     user = get_jwt_identity()
     if user and (not 'role' in user):
         try:
-            groceries = customer_manager.getRecommendedGroceries(user)
-            reponse = {'msg': '', 'data':{'groceries':groceries}}, 200
+            groceries = customer_manager.getRecommendedGroceries(user['cust_id'])
+            response = {'msg': '', 'data':{'groceries':groceries}}, 200
         except NameError:
             response = {'msg': 'customer not found', 'data': {}}, 200
-        except Exception as e:
-            print(e)
-            response = {'msg': '', 'error': 'ise-0001'}, 500
+        #except Exception as e:
+        #    print(e)
+        #    response = {'msg': '', 'error': 'ise-0001'}, 500
         finally:
-            return reponse
-
+            return response
     else:
         return redirect(url_for('index'))
     

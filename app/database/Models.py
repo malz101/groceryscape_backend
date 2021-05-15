@@ -1,6 +1,4 @@
 from .. import db
-from flask import Flask 
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 class Customer(db.Model):
@@ -48,7 +46,7 @@ class Order(db.Model):
     deliveryparish = db.Column(db.String(45),db.ForeignKey('delivery_parish.parish'))
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
 
-    # represents the many-to-many relationship between  orders and groceries
+    # represents the many-to-many relationship between orders and groceries
     groceries = db.relationship("OrderGroceries", back_populates="orders", cascade="all,delete")
 
     # represents a one-to-one relationship between payment and order
@@ -56,9 +54,6 @@ class Order(db.Model):
 
     # represents a one to many-to-many relationship between employee and orders
     checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id'))
-
-    
-
 
 class Grocery(db.Model):
     __tablename__ = 'grocery'
@@ -122,7 +117,6 @@ class DeliveryParish(db.Model):
     parish = db.Column(db.String(45), primary_key=True)
     delivery_rate = db.Column(db.Numeric(10,2), nullable=False)
 
-    
 class Taxes(db.Model):
     tax = db.Column(db.String(50), nullable=False, primary_key=True)
     rate = db.Column(db.Numeric(10,2), nullable=False)

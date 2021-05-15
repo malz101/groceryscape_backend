@@ -1,9 +1,11 @@
 import os
 from app import app
-from flask import Flask, render_template, send_from_directory
-from flask_sqlalchemy import SQLAlchemy
-from flask import session
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+#from flask import Flask, render_template, send_from_directory
+from flask import send_from_directory
+#from flask_sqlalchemy import SQLAlchemy
+#from flask import session
+#from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 """import blueprints (routes) for different sections of the system"""
 from .CustomerRoute import manage_customer_account
@@ -15,11 +17,14 @@ from .RatingRoute import manage_rating
 from .OrderRoute import manage_order
 from app.system_management.MLManager import MLManager
 from app.database.db_access import rating_access
-from app.database.db_access import grocery_access
+from app.database.db_access import order_groceries_access
 from app.database.db_access import order_access
+from app.database.db_access import cart_access
 
 from ..system_management.CustomerAccountManager import AccountManager
-account_manager = AccountManager(customer_access, MLManager(rating_access,grocery_access),order_access)
+account_manager = AccountManager(customer_access, \
+    MLManager(customer_access, order_groceries_access, rating_access, cart_access), \
+    order_access)
 
 
 """register blueprints"""

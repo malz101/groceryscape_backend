@@ -1,3 +1,4 @@
+from sqlalchemy import exc
 from ... import db
 from ..Models import OrderGroceries
 from ..Models import DeliveryParish
@@ -48,3 +49,47 @@ class OrderGroceriesAccess:
         else:
             return False
 
+    def getGroceryPairFreq(self, groceryId):
+        """ Returns a list of the number of times a pair of groceries
+            occurs in the orders made """
+
+        def countPairs(gid, groceryOrder, orderGrocery, result):
+            try:
+                for o in groceryOrder[gid]:
+                    for g in orderGrocery[o]:
+                        if (gid != g):
+                            try:
+                                temp = result[gid][g]
+                            except KeyError:
+                                result[gid] = {}
+                                result[gid][g] = 0
+                            result[gid][g] += 1
+            except KeyError:
+                # The grocery likely has never been purchased before
+                result[gid] = {}
+                pass
+
+        # Maping groceries to orders and vice versa
+        groceries = OrderGroceries.query.all()
+        groceryOrder = {}
+        orderGrocery = {}
+        for g in groceries:
+            try:
+                groceryOrder[g.grocery_id].add(g.order_id)
+            except KeyError:
+                groceryOrder[g.grocery_id] = set()
+                groceryOrder[g.grocery_id].add(g.order_id)
+
+            try:
+                orderGrocery[g.order_id].add(g.grocery_id)
+            except KeyError:
+                orderGrocery[g.order_id] = set()
+                orderGrocery[g.order_id].add(g.grocery_id)
+
+        result = {}
+        if (type(groceryId) == str):
+            countPairs(groceryId, groceryOrder, orderGrocery, result)
+        elif (type(groceryId) == list):
+            for gid in groceryId:
+                countPairs(gid, groceryOrder, orderGrocery, result)
+        return result

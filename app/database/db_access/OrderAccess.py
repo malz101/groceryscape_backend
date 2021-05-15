@@ -26,15 +26,13 @@ class OrderAccess:
             return False
 
     def dumpCart(self, cartItems):
-
         order = self.createOrder(cartItems[0].cart_id)
-
         for item in cartItems:
             orderGroceries = OrderGroceries(order_id=order.id, grocery_id=item.item_id, quantity=item.quantity)
             db.session.add(orderGroceries)
             db.session.commit()
         return order.id
-    
+
     def updateStatus(self,orderId, status):
         order = self.getOrderById(orderId)
         if order:
@@ -44,9 +42,7 @@ class OrderAccess:
         else:
             return  False
 
-
     def scheduleDelivery(self, orderId, date,custId):
-        
         order = self.getOrderById(orderId)
         if order:
             if order.customer_id == custId:
@@ -57,7 +53,7 @@ class OrderAccess:
                 return False #raise an exception error here to indicate auth error
         else:
             return False
-            
+
     def checkoutOrder(self, orderId, employee):
         order = self.getOrderById(orderId)
         if order:
@@ -76,17 +72,18 @@ class OrderAccess:
         except:
             return False
 
-    def getOrders(self,custId=None, status=None, min_order_timestamp=None,\
-                            max_order_timestamp=None, min_delivery_timestamp=None,\
-                            max_delivery_timestamp=None, delivery_town=None,delivery_parish=None):
-        
+    def getOrders(self, custId=None, status=None, min_order_timestamp=None, \
+                    max_order_timestamp=None, min_delivery_timestamp=None, \
+                    max_delivery_timestamp=None, delivery_town=None, \
+                    delivery_parish=None):
+
         if status is None:
             status = ''
         status = '%{}%'.format(status)
 
         if min_order_timestamp is None:
             min_order_timestamp = datetime(1970, 1, 1,tzinfo=timezone.utc)
-        
+
         if min_delivery_timestamp is None:
             min_delivery_timestamp = datetime(1970, 1, 1,tzinfo=timezone.utc)
 
@@ -103,7 +100,6 @@ class OrderAccess:
             delivery_range_provided = None
         else:
             max_delivery_timestamp = datetime.strptime(max_delivery_timestamp, '%Y-%m-%d %H:%M:%S')
-
 
         town_provided = ''
         if delivery_town is None:
@@ -143,14 +139,12 @@ class OrderAccess:
                         Order.deliverydate == delivery_range_provided\
                     )
                 )
-            ).all()            
-        
+            ).all()
         # try:
         if orders:
             return orders
         # except:
         return False
-
 
     def getCustomerPendingOrder(self,custId):
         orders = Order.query.filter(and_(Order.customer_id==int(custId),\
@@ -198,12 +192,11 @@ class OrderAccess:
     def getItemsInOrder(self, orderId):
         return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getAllItemsOnOrder(orderId)
 
-    def getTax(self,groceryId, type):
-        return GroceryAccess().getTax(groceryId,type)
+    def getTax(self, groceryId, type):
+        return GroceryAccess().getTax(groceryId, type)
 
     def getTotalOnOrder(self, orderId):
         return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getTotalOnOrder(orderId)
 
-    def getDeliveryCost(self,orderId):
+    def getDeliveryCost(self, orderId):
         return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getDeliveryCost(orderId)
-
