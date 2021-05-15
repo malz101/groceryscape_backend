@@ -118,9 +118,9 @@ def get_recommended_groceries():
             response = {'msg': '', 'data':{'groceries':groceries}}, 200
         except NameError:
             response = {'msg': 'customer not found', 'data': {}}, 200
-        #except Exception as e:
-        #    print(e)
-        #    response = {'msg': '', 'error': 'ise-0001'}, 500
+        except Exception as e:
+            print(e)
+            response = {'msg': '', 'error': 'ise-0001'}, 500
         finally:
             return response
     else:
