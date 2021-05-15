@@ -120,7 +120,7 @@ def update_cart():
                 response = {'msg':'cart updated', 'data':{'cart':carItem}}, 200
             else:
                 response = {'msg':'cart not updated', 'error':'create-0001'}, 404
-        except:
+        except Exception as e:
             print(e)
             response = {'msg':'', 'error':'ise-0001'}, 500
         finally:
