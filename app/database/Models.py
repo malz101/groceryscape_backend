@@ -1,4 +1,5 @@
 from .. import db
+
 from flask import Flask 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
@@ -54,7 +55,7 @@ class Order(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id'))# represents a one to many-to-many relationship between employee and orders
 
-    # represents the many-to-many relationship between  orders and groceries
+    # represents the many-to-many relationship between orders and groceries
     groceries = db.relationship("OrderGroceries", back_populates="orders", cascade="all,delete")
 
     # represents a one-to-one relationship between payment and order
@@ -167,6 +168,7 @@ class MaxDeliveriesPerSlot(db.Model):
     __tablename__ = 'max_deliveries_per_slot'
     max_deliveries_per_time_slot = db.Column(db.Integer,primary_key=True, nullable=False)
 
+    
 class Taxes(db.Model):
     __tablename__ = 'taxes'
     tax = db.Column(db.String(50), nullable=False, primary_key=True)

@@ -34,6 +34,7 @@ class OrderAccess:
         except:
             return False
 
+
     def addItemsToOrder(self, cart_summary,cust_id):
         '''add items to created order'''
         order = self.createOrder(cust_id)
@@ -56,7 +57,7 @@ class OrderAccess:
 
 
     def scheduleDelivery(self, orderId,timeslot, deliverydate,custId):
-        
+
         order = self.getOrderById(orderId)
         if order:
             if order.customer_id == custId:
@@ -69,6 +70,7 @@ class OrderAccess:
                 return False #raise an exception error here to indicate auth error
         else:
             return False
+
     
 
     def getDeliveryTimeSlotCount(self, deliverytimeslot, deliverydate):
@@ -76,6 +78,7 @@ class OrderAccess:
         count = db.session.query(func.count(Order.deliverytimeslot)).filter(and_(
             Order.deliverytimeslot==deliverytimeslot,Order.deliverydate==date_obj)).first()[0]
         return count
+
 
     def checkoutOrder(self, orderId, employee):
         order = self.getOrderById(orderId)
@@ -94,6 +97,7 @@ class OrderAccess:
                 return orders
         except:
             return False
+
 
     def getOrders(self,custId=None, status=None, min_order_timestamp=None,\
                             max_order_timestamp=None, min_delivery_date=None,\
@@ -123,7 +127,6 @@ class OrderAccess:
             delivery_range_provided = None
         else:
             max_delivery_date = datetime.strptime(max_delivery_date, '%Y-%m-%d')
-
 
         town_provided = ''
         if delivery_town is None:
@@ -163,14 +166,12 @@ class OrderAccess:
                         Order.deliverydate == delivery_range_provided\
                     )
                 )
-            ).all()            
-        
+            ).all()
         # try:
         if orders:
             return orders
         # except:
         return False
-
 
     def getCustomerPendingOrder(self,custId):
         orders = Order.query.filter(and_(Order.customer_id==int(custId),\
@@ -219,8 +220,8 @@ class OrderAccess:
     def getItemsInOrder(self, orderId):
         return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getAllItemsOnOrder(orderId)
 
-    def getTax(self,groceryId, type):
-        return GroceryAccess().getTax(groceryId,type)
+    def getTax(self, groceryId, type):
+        return GroceryAccess().getTax(groceryId, type)
 
     # def getTotalOnOrder(self, orderId):
     #     return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getTotalOnOrder(orderId)
@@ -229,3 +230,47 @@ class OrderAccess:
     def getDeliveryCost(self,orderId):
         return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getDeliveryCost(orderId)
 
+    def getGroceryPairFreq(self, groceryId):
+        """ Returns a list of the number of times a pair of groceries
+            occurs in the orders made """
+
+        def countPairs(gid, groceryOrder, orderGrocery, result):
+            try:
+                for o in groceryOrder[gid]:
+                    for g in orderGrocery[o]:
+                        if (gid != g):
+                            try:
+                                temp = result[gid][g]
+                            except KeyError:
+                                result[gid] = {}
+                                result[gid][g] = 0
+                            result[gid][g] += 1
+            except KeyError:
+                # The grocery likely has never been purchased before
+                result[gid] = {}
+                pass
+
+        # Maping groceries to orders and vice versa
+        groceries = OrderGroceries.query.all()
+        groceryOrder = {}
+        orderGrocery = {}
+        for g in groceries:
+            try:
+                groceryOrder[g.grocery_id].add(g.order_id)
+            except KeyError:
+                groceryOrder[g.grocery_id] = set()
+                groceryOrder[g.grocery_id].add(g.order_id)
+
+            try:
+                orderGrocery[g.order_id].add(g.grocery_id)
+            except KeyError:
+                orderGrocery[g.order_id] = set()
+                orderGrocery[g.order_id].add(g.grocery_id)
+
+        result = {}
+        if (type(groceryId) == str):
+            countPairs(groceryId, groceryOrder, orderGrocery, result)
+        elif (type(groceryId) == list):
+            for gid in groceryId:
+                countPairs(gid, groceryOrder, orderGrocery, result)
+        return result

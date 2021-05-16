@@ -15,7 +15,7 @@ from ..system_management.MLManager import MLManager
 manage_customer_account = Blueprint("manage_customer_account", __name__)
 
 """create an object that manages all operations on a customer's account"""
-customer_manager = AccountManager(customer_access, MLManager(rating_access,grocery_access))
+customer_manager = AccountManager(customer_access, MLManager(customer_access, order_access, rating_access, cart_access))
 
 """creates cart manager"""
 cart_manager = CartManager(cart_access, grocery_access)
@@ -116,22 +116,22 @@ def get_customer():
     else:
         return redirect(url_for('index'))
 
+      
 @manage_customer_account.route('/get_recommended_groceries', methods=["GET","POST"])
 @jwt_required()
 def get_recommended_groceries():
     user = get_jwt_identity()
     if user and (not 'role' in user):
         try:
-            groceries = customer_manager.getRecommendedGroceries(user)
-            reponse = {'msg': '', 'data':{'groceries':groceries}}, 200
+            groceries = customer_manager.getRecommendedGroceries(user['cust_id'])
+            response = {'msg': '', 'data':{'groceries':groceries}}, 200
         except NameError:
             response = {'msg': 'customer not found', 'data': {}}, 200
         except Exception as e:
             print(e)
             response = {'msg': '', 'error': 'ise-0001'}, 500
         finally:
-            return reponse
-
+            return response
     else:
         return redirect(url_for('index'))
 
@@ -303,4 +303,3 @@ def get_payment_key():
             return response
     else:
         return redirect(url_for('index'))
-

@@ -72,7 +72,7 @@ class AccountManager:
             return self.__getCustomerDetails(customer)
         return False
 
-
+      
     def getRecommendedGroceries(self, custId):
         groceries = ''
         if self.customer_access.getCustomerById(custId):
@@ -81,6 +81,7 @@ class AccountManager:
                 return str(groceries)
             return False
         raise NameError
+
 
 
     def __getCustomerDetails(self, customer):
