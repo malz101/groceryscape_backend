@@ -65,12 +65,17 @@ class CartManager:
                 SCT = self.groceryAccess.getTax(grocery.item_id, 'SCT') * grocery.quantity
                 total = float(cost_before_tax) + float(GCT) + float(SCT)
                 total_weight = str(grocery.quantity * grocery.cart_items.grams_per_unit) + " grams"
-                response.append({'grocery_id': str(grocery.item_id), \
-                                'quantity': str(grocery.quantity), \
-                                'cost_before_tax': str(cost_before_tax), \
-                                'name': grocery.cart_items.name, \
-                                'total_weight': total_weight, 'GCT': str(GCT), 'SCT': str(SCT), \
-                                'total': str(total)})
+                response.append({
+                    'grocery_id': str(grocery.item_id),
+                    'grocery_id': str(grocery.cart_items.photo),
+                    'quantity': str(grocery.quantity),
+                    'cost_before_tax': str(cost_before_tax),
+                    'name': grocery.cart_items.name,
+                    'total_weight': total_weight, 
+                    'GCT': str(GCT), 
+                    'SCT': str(SCT),
+                    'total': str(total)
+                })
             return {'items':response, 'grand_total':self.cartAccess.getTotalOnCart(cartId)}
         return False
 
@@ -97,12 +102,16 @@ class CartManager:
             SCT = self.groceryAccess.getTax(grocery.item_id, 'SCT') * grocery.quantity
             total = float(cost_before_tax) + float(GCT) + float(SCT)
             total_weight = str(grocery.quantity * grocery.cart_items.grams_per_unit) + " grams"
-            return {'grocery_id': str(grocery.item_id), \
-                    'quantity': str(grocery.quantity), \
-                    'cost_before_tax': str(cost_before_tax), \
-                    'name': grocery.cart_items.name, \
-                    'total_weight': total_weight, 'GCT': str(GCT), 'SCT': str(SCT), \
-                    'total': str(total)}
+            return {'grocery_id': str(grocery.item_id),
+                    'grocery_id': str(grocery.cart_items.photo),
+                    'quantity': str(grocery.quantity),
+                    'cost_before_tax': str(cost_before_tax),
+                    'name': grocery.cart_items.name,
+                    'total_weight': total_weight, 
+                    'GCT': str(GCT), 
+                    'SCT': str(SCT),
+                    'total': str(total)
+            }
         else:
             return False
 
