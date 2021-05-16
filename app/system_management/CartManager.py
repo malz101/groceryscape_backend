@@ -120,15 +120,20 @@ class CartManager:
 
         cartId = user['cust_id']
         cartItems = self.cartAccess.getAllCartItems(cartId)
-        cart_items_total = 0
+        sub_total = 0
+        total_gct = 0
+        total_sct = 0
         response = []
         if cartItems:
             for grocery in cartItems:
-                cost_before_tax = grocery.quantity*grocery.cart_items.cost_per_unit
-                GCT = self.groceryAccess.getTax(grocery.item_id,'GCT')*grocery.quantity
-                SCT = self.groceryAccess.getTax(grocery.item_id,'SCT')*grocery.quantity
-                total = float(cost_before_tax) + float(GCT) + float(SCT)
-                cart_items_total+=total
+                cost_before_tax = float(grocery.quantity*grocery.cart_items.cost_per_unit)
+                sub_total+=cost_before_tax
+                GCT = float(self.groceryAccess.getTax(grocery.item_id,'GCT')*grocery.quantity)
+                SCT = float(self.groceryAccess.getTax(grocery.item_id,'SCT')*grocery.quantity)
+                total_gct += GCT
+                total_sct += SCT
+
+                total = cost_before_tax + GCT + SCT
                 total_weight = str(grocery.quantity*grocery.cart_items.grams_per_unit)+" grams"
                 response.append ({
                     'grocery_id': str(grocery.item_id),
@@ -137,11 +142,12 @@ class CartManager:
                     'cost_before_tax': str(cost_before_tax),
                     'name':grocery.cart_items.name,
                     'total_weight':total_weight,
-                    'GCT':str(GCT),'SCT':str(SCT),
+                    'GCT':str(GCT),
+                    'SCT':str(SCT),
                     'total': str(total)
                 
                 })
-            return {'items':response, 'sub_total':cart_items_total}
+            return {'items':response, 'sub_total':sub_total, 'total_GCT':total_gct, 'total_sct':total_sct}
         return False
 
 
