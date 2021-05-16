@@ -1,0 +1,98 @@
+{% block title %}
+  <title>Invoice_{{order['order_id']}}_{{customer.first_name}}_{{customer.last_name}}</title>
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{url_for('static', filename='css/invoice.css')}}">
+{% endblock %}
+
+{% block header %}
+<div class="row">
+  <div class="col">
+    <h2>Grocery Scape</h2>
+  </div>
+  <div class="col content-right">
+    <h2>Order# {{order['order_id']}}</h2>
+  </div>
+</div>
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <div class="container">
+        <div class="row">
+          <div class="col">
+            <h5>Billed To:</h5>
+            <p>{{customer.first_name}} {{customer.last_name}}</p>
+            <!-- <p>{{customer.street}}</p> -->
+            <p>{{customer.town}}</p>
+            <p>{{customer.parish}}</p>
+          </div>
+          <!-- <div class="col-6"></div> -->
+          <div class="col content-right">
+            <h5>Shipped To:</h5>
+            <p>{{customer.first_name}} {{customer.last_name}}</p>
+            <!-- <p>order.street</p> -->
+            <p>{{order[delivery_town']}}</p>
+            <p>{{order['delivery_parish']}}</p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <h5>Payment Method:</h5>
+            <!-- <p>order.pay_desc</p> -->
+            <p>{{customer.email}}</p>
+          </div>
+          <!-- <div class="col-5"></div> -->
+          <div class="col content-right">
+            <h5>Order Date:</h5>
+            <p>{{order['formatted_delivery_date']}}</p>
+          </div>
+        </div>
+      </div>
+</div>
+
+<div class="container">
+    <h4>Order Summary</h4>
+    <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">No.</th>
+            <th scope="col">SKU</th>
+            <th scope="col">Item</th>
+            <th scope="col">Price</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Total</th>
+            <!-- <th scope="col">Handle</th> -->
+          </tr>
+        </thead>
+        <tbody>
+            {% for i in range len(order['order_items'])%}
+                <tr>
+                    <th scope="row">{{i}}</th>
+                    <td>{{order['order_items'][i]['sku']}</td>
+                    <td>{{order['order_items'][i]['name']}</td>
+                    <td>{{order['order_items'][i]['cost_before_tax']}</td>
+                    <td>{{order['order_items'][i]['quantity']}</td>
+                    <td>{{order['order_items'][i]['total']}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="5" class="summary-heading">Sub Total</th>
+                <td>{{order['subtotal']}}</td> 
+            </tr>
+            <tr>
+                <th colspan="5" class="summary-heading">Delivery Fees</th>
+                <td>{{order['delivery_cost']}}</td>
+            </tr>
+            <tr>
+                <th colspan="5" class="summary-heading">Total Amount</th>
+                <td>{{order['delivery_cost']}}</td>
+            </tr>
+          </tfoot>
+      </table>
+</div>
+{% endblock %}
+

@@ -41,4 +41,16 @@ pymysql
 pytz==2021.1
 blinker==1.4 
 flask-mail==0.9.1
-
+CairoSVG==2.5.2
+Flask-WeasyPrint==0.6
+Pillow=8.2.0 
+Pyphen==0.10.0 
+WeasyPrint==52.5 
+cairocffi==1.2.0 
+cssselect2==0.4.1
+defusedxml==0.7.1 
+html5lib==1.1 
+tinycss2==1.1.0
+webencodings==0.5.1
+pyOpenSSL==20.0.1
+secrets

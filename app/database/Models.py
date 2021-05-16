@@ -13,16 +13,19 @@ class Customer(db.Model):
     email = db.Column(db.String(45), nullable=False, unique=True)
     gender = db.Column(db.String(45), nullable=False)
     password = db.Column(db.String(45), nullable=False)
+    street = db.Column(db.String(45))
     town = db.Column(db.String(45), nullable=False)
     parish = db.Column(db.String(45), nullable=False)
+    email_confirmed = db.Column(db.Boolean,nullable=False, default=False)
 
-    orders = db.relationship('Order', backref='customer', cascade="all,delete")
+    orders = db.relationship('Order', back_populates='customer', cascade="all,delete")
 
     #cart associated many to many
     cart_items = db.relationship("Cart", back_populates="customer_carts", cascade="all,delete")
 
     #ratings associated many to many
     grocery_ratings = db.relationship("Rating", back_populates="customer_ratings", cascade="all,delete")
+
 
 class Employee(db.Model):
     __tablename__ = 'employee'
@@ -38,8 +41,9 @@ class Employee(db.Model):
     salary = db.Column(db.Numeric(10,2), nullable=True)
 
     # represent the payment collected an employee (many to one relationship)
-    payments_collected = db.relationship('Payment', back_populates='employee', cascade="all,delete")
+    payments_collected = db.relationship('CashPayment', back_populates='employee', cascade="all,delete")
     checkouts = db.relationship('Order', back_populates='employee', cascade="all,delete")
+
 
 class Order(db.Model):
     __tablename__ = 'orders'
@@ -54,11 +58,16 @@ class Order(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id'))# represents a one to many-to-many relationship between employee and orders
 
+    customer = db.relationship('Customer', back_populates='orders')
+
     # represents the many-to-many relationship between  orders and groceries
     groceries = db.relationship("OrderGroceries", back_populates="orders", cascade="all,delete")
 
-    # represents a one-to-one relationship between payment and order
-    payment = db.relationship('Payment', backref=db.backref('orders', uselist=False), cascade="all,delete")
+    # represents a one-to-one relationship between cash payment and order
+    cash_payment = db.relationship('CashPayment', backref=db.backref('orders', uselist=False), cascade="all,delete")
+
+    # represents a one-to-one relationship between card payment and order
+    card_payment = db.relationship('CardPayment', backref=db.backref('orders', uselist=False), cascade="all,delete")
 
     # represents the one-to-many relationship between  orders and delivery_parish
     parish = db.relationship("DeliveryParish", back_populates="orders_in_parish")
@@ -122,9 +131,8 @@ class Rating(db.Model):
     grocery_ratings = db.relationship("Grocery", back_populates="customer_ratings")
     customer_ratings = db.relationship("Customer", back_populates="grocery_ratings")
 
-
-class Payment(db.Model):
-    __tablename__ = 'payment'
+class CashPayment(db.Model):
+    __tablename__ = 'cash_payment'
     order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), primary_key=True)
     recorded_by = db.Column(db.Integer, db.ForeignKey('employee.id'))
     payment_date = db.Column(db.DateTime,default=datetime.utcnow)
@@ -133,13 +141,18 @@ class Payment(db.Model):
 
     employee = db.relationship('Employee', back_populates='payments_collected')
 
-# class CardPayment(db.Model):
-#     __tablename__ = 'card_payment'
-#     order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), primary_key=True)
-#     recorded_by = db.Column(db.Integer, db.ForeignKey('employee.id'))
-#     payment_date = db.Column(db.DateTime(),default=datetime.utcnow)
-#     amount_tendered = db.Column(db.Numeric(10,2), nullable=False)
-#     change = db.Column(db.Numeric(10,2), nullable=True)
+
+class CardPayment(db.Model):
+    __tablename__ = 'card_payment'
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), primary_key=True)
+    payment_date = db.Column(db.DateTime(),default=datetime.utcnow)
+    amount_tendered = db.Column(db.Numeric(10,2), nullable=False)
+    intent_id = db.Column(db.String(100), unique=True, nullable = False)
+
+    def __init__(self, order_id, amount, intent_id):
+        self.order_id = order_id
+        self.amount_tendered = amount
+        self.intent_id = intent_id
 
 
 class DeliveryParish(db.Model):
@@ -155,17 +168,19 @@ class DeliveryTimeSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True, index=True)
     start_time = db.Column(db.Time, nullable=False)
     end_time = db.Column(db.Time, nullable=False)
-    status = db.Column(db.Boolean,nullable=False, default='true')
+    status = db.Column(db.Boolean,nullable=False, default=True)
 
     orders = db.relationship("Order", back_populates="timeslot")
 
     def __init__(self,start_time, end_time):
         self.start_time = start_time
         self.end_time = end_time
+
     
 class MaxDeliveriesPerSlot(db.Model):
     __tablename__ = 'max_deliveries_per_slot'
     max_deliveries_per_time_slot = db.Column(db.Integer,primary_key=True, nullable=False)
+
 
 class Taxes(db.Model):
     __tablename__ = 'taxes'
