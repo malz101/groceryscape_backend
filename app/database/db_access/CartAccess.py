@@ -38,7 +38,6 @@ class CartAccess:
             return False
 
     def emptyCart(self, cartId):
-
         # 1) check if there are atleast one cart entry for customer
         cart = Cart.query.filter_by(cart_id=cartId).first()
 
@@ -52,12 +51,10 @@ class CartAccess:
                 return True
             else:
                 return False
-
         except:
             return False
 
     def removeItem(self, cartId, itemId):
-
         # 1) check if the grocery is already in the customers cart
         cartEntry = self.getCartItem(cartId, itemId)
         if cartEntry:
@@ -69,7 +66,6 @@ class CartAccess:
         else:
             # 3) otherwise return error msg
             return False
-
 
     # def checkoutCart(self, custId):
 
@@ -86,8 +82,8 @@ class CartAccess:
     #         return False
     #     return False
 
+    
     def getCartItem(self, cartId, itemId):
-
         # 1) check if cart entry is in db
         cart = Cart.query.filter_by(cart_id=cartId, item_id=itemId).first()
 
@@ -99,9 +95,7 @@ class CartAccess:
             return False
 
     def getAllCartItems(self, cartId):
-
         cartItems = Cart.query.filter_by(cart_id=cartId).all()
-
         try:
             if cartItems[0].cart_id:
                 return cartItems
@@ -125,7 +119,7 @@ class CartAccess:
                 return False
         else:
             return False
-        
+
     def getTotalOnCart(self, cartId):
         items = self.getAllCartItems(cartId)
         total = 0
@@ -139,8 +133,3 @@ class CartAccess:
             return total
         else:
             return False
-
-
-
-
-

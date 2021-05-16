@@ -12,7 +12,6 @@ class RatingAccess:
         self.customerAccess = customerAccess
 
     def rateGrocery(self, custId, itemId, myRating):
-
         grocery = self.groceryAccess.searchForGrocery(itemId)
         customer = self.customerAccess.getCustomerById(custId)
 
@@ -32,11 +31,9 @@ class RatingAccess:
                 db.session.commit()
                 return self.getRating(custId, itemId)
         else:
-            False
-
+            return False
 
     def getRating(self, custId, itemId):
-
         rating = Rating.query.filter_by(cust_id=custId, item_id=itemId).first()
         try:
             if rating.cust_id:
@@ -45,9 +42,7 @@ class RatingAccess:
                 return False
         except:
             return False
-        
-    def getRatingDF(self):
-        db_connection = create_engine(os.environ.get('PYMYSQL_DATABASE_URI') or 'mysql+pymysql://root:''@localhost:3306/food_delivery')
-        df = pd.read_sql('SELECT * FROM rating', con=db_connection)
-        print(df)
-        return df
+
+    def getAllRatings(self):
+        ratings = Rating.query.all()
+        return ratings

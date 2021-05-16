@@ -25,8 +25,6 @@ def addToCart():
             response = {'msg':'', 'error':'ise-0001'}, 500
         finally:
             return response
-
-
     else:
         return emp_login_restrict_msg
 
@@ -109,6 +107,3 @@ def update_cart():
             return response
     else:
         return emp_login_restrict_msg
-    
-
-
