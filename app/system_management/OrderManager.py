@@ -441,6 +441,7 @@ class OrderManager:
                     total_weight = str(order_item.quantity * order_item.groceries.grams_per_unit) + " grams"
                     order_items.append({
                         'grocery_id': str(order_item.grocery_id),
+                        'category': order_item.groceries.category,
                         'sku': str(order_item.groceries.sku),
                         'quantity': str(order_item.quantity),
                         'cost_before_tax': str(cost_before_tax),
