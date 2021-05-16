@@ -22,7 +22,7 @@ class OrderManager:
             order_preview['delivery_parish'] = str(deliveryparish.parish) 
             delivery_cost = deliveryparish.delivery_rate
             order_preview['delivery_cost'] = str(delivery_cost)
-            order_preview['total'] = order_preview['sub_total'] + float(delivery_cost)
+            order_preview['total'] = order_preview['sub_total']+order_preview['total_sct']+order_preview['total_gct']+ float(delivery_cost)
             return order_preview
         return False
 

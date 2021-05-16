@@ -147,7 +147,7 @@ class CartManager:
                     'total': str(total)
                 
                 })
-            return {'items':response, 'sub_total':sub_total, 'total_GCT':total_gct, 'total_sct':total_sct}
+            return {'items':response, 'sub_total':sub_total, 'total_gct':total_gct, 'total_sct':total_sct}
         return False
 
 
