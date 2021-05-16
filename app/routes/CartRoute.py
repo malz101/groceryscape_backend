@@ -2,8 +2,7 @@ from flask import Blueprint
 from flask import redirect, url_for, session, request
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from ..system_management.CartManager import CartManager
-from ..database.db_access import cart_access
-from ..database.db_access import grocery_access
+from ..database.db_access import cart_access, grocery_access
 
 manage_cart = Blueprint("manage_cart", __name__)
 
@@ -29,24 +28,24 @@ def addToCart():
     else:
         return emp_login_restrict_msg
 
-@manage_cart.route('/CheckOutCart', methods=['POST', 'GET'])
-@jwt_required()
-def CheckOutCart():
-    user = get_jwt_identity()
-    if not 'role' in user:
-        try:
-            order = cart_manager.checkoutCart(user)
-            if order:
-                response = {'msg':'success', 'data':order},200
-            else:
-                response = {'msg':'order was not created', 'error':'create-0001'}, 404
-        except Exception as e:
-            print(e)
-            response = {'msg':'','error':'ise-0001'}, 500
-        finally:
-            return response 
-    else:
-        return emp_login_restrict_msg
+# @manage_cart.route('/CheckOutCart', methods=['POST', 'GET'])
+# @jwt_required()
+# def CheckOutCart():
+#     user = get_jwt_identity()
+#     if not 'role' in user:
+#         try:
+#             order = cart_manager.checkoutCart(user)
+#             if order:
+#                 response = {'msg':'success', 'data':order},200
+#             else:
+#                 response = {'msg':'order was not created', 'error':'create-0001'}, 404
+#         except Exception as e:
+#             print(e)
+#             response = {'msg':'','error':'ise-0001'}, 500
+#         finally:
+#             return response 
+#     else:
+#         return emp_login_restrict_msg
     
 @manage_cart.route('/removeFromCart/<grocery_id>', methods=['POST', 'GET'])
 @jwt_required()
@@ -76,9 +75,9 @@ def empty_cart():
         try:
             cartItems = cart_manager.emptyCart(user)
             if cartItems:
-                response = {'msg':'success', 'data':cartItems},200
+                response = {'msg':'success', 'data':{}},200
             else:
-                response = {'msg':'no item found', 'error':'notfound-0001'},404
+                response = {'msg':'no item found', 'error':'notfound-0001'},200
         except Exception as e:
             print(e)
             response = {'msg':'','error':'ise-0001'}, 500
@@ -107,6 +106,7 @@ def get_cart_items():
     else:
         return emp_login_restrict_msg
 
+
 @manage_cart.route('/update_cart', methods=['POST','GET'])
 @jwt_required()
 def update_cart():
@@ -115,11 +115,12 @@ def update_cart():
         try:
             cartItem = cart_manager.updateCartItem(request, user)
             if cartItem:
-                response = {'msg':'cart updated', 'data':{'cart':carItem}}, 200
+                response = {'msg':'cart updated', 'data':{'cart':cartItem}}, 200
             else:
                 response = {'msg':'cart not updated', 'error':'create-0001'}, 404
-        except:
-            reponse = {'msg':'', 'error':'ise-0001'}, 500
+        except Exception as e:
+            print(e)
+            response = {'msg':'', 'error':'ise-0001'}, 500
         finally:
             return response
     else:

@@ -12,18 +12,16 @@ from .CustomerRoute import manage_customer_account
 from .EmployeeRoute import manage_employee_account
 from .GroceryRoute import manage_groceries
 from .CartRoute import manage_cart
-from ..database.db_access import customer_access
 from .RatingRoute import manage_rating
 from .OrderRoute import manage_order
 from app.system_management.MLManager import MLManager
-from app.database.db_access import rating_access
-from app.database.db_access import order_access
-from app.database.db_access import cart_access
+
+from app.database.db_access import customer_access,rating_access,grocery_access,order_access,\
+                                    delivery_access
+
 
 from ..system_management.CustomerAccountManager import AccountManager
-account_manager = AccountManager(customer_access, \
-    MLManager(customer_access, order_access, rating_access, cart_access), \
-    order_access)
+account_manager = AccountManager(customer_access, MLManager(customer_access, order_access, rating_access, cart_access))
 
 
 """register blueprints"""
@@ -46,6 +44,66 @@ def index():
         return user
     else:
         return {'msg': 'you are not logged in as a customer', 'error': 'auth-0001'}, 401
+
+
+@app.route('/get_parish/<parish>', methods=['GET'])
+@jwt_required()
+def get_parish(parish):
+    try:
+        parish = delivery_access.getDeliveryParish(parish)
+        if parish:
+            # print('Parish',parish.parish)
+            response = {'msg':'success', 'data':{'parish':{'name':str(parish.parish), 'delivery_fee':float(parish.delivery_rate)}}}, 200
+        else:
+            response = {'msg':'unsuccessful', 'error':'notfound-0001'}, 404
+    except Exception as e:
+        print(e)
+        reponse = {'msg':'', 'error':'ise-0001'}, 500
+    finally:
+        return response
+
+
+@app.route('/get_delivery_timeslots', methods=['GET'])
+@jwt_required()
+def get_delivery_timeslots():
+    try:
+        timeslots = delivery_access.getDeliveryTimeSlots()
+        if timeslots:
+            result=[]
+            for timeslot in timeslots:
+                result.append({
+                    'id':str(timeslot.id),
+                    'start_time':str(timeslot.start_time),
+                    'end_time':str(timeslot.end_time)
+                })
+            response = {'msg':'success', 'data':{'timeslots':result}}, 200
+        else:
+            response = {'msg':'unsuccessful', 'error':'notfound-0001'}, 404
+    except Exception as e:
+        print(e)
+        response = {'msg':'', 'error':'ise-0001'}, 500
+    finally:
+        return response
+
+
+@app.route('/get_parishes', methods=['GET'])
+@jwt_required()
+def get_parishes():
+    try:
+        parishes = delivery_access.getDeliveryParishes()
+        if parishes:
+            result=[]
+            for parish in parishes:
+                result.append({'name':str(parish.parish), 'delivery_fee':float(parish.delivery_rate)})
+            response = {'msg':'success', 'data':{'parishes':result}}, 200
+        else:
+            response = {'msg':'unsuccessful', 'error':'notfound-0001'}, 404
+    except Exception as e:
+        print(e)
+        reponse = {'msg':'', 'error':'ise-0001'}, 500
+    finally:
+        return response
+
 
 @app.route('/uploads/<filename>')
 def get_image(filename):

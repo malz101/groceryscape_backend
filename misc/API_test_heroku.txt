@@ -1,0 +1,169 @@
+---------------------------------------------------------------
+                            APP 
+---------------------------------------------------------------
+1) get parish
+    https://infinite-beach-27814.herokuapp.com/get_parish/<parish>
+
+2) get all parishes
+    https://infinite-beach-27814.herokuapp.com/get_parishes
+
+3) get all delivery timeslots
+    https://infinite-beach-27814.herokuapp.com/get_delivery_timeslots
+
+3) get image
+    https://infinite-beach-27814.herokuapp.com/uploads/<filename>
+
+
+
+---------------------------------------------------------------
+                            Customer
+----------------------------------------------------------------
+1) sign up:
+     https://infinite-beach-27814.herokuapp.com/manage_customer_account/signup
+
+2) login:
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/login
+3) update account:
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/update_account
+
+4) logout: ***
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/logout
+
+5) get order:
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/get_order/<order_id>
+
+6) get my orders:
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/get_my_orders
+    can be filtered by:
+    status, order_start_date, order_end_date, delivery_start_date,
+    delivery_end_date, delivery_town, delivery_parish
+
+7) cancel order:
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/cancel_order/<order_id>
+
+8) get recommended groceries:
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/get_recommended_groceries
+
+9) set delivery location:
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/set_delivery_location/<order_id>
+
+10) get payment key: GET
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/get_pay_key
+
+11) pay for order: POST
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/pay
+    body: order_id, payment_method_id, payment_intent_id
+
+12) get order preview: GET/POST
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/get_order_preview?parish=<name of parish>
+
+13) create order: GET/POST
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/create_order
+
+14) get valid delivery timeslots
+    https://infinite-beach-27814.herokuapp.com/manage_customer_account/get_delivery_timeslots
+
+
+---------------------------------------------------------------
+                            Grocery
+----------------------------------------------------------------
+
+1) create grocery:
+    https://infinite-beach-27814.herokuapp.com/manage_groceries/submit_grocery?grocery_name=biscuit&description=butterkiss&quantity=12&price=90&units=bag&grams_per_unit=0.67&category=MEAT
+
+
+2) update grocery: will be changed to post only
+    https://infinite-beach-27814.herokuapp.com/manage_groceries/update_grocery?grocery_id=2&attribute=name&value=apple
+
+3) delete grocery:
+    https://infinite-beach-27814.herokuapp.com/manage_groceries/delete_grocery?grocery_id=3
+
+4) query grocery:
+     https://infinite-beach-27814.herokuapp.com/manage_groceries/get_grocery?grocery_id=10
+
+5) query all groceries:
+    https://infinite-beach-27814.herokuapp.com/manage_groceries/get_groceries
+    can be filtered by:
+    name,description,category
+
+
+---------------------------------------------------------------
+                            Employee
+----------------------------------------------------------------
+1) login: will be changed to post only
+    http://localhost:5000/manage_employee_account/login?email=jordanchristine@example.org&password=1234
+
+2) logout: ***
+    http://localhost:5000/manage_employee_account/logout
+
+3) add employee: will be changed to post only
+    http://localhost:5000/manage_employee_account/register?first_name=Jeremy&last_name=Thomas&email=jeremythomas@hotmail.com&address=Cross%20Road,%20Kgn&password=000&role=admin&salary=200000.00
+
+4) delete employee:
+    http://localhost:5000/manage_employee_account/delete_employee?emp_id=15
+
+5) get employees:
+    http://localhost:5000/manage_employee_account/get_employees
+
+6) get an employee:
+    http://localhost:5000/manage_employee_account/get_employee?emp_id=14
+
+7) update employee: will be changed to post only
+    http://localhost:5000/manage_employee_account/update_employee?emp_id=2&attribute=first_name&value=Tommy
+
+---------------------------------------------------------------
+                            Cart
+----------------------------------------------------------------
+1) add item to cart:
+    https://infinite-beach-27814.herokuapp.com/manage_cart/addToCart?quantity=3&item_id=2
+
+2) remove item from cart:
+    https://infinite-beach-27814.herokuapp.com/manage_cart/removeFromCart/<grocery_id>
+
+3) query cart items:
+    https://infinite-beach-27814.herokuapp.com/manage_cart/get_cart_items
+
+4) checkout cart:
+    https://infinite-beach-27814.herokuapp.com/manage_cart/CheckOutCart
+
+5) update cart item:
+    https://infinite-beach-27814.herokuapp.com/manage_cart/update_cart?item_id=5&quantity=15
+
+6) empty cart:
+    https://infinite-beach-27814.herokuapp.com/manage_cart/empty_cart
+
+---------------------------------------------------------------
+                            Rating
+---------------------------------------------------------------
+1) rate grocery:
+    https://infinite-beach-27814.herokuapp.com/manage_rating/rate_grocery?item_id=9&rating=6
+
+2) get all ratings:
+
+
+3) get rating:
+
+---------------------------------------------------------------
+                            Order
+---------------------------------------------------------------
+1) schedule delivery: POST
+    https://infinite-beach-27814.herokuapp.com/manage_order/schedule_order
+    body: order_id=3, date=2021-04-20, timeslot=2
+
+2) checkout order:
+    https://infinite-beach-27814.herokuapp.com/manage_order/checkout_order?order_id=3
+
+3) get order:
+    https://infinite-beach-27814.herokuapp.com/manage_order/get_order/<order_id>
+
+4) get all order:
+    https://infinite-beach-27814.herokuapp.com/manage_order/get_orders
+    can be filtered by:
+    cust_id, status, order_start_date, order_end_date, delivery_start_date,
+    delivery_end_date, delivery_town, delivery_parish
+
+5) get schedule:
+    https://infinite-beach-27814.herokuapp.com/manage_order/get_schedule
+
+6) record payment: Will be changed to post only
+    https://infinite-beach-27814.herokuapp.com/manage_order/record_payment?order_id=5&amount_tendered=5000

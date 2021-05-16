@@ -11,9 +11,9 @@ class CustomerAccess:
     """retrieve a customer record from the database given their email and password"""
     def login(self, email, password):
         customer = Customer.query.filter_by(email=email).first()
-
-        if customer.email == email and customer.password == password:
-            return customer
+        if customer:
+            if customer.email == email and customer.password == password:
+                return customer
         else:
             return False
 
@@ -34,6 +34,7 @@ class CustomerAccess:
         customer = Customer.query.filter_by(id=id).first()
         try:
             if customer.id == int(id):
+                print(customer)
                 return customer
             else:
                 return False
@@ -79,12 +80,14 @@ class CustomerAccess:
         return False
 
     def getCart(self, cartId):
+
         customer = self.getCustomerById(cartId)
         if customer:
             return customer.cart_items
         else:
             return False
-
+          
+          
     def getTotalAmtPurchased(self, custId):
         """ Returns the total amount of each item a customer has
             purchased over the lifetime of the account. If a list

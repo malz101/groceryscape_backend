@@ -3,10 +3,10 @@ from ..Models import Employee
 
 class EmployeeAccess:
 
-    def registerEmployee(self, firstName, lastName, email, password, address, role, salary):
+    def registerEmployee(self, firstName, lastName, email, password, street, town, parish, role, salary):
 
-        new_employee = Employee(first_name=firstName, last_name=lastName, email=email, password=password, address=address,\
-                                role=role, salary=salary)
+        new_employee = Employee(first_name=firstName, last_name=lastName, email=email, password=password, street=street,\
+                                town=town, parish=parish,role=role, salary=salary)
         db.session.add(new_employee)
         db.session.commit()
 
@@ -79,8 +79,16 @@ class EmployeeAccess:
                 employee.cost_per_unit = float(value)
                 db.session.commit()
                 return self.getEmployee(empId)
-            if attribute == 'address':
-                employee.address = value
+            if attribute == 'street':
+                employee.street = value
+                db.session.commit()
+                return self.getEmployee(empId)
+            if attribute == 'town':
+                employee.town = value
+                db.session.commit()
+                return self.getEmployee(empId)
+            if attribute == 'parish':
+                employee.parish = value
                 db.session.commit()
                 return self.getEmployee(empId)
         return False

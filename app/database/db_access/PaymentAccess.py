@@ -1,7 +1,6 @@
 from ... import db
 from ..Models import Payment
 from datetime import datetime
-
 class PaymentAccess:
     
     def __init__(self, orderAccess,orderGroceriesAccess, employeeAccess):
