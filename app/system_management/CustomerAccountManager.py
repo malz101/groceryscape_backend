@@ -1,6 +1,8 @@
 import stripe
 import os
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired
+from flask_mail import Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
+
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 class AccountManager:
 
@@ -8,7 +10,7 @@ class AccountManager:
         self.MLManager = MLManager
         self.customer_access = customer_access
 
-    def createAccount(self, request, mail, key):
+    def createAccount(self, request, mail,url_for, key):
 
         """extract details from the request"""
         getParam = self.getRequestType(request)
@@ -27,22 +29,21 @@ class AccountManager:
         """create account with sanitized data"""
         customer = self.customer_access.registerCustomer(firstName, lastName, telephone, email, gender, password, street, town, parish)
         if customer:
-            self.__sendConfirmationEmail(firstName,email, mail, key)
+            self.__sendConfirmationEmail(firstName,email, mail, url_for,key)
             return True
         return False
 
-    def __sendConfirmationEmail(self,fname,email,mail, key):
+    def __sendConfirmationEmail(self,fname,email,mail,url_for, key):
         '''sends a confirmation email to user'''
         s = URLSafeTimedSerializer(key)
         salt = os.environ.get('EMAIL_CONFIRM_KEY')
         token = s.dumps(email, salt=salt)
-        link = url_for('manage_customer_account/confirm_email', token=token, _external=True)
+        link = url_for('manage_customer_account.confirm_email', token=token, _external=True)
 
-        msg = Message(recipients=email)
+        msg = Message(recipients=[email])
         msg.subject = "Confirm Email"
-        msg.body=""" Dear {},
-                     Please click the link below or copy and paste in address bar of browser.
-                     {}""".format(fname,link)
+        msg.body="""Dear {},\nPlease click the link below or copy and paste in address bar of browser.\n\n{}""".format(fname,link)
+        # print('Mail obj',repr(mail))
         mail.send(msg)
 
     
@@ -78,6 +79,7 @@ class AccountManager:
                 'last_name': customer.last_name,
                 'telephone': customer.telephone,
                 'town': customer.town,
+                'street': customer.street,
                 'email_confirmed': customer.email_confirmed,
                 'parish': customer.parish
             }
@@ -119,9 +121,17 @@ class AccountManager:
 
     def __getCustomerDetails(self, customer):
 
-        return {"cust_id": str(customer.id), 'first_name': customer.first_name, 'last_name': customer.last_name, \
-                        'telephone': customer.telephone, 'email': customer.email, 'gender': customer.gender, \
-                        'town': customer.town, 'parish': customer.parish}
+        return {
+            "cust_id": str(customer.id),
+            'first_name': customer.first_name,
+            'last_name': customer.last_name,
+            'telephone': customer.telephone, 
+            'email': customer.email, 
+            'gender': customer.gender,
+            'street': customer.street,
+            'town': customer.town,
+            'parish': customer.parish
+        }
 
                 
     def getRequestType(self, request):

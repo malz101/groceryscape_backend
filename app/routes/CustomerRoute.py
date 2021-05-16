@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
-from flask import Blueprint
-from flask import redirect, url_for, session, request, render_template
+from flask import Blueprint,redirect, url_for, session, request, render_template
 from app import app, mail
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from ..system_management.CustomerAccountManager import AccountManager
@@ -30,24 +29,24 @@ order_manager = OrderManager(order_access, payment_access, delivery_access)
 def signup():
     """Pass all the responsibility of creating an account to the account manager"""
     try:
-        customer = customer_manager.createAccount(request, mail, app.config['SECRET_KEY'])
+        customer = customer_manager.createAccount(request, mail,url_for, app.config['SECRET_KEY'])
         if customer:
             response = {'msg': 'account created', 'data':{}}, 201
         else:
             response = {'msg': 'email address already exits', 'error':'create-0001'}, 404
     except Exception as e:
         print(e)
-        reponse = {'msg': '', 'error':'ise-0001'}, 500
+        response = {'msg': '', 'error':'ise-0001'}, 500
     finally:
-        return reponse
+        return response
 
 
 @manage_customer_account.route('/confirm_email/<token>', methods=['GET'])
 def confirm_email(token):
     try:
-        response = customer_manager.confirmEmail(token)
-        if reponse == True:
-            response = redirect(url_for("groceryscape.web.app", _external=True))
+        response = customer_manager.confirmEmail(token,app.config['SECRET_KEY'])
+        if response == True:
+            response = {'msg':'success, email confirmed', 'data':{}}, 200
     except Exception as e:
         print(e)
         response = {'msg':'', 'error':'ise-0001'}, 500
@@ -129,11 +128,11 @@ def get_customer():
                     response = {'msg':'user with id '+user['cust_id']+' does not exist','error':'notfound-0001'}, 404
             except Exception as e:
                 print(e)
-                response = {'msg':'','error':'ise-0001'}, 500
+                response = {'msg':'','error':'ise-0001'}, 401
             finally:
                 return response
         else:
-            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 500
+            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 401
     else:
         return redirect(url_for('index'))
 
@@ -154,7 +153,7 @@ def get_recommended_groceries():
             finally:
                 return reponse
         else:
-            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 500
+            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 401
     else:
         return redirect(url_for('index'))
 
@@ -168,7 +167,7 @@ def get_delivery_timeslots():
             response = order_manager.getDeliveryTimeSlots()
             return response
         else:
-            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 500
+            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 401
     else:
         return redirect(url_for('index'))
 
@@ -192,7 +191,7 @@ def get_order_preview():
             finally:
                 return response
         else:
-            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 500 
+            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 401 
     else:
         return redirect(url_for('index'))
 
@@ -216,7 +215,7 @@ def create_order():
             finally:
                 return response
         else:
-            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 500 
+            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 401 
     else:
         return redirect(url_for('index'))
 
@@ -240,7 +239,7 @@ def get_my_orders():
             finally:
                 return response
         else:
-            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 500
+            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 401
     else:
         return redirect(url_for('index'))
 
@@ -263,7 +262,7 @@ def get_order(order_id):
             finally:
                 return response
         else:
-            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 500
+            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 401
     else:
         return redirect(url_for('index'))
     
@@ -286,7 +285,7 @@ def cancel_order(order_id):
             finally:
                 return response
         else:
-            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 500
+            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 401
     else:
         return redirect(url_for('index'))
 
@@ -299,7 +298,7 @@ def set_delivery_location(order_id):
         if bool(user['email_confirmed']):
             try:
                 order = order_manager.setDeliveryLocation(user, request, order_id)
-                print(order)
+                # print(order)
                 if order:
                     response = {'msg':'delivery location update successful', 'data':{'order':order}}, 200
                 else:
@@ -310,7 +309,7 @@ def set_delivery_location(order_id):
             finally:
                 return response
         else:
-            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 500
+            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 401
     else:
         return redirect(url_for('index'))
 
@@ -330,7 +329,7 @@ def pay():
             finally:
                 return response
         else:
-            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 500
+            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 401
     else:
         return redirect(url_for('index'))
 
@@ -349,7 +348,7 @@ def get_payment_key():
             finally:
                 return response
         else:
-            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 500
+            return {'msg': 'email not confirmed', 'error':'auth-0002'}, 401
     else:
         return redirect(url_for('index'))
 

@@ -17,7 +17,7 @@ def addToCart():
         try:
             cart = cart_manager.addToCart(request, user)
             if cart:
-                response = {'msg':'success','data':{'cart':cart}}, 201
+                response = {'msg':'success','data':{}}, 201
             else:
                 response = {'msg':'Item not added. Duplicate Item or Grocery Item not in database','error':'create-0001'}, 404
         except Exception as e:
@@ -30,25 +30,7 @@ def addToCart():
     else:
         return emp_login_restrict_msg
 
-# @manage_cart.route('/CheckOutCart', methods=['POST', 'GET'])
-# @jwt_required()
-# def CheckOutCart():
-#     user = get_jwt_identity()
-#     if not 'role' in user:
-#         try:
-#             order = cart_manager.checkoutCart(user)
-#             if order:
-#                 response = {'msg':'success', 'data':order},200
-#             else:
-#                 response = {'msg':'order was not created', 'error':'create-0001'}, 404
-#         except Exception as e:
-#             print(e)
-#             response = {'msg':'','error':'ise-0001'}, 500
-#         finally:
-#             return response 
-#     else:
-#         return emp_login_restrict_msg
-    
+  
 @manage_cart.route('/removeFromCart/<grocery_id>', methods=['POST', 'GET'])
 @jwt_required()
 def removeFromCart(grocery_id):
@@ -121,7 +103,7 @@ def update_cart():
             else:
                 response = {'msg':'cart not updated', 'error':'create-0001'}, 404
         except:
-            reponse = {'msg':'', 'error':'ise-0001'}, 500
+            response = {'msg':'', 'error':'ise-0001'}, 500
         finally:
             return response
     else:

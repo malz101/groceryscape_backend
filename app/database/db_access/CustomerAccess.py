@@ -14,7 +14,7 @@ class CustomerAccess:
             return False
 
     """register a customer to the db"""
-    def registerCustomer(self, firstName, lastName, telephone, email, gender, password, town, parish):
+    def registerCustomer(self, firstName, lastName, telephone, email, gender, password,street, town, parish):
         customer = {}
         try:
             customer = Customer(first_name=firstName, last_name=lastName, telephone=telephone, email=email, gender=gender, password=password,street=street, town=town, parish=parish)
@@ -26,10 +26,10 @@ class CustomerAccess:
             db.session.rollback()
             return False
         
-    def confirmEmail(email):
+    def confirmEmail(self,email):
         customer = Customer.query.filter_by(email=email).first()
         if customer:
-            customer.email_confirmed = 'true'
+            customer.email_confirmed = True
             db.session.commit()
             return True
         return False

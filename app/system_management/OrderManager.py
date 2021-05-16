@@ -142,10 +142,9 @@ class OrderManager:
 
         order = self.orderAccess.setDeliveryLocation(int(cust_id),int(order_id),street, parish,town)
         if order:
-            empFname = order.employee
-            empLname = order.employee
-            if empFname:
-                empName = (empFname.first_name + " " + empLname.last_name)
+            emp = order.employee
+            if emp:
+                empName = (emp.first_name + " " + emp.last_name)
             else:
                 empName = 'False'
             return self.__getOrderDetails(order,empName)
@@ -428,24 +427,24 @@ class OrderManager:
         order_items = []
         order_total_before_delivery_cost = 0
 
-        def getOrderItems(orderId):
+        def getOrderItems():
             # orderItems = self.orderAccess.getItemsInOrder(orderId)
             orderItems = order.groceries
             nonlocal order_total_before_delivery_cost
             if orderItems:
-                for grocery in orderItems:
-                    cost_before_tax = grocery.quantity * grocery.groceries.cost_per_unit
-                    GCT = self.orderAccess.getTax(grocery.grocery_id, 'GCT') * grocery.quantity
-                    SCT = self.orderAccess.getTax(grocery.grocery_id, 'SCT') * grocery.quantity
+                for order_item in orderItems:
+                    cost_before_tax = order_item.quantity * order_item.groceries.cost_per_unit
+                    GCT = self.orderAccess.getTax(order_item.grocery_id, 'GCT') * order_item.quantity
+                    SCT = self.orderAccess.getTax(order_item.grocery_id, 'SCT') * order_item.quantity
                     item_total = float(cost_before_tax) + float(GCT) + float(SCT)
                     order_total_before_delivery_cost += item_total
-                    total_weight = str(grocery.quantity * grocery.groceries.grams_per_unit) + " grams"
+                    total_weight = str(order_item.quantity * order_item.groceries.grams_per_unit) + " grams"
                     order_items.append({
-                        'grocery_id': str(grocery.grocery_id),
-                        'sku': str(grocery.sku),
-                        'quantity': str(grocery.quantity),
+                        'grocery_id': str(order_item.grocery_id),
+                        'sku': str(order_item.groceries.sku),
+                        'quantity': str(order_item.quantity),
                         'cost_before_tax': str(cost_before_tax),
-                        'name': grocery.groceries.name,
+                        'name': order_item.groceries.name,
                         'total_weight': total_weight,
                         'GCT': str(GCT), 
                         'SCT': str(SCT),
@@ -457,13 +456,14 @@ class OrderManager:
             'order_date': str(order.orderdate),
             'status': str(order.status), 'customer_id': str(order.customer_id),
             'customer': (order.customer.first_name + " " + order.customer.last_name),
-            'formatted_delivery_date': order.deliverydate.strftime("%B %d %Y"),
+            'formatted_delivery_date': order.deliverydate.strftime("%B %d %Y") if order.deliverydate else str(None),
+            'delivery_timeslot': str(order.timeslot.start_time)+"-"+str(order.timeslot.end_time) if order.timeslot else str(None),
             'delivery_date': str(order.deliverydate),
             'delivery_town': str(order.deliverytown), 
             'delivery_parish': str(order.deliveryparish), 
             'checkout_by': empName
         }
-        getOrderItems(order)
+        getOrderItems()
         result['order_items'] = order_items
         result['subtotal'] = order_total_before_delivery_cost
         delivery_cost = order.parish.delivery_rate

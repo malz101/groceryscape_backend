@@ -16,7 +16,7 @@ class Customer(db.Model):
     street = db.Column(db.String(45))
     town = db.Column(db.String(45), nullable=False)
     parish = db.Column(db.String(45), nullable=False)
-    email_confirmed = db.Column(db.Boolean,nullable=False, default='false')
+    email_confirmed = db.Column(db.Boolean,nullable=False, default=False)
 
     orders = db.relationship('Order', back_populates='customer', cascade="all,delete")
 
@@ -168,7 +168,7 @@ class DeliveryTimeSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True, index=True)
     start_time = db.Column(db.Time, nullable=False)
     end_time = db.Column(db.Time, nullable=False)
-    status = db.Column(db.Boolean,nullable=False, default='true')
+    status = db.Column(db.Boolean,nullable=False, default=True)
 
     orders = db.relationship("Order", back_populates="timeslot")
 
