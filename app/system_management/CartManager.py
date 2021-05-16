@@ -138,6 +138,7 @@ class CartManager:
                 response.append ({
                     'grocery_id': str(grocery.item_id),
                     'photo' : grocery.cart_items.photo,
+                    'category': grocery.cart_items.category,
                     'quantity': str(grocery.quantity),
                     'cost_before_tax': str(cost_before_tax),
                     'name':grocery.cart_items.name,
