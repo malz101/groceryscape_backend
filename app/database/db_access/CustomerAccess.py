@@ -18,10 +18,10 @@ class CustomerAccess:
             return False
 
     """register a customer to the db"""
-    def registerCustomer(self, firstName, lastName, telephone, email, gender, password, town, parish):
+    def registerCustomer(self, firstName, lastName, telephone, email, gender, password,street, town, parish):
         customer = {}
         try:
-            customer = Customer(first_name=firstName, last_name=lastName, telephone=telephone, email=email, gender=gender, password=password, town=town, parish=parish)
+            customer = Customer(first_name=firstName, last_name=lastName, telephone=telephone, email=email, gender=gender, password=password, street=street,town=town, parish=parish)
             db.session.add(customer)
             db.session.commit()
             customer = self.getCustomerById(customer.id)
