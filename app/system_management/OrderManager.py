@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from flask import render_template, url_for
 from flask_weasyprint import HTML, render_pdf
-from flask_mail import Message
+
 
 
 class OrderManager:

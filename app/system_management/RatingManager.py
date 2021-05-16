@@ -29,7 +29,18 @@ class RatingManager:
         except Exception as e:
             print(e)
             return {'msg':'failed request', 'error':'ise-0001'}, 500
-        
+    
+    
+    def getCustomerRating(self,user,request):
+        getParam = self.getRequestType(request)
+        grocery_id = getParam('item_id')
+        cust_id = user['cust_id']
+
+        rating = self.rating_access.getRating(cust_id,grocery_id)
+        if rating:
+            return {'msg':'success', 'data':{'rating':rating.rating}}, 200
+        return {'msg':'no rating for this item', 'data':{}}, 200
+
     def getDataFrame(self):
         return self.rating_access.getDataFrame()
 

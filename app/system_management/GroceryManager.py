@@ -2,9 +2,11 @@ from app import uploaddir
 import os
 from werkzeug.utils import secure_filename
 class GroceryManager:
-    def __init__(self, grocery_access):
+    def __init__(self, grocery_access, rating_access):
         self.grocery_access = grocery_access
-        
+        self.rating_access = rating_access
+
+
     def addGrocery(self, request):
 
         try:
@@ -29,7 +31,7 @@ class GroceryManager:
             """add grocery item to stock"""
             grocery = self.grocery_access.create_grocery(name, description, int(quantity), units, float(price), float(grams_per_unit),category, filename)
             if grocery:
-                return {'msg':'success', 'data':{'grocery':self.__getGroceryDetails(grocery)}}, 200
+                return {'msg':'success', 'data':{'grocery':self.__getGroceryDetails(grocery, None)}}, 200
             else:
                 return {'msg':'request to create new grocery item failed', 'error':'create-0001'}, 404
         except Exception as e:
@@ -49,7 +51,9 @@ class GroceryManager:
             '''perform update'''
             grocery = self.grocery_access.updateGrocery(grocery_id, attribute, value)
             if grocery:
-                return {'msg':'success', 'data':{'grocery':self.__getGroceryDetails(grocery)}}, 200
+                rating = self.rating_access.getItemRating(grocery.id)
+                return {'msg':'success', 'data':{'grocery':self.__getGroceryDetails(grocery,rating)}}, 200
+
             else:
                 return {'msg':'update failed', 'error':'create-0001'}, 404
         except Exception as e:
@@ -69,7 +73,8 @@ class GroceryManager:
             response = []
             if groceries:
                 for grocery in groceries:
-                    response.append(self.__getGroceryDetails(grocery))
+                    rating = self.rating_access.getItemRating(grocery.id)
+                    response.append(self.__getGroceryDetails(grocery, rating))
                 return {'msg':'success', 'data':{'groceries':response}}, 200
             else:
                 return {'msg':'no groceries in stock', 'data':{}}, 200
@@ -89,36 +94,82 @@ class GroceryManager:
             response = []
             if groceries:
                 for grocery in groceries:
-                    response.append(self.__getGroceryDetails(grocery))
+                    rating = self.rating_access.getItemRating(grocery.id)
+                    response.append(self.__getGroceryDetails(grocery,rating))
                 return {'msg':'success', 'data':{'groceries':response}},200
             else:
                 return {'msg':'no grocery found', 'data':{}}, 200
         except Exception as e:
             print (e)
             return {'msg':'request failed', 'error':'ise-0001'}, 500
+    
+
+    def getGroceriesInList(self,ids):
+        groceries = self.grocery_access.getGroceriesInList(ids)
+        result =[]
+        if groceries:
+            for grocery in groceries:
+                rating = self.rating_access.getItemRating(grocery.id)
+                result.append(self.__getGroceryDetails(grocery, rating))
+        return result
 
 
     def getGrocery(self, request):
-
         try:
             getParam = self.getRequestType(request)
             groceryId = getParam('grocery_id')
 
             grocery = self.grocery_access.searchForGrocery(int(groceryId))
             if grocery:
-                return {'msg':'success', 'data':{'grocery':self.__getGroceryDetails(grocery)}}, 200
+                rating = self.rating_access.getItemRating(grocery.id)
+                return {'msg':'success', 'data':{'grocery':self.__getGroceryDetails(grocery,rating)}}, 200
             else:
                 return {'msg':'no grocery found', 'data':{}}, 200
         except Exception as e:
             print(e)
             return {'msg':'request failed', 'error':'ise-0001'}, 500
+        
 
-    def __getGroceryDetails(self, grocery):
+    def getFeaturedItems(self):
+        try:
+            ratings = self.rating_access.getTopItems()
+            
+            ids = [rating.item_id for rating in ratings]
 
-        return {'id': str(grocery.id), 'name': grocery.name, 'description': grocery.description, \
-                        'quantity': str(grocery.quantity), 'units': grocery.units, \
-                        'cost_per_unit': str(grocery.cost_per_unit), 'grams_per_unit':str(grocery.grams_per_unit),\
-                'category':grocery.category, 'photo':grocery.photo, 'sku':grocery.sku}
+            items = self.grocery_access.getGroceriesInList(ids)
+
+            if items:
+                result = []
+                for item in items:
+                    rating = self.rating_access.getItemRating(item.id)
+                    result.append(self.__getGroceryDetails(item,rating))
+                return {'msg':'success','data':{'groceries':result}}
+            return False
+        except Exception as e:
+            print(e)
+            return {'msg':'request failed', 'error':'ise-0001'}, 500
+
+    def __getGroceryDetails(self, grocery,rating):
+
+        result = {
+            'id': str(grocery.id),
+            'name': grocery.name, 
+            'description': grocery.description,            
+            'quantity': str(grocery.quantity), 
+            'units': grocery.units,
+            'cost_per_unit': str(grocery.cost_per_unit), 
+            'grams_per_unit':str(grocery.grams_per_unit),
+            'category':grocery.category, 
+            'photo':grocery.photo, 
+            'sku':grocery.sku
+        }
+        if rating:
+            result['rating'] = rating.total_rating/(rating.num_customer*5)*5
+            result['num_customers_rated'] = rating.num_customer
+        else:
+            result['rating'] = None
+            result['num_customers_rated'] = 0
+        return result
 
 
     def getRequestType(self, request):

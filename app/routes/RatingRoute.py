@@ -19,6 +19,7 @@ def rate_grocery():
     else:
         return redirect(url_for('index'))
 
+
 @manage_rating.route('/data_frame', methods=['POST','GET'])
 @jwt_required()
 def data_frame():

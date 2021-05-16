@@ -1,9 +1,10 @@
 from ... import db
-from ..Models import Rating, Grocery, Customer
+from ..Models import Rating, Grocery, Customer, ItemTotalRating
 from sqlalchemy import create_engine
 import pymysql
 import  pandas as pd
 import os
+import random
 
 class RatingAccess:
 
@@ -46,3 +47,12 @@ class RatingAccess:
     def getAllRatings(self):
         ratings = Rating.query.all()
         return ratings
+    
+    def getTopItems(self, ):
+        top_items = ItemTotalRating.query.order_by(ItemTotalRating.coefficient.desc()).limit(50).all()
+        num_to_select = 20                           # set the number to select here.
+        return random.sample(top_items, num_to_select)
+
+    def getItemRating(self,item_id):
+        rating_summary = ItemTotalRating.query.filter_by(item_id=item_id).first()
+        return rating_summary

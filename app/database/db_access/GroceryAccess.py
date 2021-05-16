@@ -84,7 +84,10 @@ class GroceryAccess:
         return False
         # except:
         #     return False
-
+    
+    def getGroceriesInList(self,ids):
+        groceries = Grocery.query.filter(Grocery.id.in_(ids)).all()
+        return groceries
 
     def removeGroceryItem(self, groceryId):
 

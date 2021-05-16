@@ -122,7 +122,10 @@ CREATE TABLE  rating  (
   FOREIGN KEY( item_id ) REFERENCES  grocery ( id ) ON DELETE CASCADE
 );
 
-
+create view item_total_rating as
+    select item_id, sum(rating) as total_rating, count(*) as num_customer, (sum(rating)*((count(*)*1.0)/10000))  as coefficient
+    from rating group by item_id
+;
 
 INSERT INTO  employee  (first_name ,  last_name ,  email ,  password ,  street, town , parish,   role ,  salary ) VALUES
 ('Chayna', 'Gordon', 'chay@gmail.com', '0000', 'home', 'home', 'St. James','admin', '607.00'),

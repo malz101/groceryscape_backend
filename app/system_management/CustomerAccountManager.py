@@ -114,7 +114,7 @@ class AccountManager:
         if self.customer_access.getCustomerById(custId):
             groceries = self.MLManager.getRecommendGroceries(custId)
             if groceries:
-                return str(groceries)
+                return groceries
             return False
         raise NameError
 

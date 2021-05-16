@@ -4,10 +4,12 @@ from flask import Blueprint,redirect, url_for, session, request, render_template
 from app import app, mail
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from ..system_management.CustomerAccountManager import AccountManager
+from ..system_management.GroceryManager import GroceryManager
 from ..system_management.CartManager import CartManager
 from ..system_management.OrderManager import OrderManager
+from ..system_management.RatingManager import RatingManager
 from ..database.db_access import customer_access,grocery_access, rating_access,\
-                                    order_access, cart_access,payment_access,delivery_access
+                                    order_access, cart_access,payment_access,delivery_access, grocery_access
 from ..system_management.MLManager import MLManager
 
 
@@ -23,6 +25,11 @@ cart_manager = CartManager(cart_access, grocery_access)
 """creates order manager"""
 order_manager = OrderManager(order_access, payment_access, delivery_access)
 
+"""object used to manipulate all grocery operations"""
+grocery_manager = GroceryManager(grocery_access, rating_access)
+
+"""object used to manipulate all rating operations"""
+rating_manager = RatingManager(rating_access)
 
 """handles customers' account requests"""
 @manage_customer_account.route('/signup', methods=['POST'])
@@ -46,7 +53,7 @@ def confirm_email(token):
     try:
         response = customer_manager.confirmEmail(token,app.config['SECRET_KEY'])
         if response == True:
-            response = {'msg':'success, email confirmed', 'data':{}}, 200
+            response = redirect('https://groceryscape.web.app/')
     except Exception as e:
         print(e)
         response = {'msg':'', 'error':'ise-0001'}, 500
@@ -142,7 +149,8 @@ def get_recommended_groceries():
     user = get_jwt_identity()
     if user and (not 'role' in user):
         try:
-            groceries = customer_manager.getRecommendedGroceries(user['cust_id'])
+            grocery_ids = customer_manager.getRecommendedGroceries(user['cust_id'])
+            groceries = grocery_manager.getGroceriesInList(grocery_ids)
             response = {'msg': '', 'data':{'groceries':groceries}}, 200
         except NameError:
             response = {'msg': 'customer not found', 'data': {}}, 200
@@ -151,6 +159,17 @@ def get_recommended_groceries():
             response = {'msg': '', 'error': 'ise-0001'}, 500
         finally:
             return response
+    else:
+        return redirect(url_for('index'))
+
+
+@manage_customer_account.route('/get_item_rating', methods=['POST','GET'])
+@jwt_required()
+def get_item_rating():
+    user = get_jwt_identity()
+    if user and (not 'role' in user):
+        response = rating_manager.getCustomerRating(user, request)
+        return response
     else:
         return redirect(url_for('index'))
 

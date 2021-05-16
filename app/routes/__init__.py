@@ -17,7 +17,7 @@ from .OrderRoute import manage_order
 from app.system_management.MLManager import MLManager
 
 from app.database.db_access import customer_access,rating_access,grocery_access,order_access,\
-                                    delivery_access
+                                    delivery_access, cart_access
 
 
 from ..system_management.CustomerAccountManager import AccountManager

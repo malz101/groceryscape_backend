@@ -4,6 +4,10 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 from datetime import datetime
+from sqlalchemy import Column, Integer, String, Table, Numeric, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 class Customer(db.Model):
     __tablename__ = 'customer'
@@ -59,13 +63,9 @@ class Order(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id'))# represents a one to many-to-many relationship between employee and orders
 
-<<<<<<< HEAD
     customer = db.relationship('Customer', back_populates='orders')
 
     # represents the many-to-many relationship between  orders and groceries
-=======
-    # represents the many-to-many relationship between orders and groceries
->>>>>>> merge_recommender-dev
     groceries = db.relationship("OrderGroceries", back_populates="orders", cascade="all,delete")
 
     # represents a one-to-one relationship between cash payment and order
@@ -136,6 +136,15 @@ class Rating(db.Model):
     grocery_ratings = db.relationship("Grocery", back_populates="customer_ratings")
     customer_ratings = db.relationship("Customer", back_populates="grocery_ratings")
 
+
+class ItemTotalRating(db.Model):
+    __tablename__ = 'item_total_rating'
+    item_id = db.Column(db.Integer, primary_key=True)
+    total_rating = db.Column(db.Integer)
+    num_customer = db.Column(db.Integer)
+    coefficient = db.Column(db.Numeric(15,10))
+
+
 class CashPayment(db.Model):
     __tablename__ = 'cash_payment'
     order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), primary_key=True)
@@ -186,11 +195,6 @@ class MaxDeliveriesPerSlot(db.Model):
     __tablename__ = 'max_deliveries_per_slot'
     max_deliveries_per_time_slot = db.Column(db.Integer,primary_key=True, nullable=False)
 
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> merge_recommender-dev
 class Taxes(db.Model):
     __tablename__ = 'taxes'
     tax = db.Column(db.String(50), nullable=False, primary_key=True)

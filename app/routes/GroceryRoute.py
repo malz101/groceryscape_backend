@@ -2,13 +2,13 @@ from flask import Blueprint
 from flask import redirect, url_for, session, request, render_template
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from ..system_management.GroceryManager import GroceryManager
-from ..database.db_access import grocery_access
+from ..database.db_access import grocery_access, rating_access
 
 """This blueprint will handle all requests related to the management of groceries"""
 manage_groceries = Blueprint("manage_groceries", __name__)
 
 """object used to manipulate all grocery operations"""
-grocery_manager = GroceryManager(grocery_access)
+grocery_manager = GroceryManager(grocery_access, rating_access)
 
 @manage_groceries.route('/create_grocery')
 @jwt_required()
@@ -56,7 +56,13 @@ def get_groceries():
     response = grocery_manager.getGroceries(request)
     return response
 
+
 @manage_groceries.route('/get_grocery', methods=['POST','GET'])
 def get_grocery():
     response = grocery_manager.getGrocery(request)
+    return response
+
+@manage_groceries.route('/get_featured_items', methods=['POST','GET'])
+def getFeaturedItems():
+    response = grocery_manager.getFeaturedItems()
     return response
