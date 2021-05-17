@@ -396,20 +396,23 @@ class OrderManager:
     def __sendEmail(self,order_id,mail):
         '''send invoice to customer for completed payment'''
         order = self.orderAccess.getOrderById(order_id)
+        print("passed get by order id")
         order_details = self.__getOrderDetails(order,'')
+        print('passed get order details')
         customer = order.customer
 
         msg = Message(recipients=[str(customer.email)])
+        print('passed Message')
         msg.subject = "Payment Confirmation for Order "+str(order_id)
         if order:
             html = render_template('invoice.html', order=order_details, customer=customer)
+            print('passed render template')
             pdf = render_pdf(HTML(string=html))
+            print('passed render pdf')
             msg.attach(filename="invoice_"+order['order_id']+".pdf",disposition="attachment",content_type="application/pdf",data=pdf)
-            msg.body=""" Dear {},
-                        your order has been completed and payment received for {}, please find the attachment for the same""".format(customer.first_name,order['order_id'])
+            msg.body="""Dear {},\nyour order has been completed and payment received for {}, please find the attachment for the same""".format(customer.first_name,order['order_id'])
         else:
-            msg.body=""" Dear {},
-                        Your order has been completed and payment received for {}. An error has occured while generating pdf, please contact customer service""".format(customer.first_name,order['order_id'])
+            msg.body=""" Dear {},\nYour order has been completed and payment received for {}. An error has occured while generating pdf, please contact customer service""".format(customer.first_name,order['order_id'])
         mail.send(msg)
 
 
