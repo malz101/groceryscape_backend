@@ -385,7 +385,7 @@ class OrderManager:
             print("passed payment access")
             self.orderAccess.updateStatus(order_id,'served')
             print("passed updatestatus")
-            # self.__sendEmail(order_id,mail)
+            self.__sendEmail(order_id,mail)
             print("passed send email")
             return {'msg':'success','data':{}}, 200
         else:
