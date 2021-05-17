@@ -55,7 +55,7 @@ class OrderManager:
         if cancelled_order:
             emp = cancelled_order.employee
             if emp:
-                emp = (emp.first_name + " " + emp.last_name)
+                empName = (emp.first_name + " " + emp.last_name)
             else:
                 empName = 'False'
             return self.__getOrderDetails(cancelled_order, empName)
