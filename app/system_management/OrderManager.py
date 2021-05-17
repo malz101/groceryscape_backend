@@ -380,10 +380,11 @@ class OrderManager:
             # Handle post-payment fulfillment
             order_id = int(intent.metadata['order_id'])
             self.paymentAccess.recordCardPayment(order_id, intent.amount/100, intent.id)
+            print("passed payment access")
             self.orderAccess.updateStatus(order_id,'served')
-            
+            print("passed updatestatus")
             self.__sendEmail(order_id,mail)
-
+            print("passed send email")
             return {'msg':'success','data':{}}, 200
         else:
             # Invalid status
@@ -393,7 +394,7 @@ class OrderManager:
     def __sendEmail(self,order_id,mail):
         '''send invoice to customer for completed payment'''
         order = self.orderAccess.getOrderById(order_id)
-        order_details = self.__getOrderDetails(order,'')
+        order_details = self.__getOrderDetails(order,)
         customer = order.customer
 
         msg = Message(recipients=[str(customer.email)])
