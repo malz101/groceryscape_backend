@@ -17,29 +17,8 @@ class CartManager:
 
         '''add item to cart for customer'''
         result = self.cartAccess.addToCart(int(itemId), int(cartId), int(quantity))
-        # groceries = []
-        # if cart:
-        #     for grocery in cart:
-        #         # cost_before_tax = grocery.quantity * grocery.cart_items.cost_per_unit
-        #         # GCT = self.groceryAccess.getTax(grocery.item_id, 'GCT') * grocery.quantity
-        #         # SCT = self.groceryAccess.getTax(grocery.item_id, 'SCT') * grocery.quantity
-        #         # total = float(cost_before_tax) + float(GCT) + float(SCT)
-        #         # total_weight = str(grocery.quantity * grocery.cart_items.grams_per_unit) + " grams"
-        #         groceries.append({
-        #             'grocery_id': str(grocery.item_id),
-        #             'photo' : grocery.cart_items.photo,
-        #             'quantity': str(grocery.quantity),
-        #             # 'cost_before_tax': str(cost_before_tax),
-        #             'name': grocery.cart_items.name 
-        #             # 'total_weight': total_weight, 
-        #             # 'GCT': str(GCT), 
-        #             # 'SCT': str(SCT),
-        #             # 'total': str(total)
-        #         })
-        
+
         return result
-            # return {'items':groceries, 'sub_total':self.cartAccess.getTotalOnCart(cartId)}
-        # return False
 
 
     def emptyCart(self, user):
@@ -69,6 +48,7 @@ class CartManager:
                     'grocery_id': str(grocery.item_id),
                     'photo': str(grocery.cart_items.photo),
                     'quantity': str(grocery.quantity),
+                    'inventory': str(grocery.cart_items.quantity),
                     'cost_before_tax': str(cost_before_tax),
                     'name': grocery.cart_items.name,
                     'total_weight': total_weight, 
@@ -79,17 +59,9 @@ class CartManager:
             return {'items':response, 'grand_total':self.cartAccess.getTotalOnCart(cartId)}
         return False
 
-    # def checkoutCart(self, user):
-
-    #     cartId = user['cust_id']
-    #     order = self.cartAccess.checkoutCart(int(cartId))
-    #     if order:
-    #         return {'order':{'order_id':str(order.id), 'order_date':order.orderdate, 'status':str(order.status), \
-    #                 'customer_id':str(order.customer_id), 'customer':(order.customer.first_name + " "+ order.customer.last_name)}}
-    #     return False
 
     def updateCartItem(self, request, user):
-
+        '''Updates items in user cart'''
         getParam = self.getRequestType(request)
         itemId = getParam('item_id')
         quantity = getParam('quantity')
@@ -106,6 +78,7 @@ class CartManager:
                 'grocery_id': str(grocery.item_id),
                 'photo': str(grocery.cart_items.photo),
                 'quantity': str(grocery.quantity),
+                'inventory': str(grocery.cart_items.quantity),
                 'cost_before_tax': str(cost_before_tax),
                 'name': grocery.cart_items.name,
                 'total_weight': total_weight, 
@@ -139,6 +112,7 @@ class CartManager:
                     'grocery_id': str(grocery.item_id),
                     'photo' : grocery.cart_items.photo,
                     'category': grocery.cart_items.category,
+                    'inventory': str(grocery.cart_items.quantity),
                     'quantity': str(grocery.quantity),
                     'cost_before_tax': str(cost_before_tax),
                     'name':grocery.cart_items.name,

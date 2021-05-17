@@ -444,6 +444,7 @@ class OrderManager:
                         'photo': order_item.groceries.photo,
                         'category': order_item.groceries.category,
                         'sku': str(order_item.groceries.sku),
+                        'inventory': str(order_item.groceries.quantity),
                         'quantity': str(order_item.quantity),
                         'cost_before_tax': str(cost_before_tax),
                         'name': order_item.groceries.name,

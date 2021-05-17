@@ -27,6 +27,7 @@ class CustomerAccess:
             customer = self.getCustomerById(customer.id)
             return customer
         except IntegrityError as e:
+            print(e)
             db.session.rollback()
             return False
 
