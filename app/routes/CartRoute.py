@@ -20,6 +20,9 @@ def addToCart():
                 response = {'msg':'success','data':{}}, 201
             else:
                 response = {'msg':'Item not added. Duplicate Item or Grocery Item not in database','error':'create-0001'}, 404
+        except ValueError as e:
+            print(e)
+            response = {'msg':'quantity execeed quantity stock or negative value provided', 'error':'create-0001'}, 200
         except Exception as e:
             print(e)
             response = {'msg':'', 'error':'ise-0001'}, 500
@@ -89,17 +92,23 @@ def get_cart_items():
         return emp_login_restrict_msg
 
 
-@manage_cart.route('/update_cart', methods=['POST','GET'])
+@manage_cart.route('/update_cart', methods=['POST'])
 @jwt_required()
 def update_cart():
     user = get_jwt_identity()
     if not 'role' in user:
         try:
-            cartItem = cart_manager.updateCartItem(request, user)
+            cartItem = cart_manager.updateCart(request, user)
             if cartItem:
                 response = {'msg':'cart updated', 'data':{'cart':cartItem}}, 200
             else:
                 response = {'msg':'cart not updated', 'error':'create-0001'}, 404
+        except ValueError as e:
+            print(e)
+            response = {'msg':'one of the items specified is now out of stock or negative value provided', 'error':'create-0001'}, 200
+        except TypeError as e:
+            print(e)
+            response = {'msg':'incorrect data format', 'error':'create-0001'}, 400
         except Exception as e:
             print(e)
             response = {'msg':'', 'error':'ise-0001'}, 500

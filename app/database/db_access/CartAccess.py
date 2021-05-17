@@ -3,7 +3,7 @@ from ..Models import Cart
 from ..Models import Grocery
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
-
+from sqlalchemy import and_, or_, not_, func
 class CartAccess:
 
     def __init__(self, groceryAccess, orderAccess, customerAccess):
@@ -19,8 +19,8 @@ class CartAccess:
 
             if grocery and customer:
                 
-                if (grocery.quantity > 0) and (quantity <= grocery.quantity):
-                    self.groceryAccess.updateGrocery(grocery.id,'quantity', grocery.quantity - quantity)
+                if (grocery.quantity > 0) and (quantity <= grocery.quantity) and quantity>-1:
+                    # self.groceryAccess.updateGrocery(grocery.id,'quantity', grocery.quantity - quantity)
                     cart = Cart(cart_id=customer.id, quantity=quantity)
                     cart.cart_items = grocery
                     customer.cart_items.append(cart)
@@ -29,7 +29,7 @@ class CartAccess:
                     return True
                     # return self.getAllCartItems(cartId)
                 else:
-                    return False
+                    raise ValueError
             # 3) if grocery or customer is not valid, abort the operation
             else:
                 return False
@@ -67,22 +67,6 @@ class CartAccess:
             # 3) otherwise return error msg
             return False
 
-    # def checkoutCart(self, custId):
-
-    #     # 1) check if customer exits
-    #     customer = self.customerAccess.getCustomerById(custId)
-    #     if customer:
-    #         # 2) get all cart items
-    #         cartItems = self.getAllCartItems(customer.id)
-    #         if cartItems:
-    #             orderId = self.orderAccess.addItemsToOrder(cartItems,cust_id)
-                
-    #             # self.emptyCart(custId)
-    #             return self.orderAccess.getOrderById(orderId)
-    #         return False
-    #     return False
-
-    
     def getCartItem(self, cartId, itemId):
         # 1) check if cart entry is in db
         cart = Cart.query.filter_by(cart_id=cartId, item_id=itemId).first()
@@ -102,23 +86,26 @@ class CartAccess:
         except:
             return False
 
-    def updateCartItem(self, cartId, itemId, quantity):
-        cartItem = self.getCartItem(cartId, itemId)
-        if cartItem:
-            grocery = self.groceryAccess.searchForGrocery(cartItem.item_id)
-            self.groceryAccess.updateGrocery(grocery.id, 'quantity', grocery.quantity + cartItem.quantity)
-            grocery = self.groceryAccess.searchForGrocery(cartItem.item_id)
-            if (grocery.quantity > 0) and (quantity <= grocery.quantity):
-                if quantity < 1:
-                    quantity = 1
-                self.groceryAccess.updateGrocery(grocery.id, 'quantity', grocery.quantity - quantity)
-                cartItem.quantity = quantity
-                db.session.commit()
-                return self.getCartItem(cartId, itemId)
+    def updateCart(self, cartId, new_values):
+        item_ids = [int(key) for key in new_values.keys()]
+        print('item_ids',item_ids)
+        cart_items = Cart.query.filter(and_(Cart.cart_id==cartId,Cart.item_id.in_(item_ids))).all()
+        print('cart items',str(cart_items))
+        updated_cart = []
+        for cartItem in cart_items:
+            quantity = int(new_values[str(cartItem.item_id)])
+            grocery = cartItem.cart_items
+            
+            if (grocery.quantity > 0) and (quantity <= grocery.quantity) and quantity>-1:
+                    cartItem.quantity = quantity
+                    updated_cart.append(cartItem)
             else:
-                return False
-        else:
-            return False
+                # cartItem.quantity = quantity
+                db.session.rollback()
+                raise ValueError
+        db.session.commit()
+        return updated_cart
+            
 
     def getTotalOnCart(self, cartId):
         items = self.getAllCartItems(cartId)

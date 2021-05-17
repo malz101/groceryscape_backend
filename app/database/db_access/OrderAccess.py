@@ -40,9 +40,10 @@ class OrderAccess:
         order = self.createOrder(cust_id)
 
         for item in cart_summary['items']:
-            orderGroceries = OrderGroceries(order_id=order.id, grocery_id=int(item['grocery_id']), quantity=item['quantity'])
-            db.session.add(orderGroceries)
-            db.session.commit()
+            order_grocery = OrderGroceries(order_id=order.id, grocery_id=int(item['grocery_id']), quantity=item['quantity'])
+            db.session.add(order_grocery)
+            order_grocery.groceries.quantity -= item['quantity']
+        db.session.commit()
         return order
     
 
@@ -196,7 +197,11 @@ class OrderAccess:
         order = self.getOrderById(orderId)
         if order:
             if order.customer_id == custId:
-                self.updateStatus(orderId,'CANCELED')
+                order.status = 'canceled'
+                for order_grocery in order.groceries:
+                    order_grocery.groceries.quantity += order_grocery.quantity
+                # self.updateStatus(orderId,'CANCELED')
+                db.session.commit()
                 return order
             else:
                 return  False

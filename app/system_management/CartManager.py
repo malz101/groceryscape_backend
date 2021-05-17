@@ -1,4 +1,3 @@
-
 class CartManager:
 
     def __init__(self, cartAccess, groceryAccess):
@@ -60,71 +59,63 @@ class CartManager:
         return False
 
 
-    def updateCartItem(self, request, user):
+    def updateCart(self, request, user):
         '''Updates items in user cart'''
-        getParam = self.getRequestType(request)
-        itemId = getParam('item_id')
-        quantity = getParam('quantity')
-        cartId = user['cust_id']
 
-        grocery = self.cartAccess.updateCartItem(int(cartId),int(itemId),int(quantity))
-        if grocery:
-            cost_before_tax = grocery.quantity * grocery.cart_items.cost_per_unit
-            GCT = self.groceryAccess.getTax(grocery.item_id, 'GCT') * grocery.quantity
-            SCT = self.groceryAccess.getTax(grocery.item_id, 'SCT') * grocery.quantity
-            total = float(cost_before_tax) + float(GCT) + float(SCT)
-            total_weight = str(grocery.quantity * grocery.cart_items.grams_per_unit) + " grams"
-            return {
-                'grocery_id': str(grocery.item_id),
-                'photo': str(grocery.cart_items.photo),
-                'quantity': str(grocery.quantity),
-                'inventory': str(grocery.cart_items.quantity),
-                'cost_before_tax': str(cost_before_tax),
-                'name': grocery.cart_items.name,
-                'total_weight': total_weight, 
-                'GCT': str(GCT), 
-                'SCT': str(SCT),
-                'total': str(total)
-            }
-        else:
+        cartId = user['cust_id']
+        new_cart_values_json = request.json
+        print(new_cart_values_json)
+
+        if new_cart_values_json:
+            cart_items = self.cartAccess.updateCart(int(cartId),new_cart_values_json)
+            print('passed cm78')
+            if cart_items:
+                return self.__getCartDetails(cart_items)
             return False
+        raise TypeError
 
     def getAllCartItems(self, user):
 
         cartId = user['cust_id']
         cartItems = self.cartAccess.getAllCartItems(cartId)
+        
+        
+        if cartItems:
+            return self.__getCartDetails(cartItems)
+        return False
+    
+    def __getCartDetails(self, cartItems):
+        '''returns details about cart'''
+
         sub_total = 0
         total_gct = 0
         total_sct = 0
         response = []
-        if cartItems:
-            for grocery in cartItems:
-                cost_before_tax = float(grocery.quantity*grocery.cart_items.cost_per_unit)
-                sub_total+=cost_before_tax
-                GCT = float(self.groceryAccess.getTax(grocery.item_id,'GCT')*grocery.quantity)
-                SCT = float(self.groceryAccess.getTax(grocery.item_id,'SCT')*grocery.quantity)
-                total_gct += GCT
-                total_sct += SCT
+        for grocery in cartItems:
+            cost_before_tax = float(grocery.quantity*grocery.cart_items.cost_per_unit)
+            sub_total+=cost_before_tax
+            GCT = float(self.groceryAccess.getTax(grocery.item_id,'GCT')*grocery.quantity)
+            SCT = float(self.groceryAccess.getTax(grocery.item_id,'SCT')*grocery.quantity)
+            total_gct += GCT
+            total_sct += SCT
 
-                total = cost_before_tax + GCT + SCT
-                total_weight = str(grocery.quantity*grocery.cart_items.grams_per_unit)+" grams"
-                response.append ({
-                    'grocery_id': str(grocery.item_id),
-                    'photo' : grocery.cart_items.photo,
-                    'category': grocery.cart_items.category,
-                    'inventory': str(grocery.cart_items.quantity),
-                    'quantity': str(grocery.quantity),
-                    'cost_before_tax': str(cost_before_tax),
-                    'name':grocery.cart_items.name,
-                    'total_weight':total_weight,
-                    'GCT':str(GCT),
-                    'SCT':str(SCT),
-                    'total': str(total)
-                
-                })
-            return {'items':response, 'sub_total':sub_total, 'total_gct':total_gct, 'total_sct':total_sct}
-        return False
-
+            total = cost_before_tax + GCT + SCT
+            total_weight = str(grocery.quantity*grocery.cart_items.grams_per_unit)+" grams"
+            response.append ({
+                'grocery_id': str(grocery.item_id),
+                'photo' : grocery.cart_items.photo,
+                'category': grocery.cart_items.category,
+                'inventory': str(grocery.cart_items.quantity),
+                'quantity': str(grocery.quantity),
+                'cost_before_tax': str(cost_before_tax),
+                'name':grocery.cart_items.name,
+                'total_weight':total_weight,
+                'GCT':str(GCT),
+                'SCT':str(SCT),
+                'total': str(total)
+            
+            })
+        return {'items':response, 'sub_total':sub_total, 'total_gct':total_gct, 'total_sct':total_sct}
 
     def getRequestType(self, request):
         if request.method == 'GET':

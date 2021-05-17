@@ -13,7 +13,11 @@ class GroceryAccess:
         db.session.add(grocery)
         db.session.commit()
         return self.searchForGrocery(grocery.id)
-
+    
+#     def decreaseQuantity(self,id, amount):
+#         dated = Grocery.query.filter_by(id=id).update(dict(email='my_new_email@example.com')))
+# db.session.commit()
+#         '''Decrease the stock count of grocery items 
     def updateGrocery(self, groceryId, attribute, value):
 
         grocery = self.searchForGrocery(groceryId)
@@ -47,6 +51,14 @@ class GroceryAccess:
                 db.session.commit()
                 return self.searchForGrocery(groceryId)
         return False
+    
+
+    def adjustStockCount(self,grocery_id,value):
+        grocery = Grocery.query.filter_by(id=grocery_id).first()
+        grocery.quantity += value
+        db.session.commit()
+        return grocery
+
 
     def searchForGrocery(self, grocery_id):
         grocery = Grocery.query.filter_by(id=grocery_id).first()

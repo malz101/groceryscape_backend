@@ -53,6 +53,7 @@ class OrderManager:
 
         cancelled_order = self.orderAccess.cancelOrder(int(custId), orderId)
         if cancelled_order:
+            # GroceryAccess.adjustStockCount(cancelled_order.)
             emp = cancelled_order.employee
             if emp:
                 empName = (emp.first_name + " " + emp.last_name)
@@ -378,7 +379,7 @@ class OrderManager:
             order_id = int(intent.metadata['order_id'])
             self.paymentAccess.recordCardPayment(order_id, intent.amount/100, intent_id)
             self.orderAccess.updateStatus(order_id,'served')
-
+            
             self.__sendEmail(order_id,mail)
 
             return {'msg':'success','data':{}}, 200
