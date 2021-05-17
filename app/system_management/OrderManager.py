@@ -378,7 +378,7 @@ class OrderManager:
             # The payment didn’t need any additional actions and completed!
             # Handle post-payment fulfillment
             order_id = int(intent.metadata['order_id'])
-            self.paymentAccess.recordCardPayment(order_id, intent.amount/100, intent_id)
+            self.paymentAccess.recordCardPayment(order_id, intent.amount/100, intent.id)
             self.orderAccess.updateStatus(order_id,'served')
             
             self.__sendEmail(order_id,mail)
