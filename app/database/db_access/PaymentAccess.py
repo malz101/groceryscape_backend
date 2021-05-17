@@ -18,7 +18,7 @@ class PaymentAccess:
 
     def recordCardPayment(self, order_id, amount, intent_id):
         '''stores details of card payment to database'''
-        payment = CashPayment(order_id,amount, intent_id)
+        payment = CardPayment(order_id,amount, intent_id)
         db.session.add(payment)
         db.session.commit()
         
