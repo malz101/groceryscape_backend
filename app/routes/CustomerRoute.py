@@ -337,7 +337,7 @@ def pay():
     if user and (not 'role' in user):
         if bool(user['email_confirmed']):
             try:
-                response = customer_manager.processCardPayment(user, request, mail)
+                response = order_manager.processCardPayment(user, request, mail)
         
             except Exception as e:
                 print(e)
