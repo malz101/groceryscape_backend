@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 from flask import render_template, url_for
 from flask_weasyprint import HTML, render_pdf
+import stripe
 
-
-
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 class OrderManager:
     
     def __init__(self, orderAccess, paymentAccess, deliveryAccess):
