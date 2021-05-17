@@ -31,6 +31,14 @@ class CustomerAccess:
             db.session.rollback()
             return False
 
+    def confirmEmail(self,email):
+        customer = Customer.query.filter_by(email=email).first()
+        if customer:
+            customer.email_confirmed = True
+            db.session.commit()
+            return True
+        return False
+        
     def getCustomerById(self, id):
         customer = Customer.query.filter_by(id=id).first()
         try:
