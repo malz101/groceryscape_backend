@@ -42,8 +42,10 @@ class OrderAccess:
         for item in cart_summary['items']:
             order_grocery = OrderGroceries(order_id=order.id, grocery_id=int(item['grocery_id']), quantity=int(item['quantity']))
             db.session.add(order_grocery)
-            print(item)
+            # print(item)
             print('was here')
+            print('Order id',order_grocery.order_id)
+            print('Grocery id', order_grocery.grocery_id)
             order_grocery.groceries.quantity -= int(item['quantity'])
         db.session.commit()
         return order
