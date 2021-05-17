@@ -379,6 +379,7 @@ class OrderManager:
             # The payment didn’t need any additional actions and completed!
             # Handle post-payment fulfillment
             order_id = int(intent.metadata['order_id'])
+            print('Payment intent', intent.amount)
             self.paymentAccess.recordCardPayment(order_id, intent.amount/100, intent.id)
             print("passed payment access")
             self.orderAccess.updateStatus(order_id,'served')
