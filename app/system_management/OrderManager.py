@@ -336,6 +336,7 @@ class OrderManager:
                     return {'msg':'order does not exist','error':'notfound-0001'}, 200
             elif payment_intent_id:
                 intent = stripe.PaymentIntent.confirm(payment_intent_id)
+
         except stripe.error.CardError as e:
             # Since it's a decline, stripe.error.CardError will be caught
             print(e.message)
@@ -395,7 +396,7 @@ class OrderManager:
     def __sendEmail(self,order_id,mail):
         '''send invoice to customer for completed payment'''
         order = self.orderAccess.getOrderById(order_id)
-        order_details = self.__getOrderDetails(order,)
+        order_details = self.__getOrderDetails(order,'')
         customer = order.customer
 
         msg = Message(recipients=[str(customer.email)])
