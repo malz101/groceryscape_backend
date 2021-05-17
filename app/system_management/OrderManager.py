@@ -3,6 +3,7 @@ from flask import render_template, url_for
 from flask_weasyprint import HTML, render_pdf
 import os
 import stripe
+from flask_mail import Message
 
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 class OrderManager:
