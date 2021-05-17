@@ -408,12 +408,12 @@ class OrderManager:
             html = render_template('base.html', order=order_details, customer=customer)
             print('passed render template')
             pdf = render_pdf(HTML(string=html))
-            print(pdf)
+            # print(pdf)
             print('passed render pdf')
             msg.attach(filename="invoice_"+str(order.id)+".pdf",disposition="attachment",content_type="application/pdf",data=pdf)
-            msg.body="""Dear {},\nyour order has been completed and payment received for {}, please find the attachment for the same""".format(customer.first_name,order['order_id'])
+            msg.body="""Dear {},\nyour order has been completed and payment received for {}, please find the attachment for the same""".format(customer.first_name,order.id)
         else:
-            msg.body="""Dear {},\nYour order has been completed and payment received for {}. An error has occured while generating pdf, please contact customer service""".format(customer.first_name,order['order_id'])
+            msg.body="""Dear {},\nYour order has been completed and payment received for {}. An error has occured while generating pdf, please contact customer service""".format(customer.first_name,order.id)
         mail.send(msg)
 
 
