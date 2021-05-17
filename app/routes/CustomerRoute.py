@@ -53,7 +53,7 @@ def confirm_email(token):
     try:
         response = customer_manager.confirmEmail(token,app.config['SECRET_KEY'])
         if response == True:
-            response = redirect('https://groceryscape.web.app/')
+            response = redirect('https://groceryscape.web.app/login')
     except Exception as e:
         print(e)
         response = {'msg':'', 'error':'ise-0001'}, 500
