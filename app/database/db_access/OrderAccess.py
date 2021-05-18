@@ -174,7 +174,7 @@ class OrderAccess:
                     Order.status.ilike(status),\
                     or_(Order.deliverytown.ilike(delivery_town), Order.deliverytown == town_provided),\
                     or_(Order.deliveryparish.ilike(delivery_parish), Order.deliveryparish == parish_provided),\
-                    or_(Order.payment_type.ilike(delivery_parish), Order.payment_type == payment_provided),\
+                    or_(Order.payment_type.ilike(delivery_parish), Order.payment_type == payment_type_provided),\
                     and_(Order.orderdate >= min_order_timestamp, Order.orderdate <= max_order_timestamp),\
                     or_(
                         and_(Order.deliverydate >= min_delivery_date, Order.deliverydate <= max_delivery_date),\
