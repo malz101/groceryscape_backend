@@ -207,7 +207,6 @@ class Taxes_on_goods(db.Model):
 
 
 #####################################################
-#
 #                       Views
 ####################################################
 
@@ -221,12 +220,18 @@ class ItemTotalRating(db.Model):
 
 class TotalQuantityPurchased(db.Model):
     __tablename__ = 'total_quantity_purchased'
-    grocery_id = db.Column(db.Integer, primary_key=True)
-    total_id = db.Column(db.Integer)
+    grocery_id = db.Column(db.Integer,db.ForeignKey('grocery.id'),primary_key=True)
+    total = db.Column(db.Integer)
 
 
 class CountPairs(db.Model):
     __tablename__ = 'count_pairs'
-    item1 = db.Column(db.Integer, primary_key=True)
-    item2 = db.Column(db.Integer)
+    item1 = db.Column(db.Integer, db.ForeignKey('grocery.id'),primary_key=True)
+    item2 = db.Column(db.Integer,db.ForeignKey('grocery.id'), primary_key=True)
     count = db.Column(db.Integer)
+
+class TotalAmountPurchased(db.Model):
+    __tablename__ = 'total_amount_purchased'
+    cust_id = db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True)
+    grocery_id = db.Column(db.Integer,db.ForeignKey('grocery.id'), primary_key=True)
+    total = db.Column(db.Integer)

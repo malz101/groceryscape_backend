@@ -1,6 +1,6 @@
 from ... import db
 from datetime import datetime, timedelta, timezone, date
-from ..Models import Order, OrderGroceries, Customer
+from ..Models import Order, OrderGroceries, Customer, TotalQuantityPurchased, CountPairs
 # from .OrderGroceriesAccess import OrderGroceriesAccess
 from .CustomerAccess import CustomerAccess
 from .GroceryAccess import GroceryAccess
@@ -233,84 +233,117 @@ class OrderAccess:
     # def getDeliveryCost(self,orderId):
     #     return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getDeliveryCost(orderId)
 
-    def getGroceryPairFreq(self, groceryId):
+    def getGroceryPairFreq(self,groceryId):
         """ Returns a dictionary of the number of times a pair of groceries
-            occurs in the orders made """
-
-        def countPairs(gid, groceryOrder, orderGrocery, result):
-            try:
-                for o in groceryOrder[gid]:
-                    for g in orderGrocery[o]:
-                        if (gid != g):
-                            try:
-                                temp = result[gid][g]
-                            except KeyError:
-                                result[gid] = {}
-                                result[gid][g] = 0
-                            result[gid][g] += 1
-            except KeyError:
-                # The grocery likely has never been purchased before
-                result[gid] = {}
-                pass
-
-        orders = Order.query.filter(Order.status != 'cancelled').all()
-        orderLst = [o.id for o in orders]
-        groceries = OrderGroceries.query.filter(OrderGroceries.order_id.in_(orderLst)).all()
-
-        # Maping groceries to orders and vice versa
-        groceryOrder = {}
-        orderGrocery = {}
-        for g in groceries:
-            try:
-                groceryOrder[g.grocery_id].add(g.order_id)
-            except KeyError:
-                groceryOrder[g.grocery_id] = set()
-                groceryOrder[g.grocery_id].add(g.order_id)
-
-            try:
-                orderGrocery[g.order_id].add(g.grocery_id)
-            except KeyError:
-                orderGrocery[g.order_id] = set()
-                orderGrocery[g.order_id].add(g.grocery_id)
-
-        result = {}
-        if (type(groceryId) == str):
-            countPairs(groceryId, groceryOrder, orderGrocery, result)
+             occurs in the orders made """
+        gids = set()
+        if (type(groceryId) == int):
+            gids.add(int())
         elif (type(groceryId) == list):
-            for gid in groceryId:
-                countPairs(gid, groceryOrder, orderGrocery, result)
+            gids.update(groceryId)
+
+        pairs = CountPairs.query.all()
+        result = {}
+        for p in pairs:
+            if (p.item1 in gids):
+                try:
+                    result[p.item1][p.item2] = p.count
+                except KeyError:
+                    result[p.item1] = {p.item2: p.count}
+
         return result
+
+    # def getGroceryPairFreq(self, groceryId):
+    #     """ Returns a dictionary of the number of times a pair of groceries
+    #         occurs in the orders made """
+
+    #     def countPairs(gid, groceryOrder, orderGrocery, result):
+    #         try:
+    #             for o in groceryOrder[gid]:
+    #                 for g in orderGrocery[o]:
+    #                     if (gid != g):
+    #                         try:
+    #                             temp = result[gid][g]
+    #                         except KeyError:
+    #                             result[gid] = {}
+    #                             result[gid][g] = 0
+    #                         result[gid][g] += 1
+    #         except KeyError:
+    #             # The grocery likely has never been purchased before
+    #             result[gid] = {}
+    #             pass
+
+    #     orders = Order.query.filter(Order.status != 'cancelled').all()
+    #     orderLst = [o.id for o in orders]
+    #     groceries = OrderGroceries.query.filter(OrderGroceries.order_id.in_(orderLst)).all()
+
+    #     # Maping groceries to orders and vice versa
+    #     groceryOrder = {}
+    #     orderGrocery = {}
+    #     for g in groceries:
+    #         try:
+    #             groceryOrder[g.grocery_id].add(g.order_id)
+    #         except KeyError:
+    #             groceryOrder[g.grocery_id] = set()
+    #             groceryOrder[g.grocery_id].add(g.order_id)
+
+    #         try:
+    #             orderGrocery[g.order_id].add(g.grocery_id)
+    #         except KeyError:
+    #             orderGrocery[g.order_id] = set()
+    #             orderGrocery[g.order_id].add(g.grocery_id)
+
+    #     result = {}
+    #     if (type(groceryId) == str):
+    #         countPairs(groceryId, groceryOrder, orderGrocery, result)
+    #     elif (type(groceryId) == list):
+    #         for gid in groceryId:
+    #             countPairs(gid, groceryOrder, orderGrocery, result)
+    #     return result
 
 
     def getTotalQuantityPurchased(groceryId=None):
         """ Returns a list of the total quantity of the grocery item that has
-            ever been purchased """
-
-        orders = Order.query.filter(Order.status.in_(('pending', 'cancelled', 'checked out')))
-        print(orders)
-        orders = orders.all()
-        print(orders)
-        orderLst = [o.id for o in orders]
-        quantities = OrderGroceries.query.filter(OrderGroceries.order_id.in_(orderLst)).all()
-
-        result = {}
-        gids = set()
-        if (groceryId == None):
-            for q in quantities:
-                try:
-                    result[q.grocery_id] += q.quantity
-                except KeyError:
-                    result[q.grocery_id] = q.quantity
+             ever been purchased """
+        
+        items_total = TotalQuantityPurchased.query.all()
+        if items_total:
+            result = {}
+            for item_total in items_total:
+                result[item_total.grocery_id] = item_total.total
             return result
-        elif (type(groceryId) == str):
-            gids.add(groceryId)
-        elif(type(groceryId) == list):
-            gids.update(groceryId)
+        return {}
 
-        for q in quantities:
-            if (q.grocery_id in gids):
-                try:
-                    result[q.grocery_id] += q.quantity
-                except KeyError:
-                    result[q.grocery_id] = q.quantity
-        return result
+
+    # def getTotalQuantityPurchased(groceryId=None):
+    #     """ Returns a list of the total quantity of the grocery item that has
+    #         ever been purchased """
+
+    #     orders = Order.query.filter(Order.status.in_(('pending', 'cancelled', 'checked out')))
+    #     print(orders)
+    #     orders = orders.all()
+    #     print(orders)
+    #     orderLst = [o.id for o in orders]
+    #     quantities = OrderGroceries.query.filter(OrderGroceries.order_id.in_(orderLst)).all()
+
+    #     result = {}
+    #     gids = set()
+    #     if (groceryId == None):
+    #         for q in quantities:
+    #             try:
+    #                 result[q.grocery_id] += q.quantity
+    #             except KeyError:
+    #                 result[q.grocery_id] = q.quantity
+    #         return result
+    #     elif (type(groceryId) == str):
+    #         gids.add(groceryId)
+    #     elif(type(groceryId) == list):
+    #         gids.update(groceryId)
+
+    #     for q in quantities:
+    #         if (q.grocery_id in gids):
+    #             try:
+    #                 result[q.grocery_id] += q.quantity
+    #             except KeyError:
+    #                 result[q.grocery_id] = q.quantity
+    #     return result

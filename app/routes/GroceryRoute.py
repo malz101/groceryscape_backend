@@ -75,6 +75,6 @@ def get_popular_items():
     return response
 
 @manage_groceries.route('/get_freq_bought_with/<item_id>', methods=['GET'])
-def get_freq_bought_with():
-    response = grocery_manager.getgetFreqBoughtWith()
+def get_freq_bought_with(item_id):
+    response = grocery_manager.getFreqBoughtWith(item_id)
     return response

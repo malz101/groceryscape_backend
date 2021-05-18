@@ -155,7 +155,7 @@ class GroceryManager:
             ids = self.ml_access.getPopularItems()
             print('gh',ids)
             if ids:
-                return {'msg':'success','data':{'groceries':getGroceriesInList(ids)}}, 200
+                return {'msg':'success','data':{'groceries':self.getGroceriesInList(ids)}}, 200
             return {'msg':'no groceries found','data':{}}, 200
         except Exception as e:
             print(e)
@@ -163,9 +163,10 @@ class GroceryManager:
 
     def getFreqBoughtWith(self,id):
         try:
-            ids = self.ml_access.getFreqBoughtWith(id)
+            ids = self.ml_access.getFreqBoughtWith(int(id))
+            print('here',ids)
             if ids:
-                return {'msg':'success','data':{'groceries':getGroceriesInList(ids)}}, 200
+                return {'msg':'success','data':{'groceries':self.getGroceriesInList(ids)}}, 200
             return {'msg':'no groceries found','data':{}}, 200
         except Exception as e:
             print(e)

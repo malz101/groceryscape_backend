@@ -154,7 +154,7 @@ class MLManager:
         # test = self.customerAccess.getOrders()[0]
         # print('Test: ', test)
         # print('Test: ', test.groceries)
-        pairDict = self.orderAccess.getGroceryPairFreq(gid)
+        pairDict = self.orderAccess.getGroceryPairFreq(int(gid))
         pairFreq = []
         for g1, pairCnt in pairDict.items():
             for g2, freq in pairCnt.items():
