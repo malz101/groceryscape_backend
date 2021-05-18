@@ -186,7 +186,7 @@ class OrderAccess:
                         Order.deliverydate == delivery_range_provided\
                     )
                 )
-            ).order_by(Order.orderdate.desc()).all()
+            ).order_by(Order.orderdate.desc()).order_by(Order.customer.last_name).order_by(Order.customer.first_name).all()
         # try:
         if orders:
             return orders
