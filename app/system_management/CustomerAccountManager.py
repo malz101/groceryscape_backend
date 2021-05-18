@@ -115,7 +115,7 @@ class AccountManager:
             print('get recommend in account manager',groceries)
             if groceries:
                 return groceries
-            return False
+            return []
         raise NameError
 
 
