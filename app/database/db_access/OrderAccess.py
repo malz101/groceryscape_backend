@@ -238,11 +238,12 @@ class OrderAccess:
              occurs in the orders made """
         gids = set()
         if (type(groceryId) == int):
-            gids.add(int())
+            gids.add(int(groceryId))
         elif (type(groceryId) == list):
             gids.update(groceryId)
 
         pairs = CountPairs.query.all()
+        # print('Count Pairs', pairs)
         result = {}
         for p in pairs:
             if (p.item1 in gids):

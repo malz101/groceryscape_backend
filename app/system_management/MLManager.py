@@ -7,6 +7,7 @@ class MLManager:
         self.orderAccess = orderAccess
         self.ratingAccess = ratingAccess
         self.cartAccess = cartAccess
+        self.recommend_count = 30
 
     def getRecommendGroceries(self, customerId):
         """ Uses a Pearson product-moment correlation coefficient matrix
@@ -66,7 +67,6 @@ class MLManager:
             return closest
 
         custId = int(customerId)
-        recommendCnt = 30
 
         # Find similar customers based on ratings provided
         ratings = self.ratingAccess.getAllRatings()
@@ -119,7 +119,7 @@ class MLManager:
                         recommendedItems.add(gid)
 
         # Pad the rest with items frequently bought together.
-        if (len(recommendedItems) < recommendCnt):
+        if (len(recommendedItems) < self.recommend_count):
             groceries = set(cart)
             if (custId in ratingsDict):
                 # Finds all items that the customer has rated positively
@@ -132,15 +132,15 @@ class MLManager:
 
             pairFreq = self.getFreqBoughtWith(list(groceries))
             i = 0
-            while ((len(recommendedItems) < recommendCnt) and (i < len(pairFreq))):
+            while ((len(recommendedItems) < self.recommend_count) and (i < len(pairFreq))):
                 recommendedItems.add(pairFreq[i][0])
                 i += 1
 
         # Pad the list with the most purchased items
-        if (len(recommendedItems) < recommendCnt):
+        if (len(recommendedItems) < self.recommend_count):
             popularItems = self.getPopularItems()
             i = 0
-            while ((len(recommendedItems) < recommendCnt) and (i < len(popularItems))):
+            while ((len(recommendedItems) < self.recommend_count) and (i < len(popularItems))):
                 recommendedItems.add(popularItems[i][0])
                 i += 1
 
@@ -154,14 +154,15 @@ class MLManager:
         # test = self.customerAccess.getOrders()[0]
         # print('Test: ', test)
         # print('Test: ', test.groceries)
-        pairDict = self.orderAccess.getGroceryPairFreq(int(gid))
+        pairDict = self.orderAccess.getGroceryPairFreq(gid)
+        print('get pair', pairDict)
         pairFreq = []
         for g1, pairCnt in pairDict.items():
             for g2, freq in pairCnt.items():
                 pairFreq.append((g1, g2, freq))
         pairFreq.sort(key=lambda p: p[2], reverse=True)
 
-        return pairFreq
+        return list(map(lambda q: q[1], pairFreq[:self.recommend_count]))
 
 
     def getPopularItems(self):
@@ -171,4 +172,4 @@ class MLManager:
         print('Quantities ml manager', quantities)
         quantityLst = list(quantities.items())
         quantityLst.sort(key=lambda q: q[1], reverse=True)
-        return list(map(lambda q: q[0], quantityLst[:30]))
+        return list(map(lambda q: q[0], quantityLst[:self.recommend_count]))
