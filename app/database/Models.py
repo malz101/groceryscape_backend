@@ -138,14 +138,6 @@ class Rating(db.Model):
     customer_ratings = db.relationship("Customer", back_populates="grocery_ratings")
 
 
-class ItemTotalRating(db.Model):
-    __tablename__ = 'item_total_rating'
-    item_id = db.Column(db.Integer, primary_key=True)
-    total_rating = db.Column(db.Integer)
-    num_customer = db.Column(db.Integer)
-    coefficient = db.Column(db.Numeric(15,10))
-
-
 class CashPayment(db.Model):
     __tablename__ = 'cash_payment'
     order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), primary_key=True)
@@ -211,3 +203,30 @@ class Taxes_on_goods(db.Model):
 
     grocery = db.relationship("Grocery", back_populates="taxes")
     tax_type = db.relationship("Taxes", back_populates="groceries")
+
+
+
+#####################################################
+#
+#                       Views
+####################################################
+
+class ItemTotalRating(db.Model):
+    __tablename__ = 'item_total_rating'
+    item_id = db.Column(db.Integer, primary_key=True)
+    total_rating = db.Column(db.Integer)
+    num_customer = db.Column(db.Integer)
+    coefficient = db.Column(db.Numeric(15,10))
+
+
+class TotalQuantityPurchased(db.Model):
+    __tablename__ = 'total_quantity_purchased'
+    grocery_id = db.Column(db.Integer, primary_key=True)
+    total_id = db.Column(db.Integer)
+
+
+class CountPairs(db.Model):
+    __tablename__ = 'count_pairs'
+    item1 = db.Column(db.Integer, primary_key=True)
+    item2 = db.Column(db.Integer)
+    count = db.Column(db.Integer)

@@ -168,6 +168,7 @@ class MLManager:
         """ Returns the top 30 most purchased items in the system """
 
         quantities = self.orderAccess.getTotalQuantityPurchased()
+        print('Quantities ml manager', quantities)
         quantityLst = list(quantities.items())
         quantityLst.sort(key=lambda q: q[1], reverse=True)
         return list(map(lambda q: q[0], quantityLst[:30]))
