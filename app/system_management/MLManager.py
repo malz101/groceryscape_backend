@@ -135,7 +135,7 @@ class MLManager:
             list of pairs with the frequency of occurence """
 
         pairDict = self.orderAccess.getGroceryPairFreq(gid)
-        print('pairDict: ', pairDict)
+        #print('Frequent Pairs: ', pairDict)
         pairFreq = []
         for g1, pairCnt in pairDict.items():
             for g2, freq in pairCnt.items():
@@ -148,7 +148,7 @@ class MLManager:
         """ Returns the top 30 most purchased items in the system """
 
         quantities = self.orderAccess.getTotalQuantityPurchased()
-        print('Quantities ml manager', quantities)
+        #print('Popular Items: ', quantities)
         quantityLst = list(quantities.items())
         quantityLst.sort(key=lambda q: q[1], reverse=True)
         return list(map(lambda q: q[0], quantityLst[:self.recommend_count]))
