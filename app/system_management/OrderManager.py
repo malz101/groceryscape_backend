@@ -327,7 +327,7 @@ class OrderManager:
         if order:
             payment = self.paymentAccess.recordCashPayment(order['total'], empId, amountTendered)
             if payment:
-                self.orderAccess.updateStatus(orderId,'served')
+                self.orderAccess.updateStatus(orderId,'delivered')
                 self.__sendEmail(order_id, mail)
 
                 return {'order_id': payment.order_id,'collected_by':payment.recorded_by, 'payment_date': str(payment.payment_date),\
@@ -420,7 +420,7 @@ class OrderManager:
             print('Payment intent', intent.amount)
             self.paymentAccess.recordCardPayment(order_id, intent.amount/100, intent.id)
             print("passed payment access")
-            self.orderAccess.updateStatus(order_id,'served')
+            self.orderAccess.updateStatus(order_id,'delivered')
             print("passed updatestatus")
             # self.__sendEmail(order_id,mail)
             print("passed send email")

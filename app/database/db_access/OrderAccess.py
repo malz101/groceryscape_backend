@@ -1,6 +1,6 @@
 from ... import db
 from datetime import datetime, timedelta, timezone, date
-from ..Models import Order, OrderGroceries
+from ..Models import Order, OrderGroceries, Customer
 # from .OrderGroceriesAccess import OrderGroceriesAccess
 from .CustomerAccess import CustomerAccess
 from .GroceryAccess import GroceryAccess
@@ -174,7 +174,7 @@ class OrderAccess:
                 )
             ).order_by(Order.orderdate.desc()).all()
         else:
-            orders = Order.query.filter(
+            orders = Order.query.join(Customer, Order.customer_id==Customer.id).filter(
                 and_(
                     Order.status.ilike(status),\
                     or_(Order.deliverytown.ilike(delivery_town), Order.deliverytown == town_provided),\
@@ -186,7 +186,7 @@ class OrderAccess:
                         Order.deliverydate == delivery_range_provided\
                     )
                 )
-            ).order_by(Order.orderdate.desc()).order_by(Order.customer.last_name).order_by(Order.customer.first_name).all()
+            ).order_by(Order.orderdate.desc()).order_by(Customer.last_name).order_by(Customer.first_name).all()
         # try:
         if orders:
             return orders
