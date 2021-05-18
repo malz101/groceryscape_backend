@@ -198,7 +198,7 @@ class OrderAccess:
         order = self.getOrderById(orderId)
         if order:
             if order.customer_id == custId:
-                order.status = 'canceled'
+                order.status = 'cancelled'
                 for order_grocery in order.groceries:
                     order_grocery.groceries.quantity += order_grocery.quantity
                 # self.updateStatus(orderId,'CANCELED')
