@@ -4,16 +4,15 @@ from ..Models import Customer
 from ..Models import Order
 from ..Models import OrderGroceries
 from sqlalchemy.exc import IntegrityError
-#from sqlalchemy import in_
+from werkzeug.security import check_password_hash
 
 class CustomerAccess:
 
     """retrieve a customer record from the database given their email and password"""
     def login(self, email, password):
         customer = Customer.query.filter_by(email=email).first()
-        if customer:
-            if customer.email == email and customer.password == password:
-                return customer
+        if customer is not None and check_password_hash(customer.password, password):
+            return customer
         else:
             return False
 
@@ -21,7 +20,7 @@ class CustomerAccess:
     def registerCustomer(self, firstName, lastName, telephone, email, gender, password,street, town, parish):
         customer = {}
         try:
-            customer = Customer(first_name=firstName, last_name=lastName, telephone=telephone, email=email, gender=gender, password=password, street=street,town=town, parish=parish)
+            customer = Customer(self, firstName, lastName, telephone, email, gender,password,street, town, parish)
             db.session.add(customer)
             db.session.commit()
             customer = self.getCustomerById(customer.id)
@@ -54,39 +53,39 @@ class CustomerAccess:
         customer = self.getCustomerById(customerId)
         if customer:
             if attribute == 'first_name':
-                customer.first_name = value
+                customer.first_name = encrypter.encrypt(value)
                 db.session.commit()
                 return self.getCustomerById(customerId)
             if attribute == 'last_name':
-                customer.last_name = value
+                customer.last_name = encrypter.encrypt(value)
                 db.session.commit()
                 return self.getCustomerById(customerId)
             if attribute == 'telephone':
-                customer.telephone = value
+                customer.telephone = encrypter.encrypt(value)
                 db.session.commit()
                 return self.getCustomerById(customerId)
             if attribute == 'email':
-                customer.email = value
+                customer.email = encrypter.encrypt(value)
                 db.session.commit()
                 return self.getCustomerById(customerId)
             if attribute == 'gender':
-                customer.gender = value
+                customer.gender = encrypter.encrypt(value)
                 db.session.commit()
                 return self.getCustomerById(customerId)
             if attribute == 'password':
-                customer.password = value
+                customer.password = generate_password_hash(value, method='pbkdf2:sha256:310000', salt_length=256)
                 db.session.commit()
                 return self.getCustomerById(customerId)
             if attribute == 'town':
-                customer.town = value
+                customer.town = encrypter.encrypt(value)
                 db.session.commit()
                 return self.getCustomerById(customerId)
             if attribute == 'parish':
-                customer.parish = value
+                customer.parish = encrypter.encrypt(value)
                 db.session.commit()
                 return self.getCustomerById(customerId)
-
         return False
+
 
     def getCart(self, cartId):
 

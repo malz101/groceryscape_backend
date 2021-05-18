@@ -1,12 +1,13 @@
 from ... import db
 from ..Models import Employee
-
+from sqlalchemy.exc import IntegrityError
+from werkzeug.security import check_password_hash
+from app import encrypter
 class EmployeeAccess:
 
-    def registerEmployee(self, firstName, lastName, email, password, street, town, parish, role, salary):
+    def def registerEmployee(self, first_name, last_name, telephone, email, password, street, town, parish, role, salary):
 
-        new_employee = Employee(first_name=firstName, last_name=lastName, email=email, password=password, street=street,\
-                                town=town, parish=parish,role=role, salary=salary)
+        new_employee = Employee(self, first_name, last_name, telephone, email, password, street, town, parish, role, salary)
         db.session.add(new_employee)
         db.session.commit()
 
@@ -15,7 +16,7 @@ class EmployeeAccess:
     def login(self, email, password):
         employee = Employee.query.filter_by(email=email).first()
         try:
-            if employee.email == email and employee.password == password:
+            if if employee is not None and check_password_hash(employee.password, password):
                 return employee
             else:
                 return False
@@ -56,23 +57,23 @@ class EmployeeAccess:
         employee = self.getEmployee(empId)
         if employee:
             if attribute == 'first_name':
-                employee.first_name = value
+                employee.first_name = encrypter.encrypt(value)
                 db.session.commit()
                 return self.getEmployee(empId)
             if attribute == 'last_name':
-                employee.last_name = value
+                employee.last_name = encrypter.encrypt(value)
                 db.session.commit()
                 return self.getEmployee(empId)
             if attribute == 'email':
-                employee.email = value
+                employee.email = encrypter.encrypt(value)
                 db.session.commit()
                 return self.getEmployee(empId)
             if attribute == 'password':
-                employee.password = value
+                employee.password = generate_password_hash(value, method='pbkdf2:sha256:310000', salt_length=256)
                 db.session.commit()
                 return self.getEmployee(empId)
             if attribute == 'role':
-                employee.role = value
+                employee.role = encrypter.encrypt(value)
                 db.session.commit()
                 return self.getEmployee(empId)
             if attribute == 'salary':
@@ -80,15 +81,15 @@ class EmployeeAccess:
                 db.session.commit()
                 return self.getEmployee(empId)
             if attribute == 'street':
-                employee.street = value
+                employee.street = encrypter.encrypt(value)
                 db.session.commit()
                 return self.getEmployee(empId)
             if attribute == 'town':
-                employee.town = value
+                employee.town = encrypter.encrypt(value)
                 db.session.commit()
                 return self.getEmployee(empId)
             if attribute == 'parish':
-                employee.parish = value
+                employee.parish = encrypter.encrypt(value)
                 db.session.commit()
                 return self.getEmployee(empId)
         return False

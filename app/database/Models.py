@@ -1,5 +1,4 @@
-from .. import db
-
+from .. import db, encrypter
 from flask import Flask 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
@@ -8,6 +7,7 @@ from sqlalchemy import Column, Integer, String, Table, Numeric, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
+from werkzeug.security import generate_password_hash
 
 class Customer(db.Model):
     __tablename__ = 'customer'
@@ -17,7 +17,7 @@ class Customer(db.Model):
     telephone = db.Column(db.String(11), nullable=False)
     email = db.Column(db.String(45), nullable=False, unique=True)
     gender = db.Column(db.String(45), nullable=False)
-    password = db.Column(db.String(45), nullable=False)
+    password = db.Column(db.String(256), nullable=False)
     street = db.Column(db.String(45))
     town = db.Column(db.String(45), nullable=False)
     parish = db.Column(db.String(45), nullable=False)
@@ -31,12 +31,24 @@ class Customer(db.Model):
     #ratings associated many to many
     grocery_ratings = db.relationship("Rating", back_populates="customer_ratings", cascade="all,delete")
 
+    def __init__(self, first_name, last_name, telephone, email, gender, password,street, town, parish):
+        self.first_name = encrypter.encrypt(first_name)
+        self.last_name = encrypter.encrypt(last_name)
+        self.telephone = encrypter.encrypt(telephone)
+        self.gender = encrypter.encrypt(gender)
+        self.email = encrypter.encrypt(email)
+        self.password = generate_password_hash(password, method='pbkdf2:sha256:310000', salt_length=256)
+        self.street = encrypter.encrypt(street)
+        self.town = encrypter.encrypt(town)
+        self.parish = encrypter.encrypt(parish)
+        
 
 class Employee(db.Model):
     __tablename__ = 'employee'
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(45), nullable=False)
     last_name = db.Column(db.String(45), nullable=False)
+    telephone = db.Column(db.String(11), nullable=False)
     email = db.Column(db.String(45), nullable=False, unique=True)
     password = db.Column(db.String(45), nullable=False)
     street = db.Column(db.String(200), nullable=False)
@@ -50,11 +62,25 @@ class Employee(db.Model):
     checkouts = db.relationship('Order', back_populates='employee', cascade="all,delete")
 
 
+    def __init__(self, first_name, last_name, telephone, email, password, street, town, parish, role, salary):
+        self.first_name = encrypter.encrypt(first_name)
+        self.last_name = encrypter.encrypt(last_name)
+        self.telephone = encrypter.encrypt(telephone)
+        self.email = encrypter.encrypt(email)
+        self.password = generate_password_hash(password, method='pbkdf2:sha256:310000', salt_length=256)
+        self.town = encrypter.encrypt(town)
+        self.town = encrypter.encrypt(town)
+        self.parish = encrypter.encrypt(parish)
+        self.role = encrypter.encrypt(role)
+        self.salary = salary
+
+
 class Order(db.Model):
     __tablename__ = 'orders'
     id = db.Column(db.Integer, primary_key=True, index=True)
     orderdate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    status = db.Column(db.String(40),nullable=False, default='pending')
+    status = db.Column(db.Enum(encrypter.encrypt('canceled'),encrypter.encrypt('served'),\
+                        encrypter.encrypt('checked out'),encrypter.encrypt('pending'), name='OrderStatus'))
     deliverytimeslot = db.Column(db.Integer, db.ForeignKey('delivery_time_slot.id'), nullable=True)
     deliverydate = db.Column(db.Date)
     deliverystreet = db.Column(db.String(100))
@@ -62,7 +88,7 @@ class Order(db.Model):
     deliveryparish = db.Column(db.String(100),db.ForeignKey('delivery_parish.parish'), default='None')
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id'))# represents a one to many-to-many relationship between employee and orders
-
+    details = db.Column(db.UnicodeText(), nullable=False)
     customer = db.relationship('Customer', back_populates='orders')
 
     # represents the many-to-many relationship between  orders and groceries
@@ -80,6 +106,9 @@ class Order(db.Model):
     employee = db.relationship('Employee', back_populates='checkouts')
 
     timeslot = db.relationship('DeliveryTimeSlot', back_populates='orders')
+    def __init__(self, customer_id):
+        self.customer_id = customer_id
+    
 
 
 class Grocery(db.Model):
@@ -176,6 +205,9 @@ class DeliveryParish(db.Model):
 
     orders_in_parish = db.relationship("Order", back_populates="parish")
 
+    def __init__(self,parish,delivery_rate):
+        self.parish = encrypter.encrypt(parish)
+        self.delivery_rate = delivery_rate
 
 class DeliveryTimeSlot(db.Model):
     __tablename__ = 'delivery_time_slot'

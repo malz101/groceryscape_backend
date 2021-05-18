@@ -1,7 +1,7 @@
 import os
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
-
+from app import encrypter
 
 class AccountManager:
 
@@ -122,14 +122,14 @@ class AccountManager:
 
         return {
             "cust_id": str(customer.id),
-            'first_name': customer.first_name,
-            'last_name': customer.last_name,
-            'telephone': customer.telephone, 
-            'email': customer.email, 
-            'gender': customer.gender,
-            'street': customer.street,
-            'town': customer.town,
-            'parish': customer.parish
+            'first_name': encrypter.decrypt(customer.first_name),
+            'last_name': encrypter.decrypt(customer.last_name),
+            'telephone': encrypter.decrypt(customer.telephone), 
+            'email': encrypter.decrypt(customer.email), 
+            'gender': encrypter.decrypt(customer.gender),
+            'street': encrypter.decrypt(customer.street),
+            'town': encrypter.decrypt(customer.town_,
+            'parish': encrypter.decrypt(customer.parish)
         }
 
                 

@@ -1,11 +1,9 @@
 import os
 from app import app
-#from flask import Flask, render_template, send_from_directory
-from flask import send_from_directory
-#from flask_sqlalchemy import SQLAlchemy
-#from flask import session
-#from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask import Flask, render_template, send_from_directory
+from flask_sqlalchemy import SQLAlchemy
+from flask import session
+from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
 
 """import blueprints (routes) for different sections of the system"""
 from .CustomerRoute import manage_customer_account
@@ -33,17 +31,14 @@ app.register_blueprint(manage_rating, url_prefix="/manage_rating")
 app.register_blueprint(manage_order, url_prefix="/manage_order")
 
 
-"""serves the index page for customers"""
-@app.route('/')
-@app.route('/index')
-@jwt_required()
-def index():
-    user = get_jwt_identity()
-    # if customer is logged in return home page with customer data. Otherwise, return just the home page
-    if user and (not 'role' in user):
-        return user
-    else:
-        return {'msg': 'you are not logged in as a customer', 'error': 'auth-0001'}, 401
+
+"""serves the index page for users"""
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def index(path):
+    # return app.send_static_file('index.html')
+    return render_template('index.html')
+
 
 
 @app.route('/get_parish/<parish>', methods=['GET'])
@@ -109,3 +104,14 @@ def get_parishes():
 def get_image(filename):
     root_dir = os.getcwd()
     return send_from_directory(os.path.join(root_dir,app.config['UPLOAD_FOLDER']), filename)
+
+
+# We are using the `refresh=True` options in jwt_required to only allow
+# refresh tokens to access this route.
+# @app.route("/refresh", methods=["POST"])
+# @jwt_required(refresh=True)
+# def refresh():
+#     identity = get_jwt_identity()
+#     access_token = create_access_token(identity=identity)
+#     return {"access_token": access_token}, 200
+

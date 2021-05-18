@@ -9,16 +9,19 @@ class EmployeeAccountManager:
             getParam = self.getRequestType(request)
             firstName = getParam('first_name')
             lastName = getParam('last_name')
+            telephone = getParam('telephone')
             email = getParam('email')
             password = getParam('password')
-            address = getParam('address')
+            street = getParam('street')
+            town = getParam('town')
+            parish = getParam('parish')
             role = getParam('role')
             salary = getParam('salary')
 
             """sanitize and validate details"""
 
             """create account with sanitized data"""
-            employee = self.employee_access.registerEmployee(firstName, lastName, email, password, address, role, float(salary))
+            employee = self.employee_access.registerEmployee(firstName, lastName, telephone, email, password, street, town, parish, role, float(salary))
             if employee:
                 return self.__getEmployeeDetails(employee)
             else:
@@ -112,10 +115,16 @@ class EmployeeAccountManager:
 
     def __getEmployeeDetails(self, employee):
 
-        return {"emp_id": employee.id, 'first_name': employee.first_name, 'last_name': employee.last_name, \
-                         'email': employee.email,'password': employee.password, 'role': employee.role,\
-                        'salary': float(employee.salary), 'street':employee.street, 'town':employee.town,
-                        'parish':employee.parish}
+        return {
+            "emp_id": employee.id,
+            'first_name': employee.first_name, 
+            'last_name': employee.last_name,
+            'email': employee.email,
+            'password': employee.password, 
+            'role': employee.role,\
+            'salary': float(employee.salary), 
+            'address':employee.address
+        }
             
     def getRequestType(self, request):
         if request.method == 'GET':

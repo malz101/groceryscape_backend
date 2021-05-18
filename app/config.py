@@ -1,11 +1,13 @@
 import os
-import datetime
+from datetime import timedelta
 
 class Config(object):
     """Base Config Object"""
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'Som3$ec5etK*y'
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'Som3$ec5etK*y'
-    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=1)
+    ENCRYPTION_PASSWORD = os.environ.get('ENCRYPTION_PASSWORD') or 'Som3$ec5etK*y'
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=1)
+    # JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'mysql+mysqlconnector://root:''@localhost/food_delivery'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     UPLOAD_FOLDER = './uploads'

@@ -146,8 +146,9 @@ class OrderManager:
         order = self.orderAccess.setDeliveryLocation(int(cust_id),int(order_id),street, parish,town)
         if order:
             emp = order.employee
+
             if emp:
-                empName = (emp.first_name + " " + emp.last_name)
+                empName = (encrypter.decrypt(emp.first_name) + " " + encrypter.decrypt(emp.last_name))
             else:
                 empName = 'False'
             return self.__getOrderDetails(order,empName)
@@ -164,10 +165,10 @@ class OrderManager:
         if orderId:
             order = self.orderAccess.checkoutOrder(orderId, empId)
             if order:
-                empFname = order.employee
-                empLname = order.employee
-                if empFname:
-                    empName = (empFname.first_name + " " + empLname.last_name)
+                emp = order.employee
+
+                if emp:
+                    empName = (encrypter.decrypt(emp.first_name) + " " + encrypter.decrypt(emp.last_name))
                 else:
                     empName = 'False'
                 return self.__getOrderDetails(order,empName)
@@ -182,10 +183,10 @@ class OrderManager:
         
         order = self.orderAccess.getOrderByIdCustomer(orderId, cust_id)
         if order:
-            empFname = order.employee
-            empLname = order.employee
-            if empFname:
-                empName = ( empFname.first_name+ " " +empLname.last_name )
+            emp = order.employee
+
+            if emp:
+                empName = ( encrypter.decrypt(emp.first_name)+ " " +encrypter.decrypt(emp.last_name))
             else:
                 empName = 'False'
 
@@ -263,21 +264,22 @@ class OrderManager:
 
         delivery_start_date = getParam('delivery_start_date')
         delivery_end_date = getParam('delivery_end_date')
+        delivery_street = getParam('delivery_street')
         delivery_town = getParam('delivery_town')
         delivery_parish = getParam('delivery_parish')
 
 
         orders = self.orderAccess.getOrders(cust_id, status, order_start_date, order_end_date,\
-                                                    delivery_start_date, delivery_end_date, delivery_town,\
-                                                    delivery_parish)
+                                                    delivery_start_date, delivery_end_date,delivery_street,\
+                                                    delivery_town,delivery_parish)
 
         response = []
         if orders:
             for order in orders:
-                empFname = order.employee
-                empLname = order.employee
-                if empFname:
-                    empName = (empFname.first_name + " " + empLname.last_name)
+                emp = order.employee
+
+                if emp:
+                    empName = (encrypter.decrypt(emp.first_name) + " " + encrypter.decrypt(emp.last_name))
                 else:
                     empName = 'False'
                 response.append(self.__getOrderDetails(order,empName))
@@ -298,10 +300,14 @@ class OrderManager:
             if payment:
                 self.orderAccess.updateStatus(orderId,'served')
                 self.__sendEmail(order_id, mail)
-
-                return {'order_id': payment.order_id,'collected_by':payment.recorded_by, 'payment_date': str(payment.payment_date),\
-                        'amount_tendered':str(payment.amount_tendered),'change':str(payment.change), 'customer':(payment.order.customer.first_name + " "+ \
-                        payment.order.customer.last_name) }
+                return {
+                    'order_id': payment.order_id,
+                    'collected_by':payment.recorded_by, 
+                    'payment_date': str(payment.payment_date),
+                    'amount_tendered':str(payment.amount_tendered),
+                    'change':str(payment.change), 
+                    'customer':(encrypter.decrypt(payment.order.customer.first_name) + " "+ encrypter.decrypt(payment.order.customer.last_name)) 
+                }
             return False
         return False
 
@@ -423,10 +429,10 @@ class OrderManager:
         response = []
         if orders:
             for order in orders:
-                empFname = order.employee
-                empLname = order.employee
-                if empFname:
-                    empName = (empFname.first_name + " " + empLname.last_name)
+                emp = order.employee
+
+                if emp:
+                    empName = (encrypter.decrypt(emp.first_name) + " " + encrypter.decrypt(emp.last_name))
                 else:
                     empName = 'False'
                 response.append(self.__getOrderDetails(order,empName))
@@ -467,13 +473,13 @@ class OrderManager:
         result = {
             'order_id': str(order.id), 
             'order_date': str(order.orderdate),
-            'status': str(order.status), 'customer_id': str(order.customer_id),
-            'customer': (order.customer.first_name + " " + order.customer.last_name),
+            'status': str(encrypter.decrypt(order.status)), 'customer_id': str(order.customer_id),
+            'customer': (encrypter.decrypt(order.customer.first_name) + " " + encrypter.decrypt(order.customer.last_name)),
             'formatted_delivery_date': order.deliverydate.strftime("%B %d %Y") if order.deliverydate else str(None),
             'delivery_timeslot': str(order.timeslot.start_time)+"-"+str(order.timeslot.end_time) if order.timeslot else str(None),
             'delivery_date': str(order.deliverydate),
-            'delivery_town': str(order.deliverytown), 
-            'delivery_parish': str(order.deliveryparish), 
+            'delivery_town': str(encrypter.decrypt(order.deliverytown)), 
+            'delivery_parish': str(encrypter.decrypt(order.deliveryparish)), 
             'checkout_by': empName
         }
         getOrderItems()

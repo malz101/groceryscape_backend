@@ -8,8 +8,8 @@ class GroceryAccess:
 
     def create_grocery(self, name, description, quantity, units, price, grams_per_unit,category, photo):
 
-        grocery = Grocery(name=name, description=description, quantity=quantity, units=units, cost_per_unit=price,\
-                          grams_per_unit=grams_per_unit,category=category, photo=photo)
+        grocery = Grocery(name, description, quantity, units, price,\
+                          grams_per_unit, category, photo)
         db.session.add(grocery)
         db.session.commit()
         return self.searchForGrocery(grocery.id)
