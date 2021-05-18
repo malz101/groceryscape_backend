@@ -122,6 +122,29 @@ def record_payment():
             response = {'msg':'', 'error':'ise-0001'}, 500
         finally:
             return response
+    else:
+        return {'msg':'you are not logged in as an employee', 'error':'auth-0001'}, 401
+
+
+
+@manage_order.route('/update_order_status', methods=['POST'])
+def update_order_status():
+    user = get_jwt_identity()
+    if user and ('role' in user):
+        try:
+            order = order_manager.updateStatus(request)
+            if order:
+                response = {'msg':'success', 'data':{'order':order}}, 200
+            else:
+                response = {'msg':'update unsuccessful', 'error':'create-0001'}, 404
+        except ValueError as e:
+            print(e)
+            response = {'msg': 'order status or order id field is empty', 'error':'create-0001'}, 200        
+        except Exception as e:
+            print(e)
+            response = {'msg':'', 'error':'ise-0001'}, 500
+        finally:
+            return response
 
     else:
         return {'msg':'you are not logged in as an employee', 'error':'auth-0001'}, 401

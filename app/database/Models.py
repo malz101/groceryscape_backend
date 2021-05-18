@@ -54,6 +54,7 @@ class Order(db.Model):
     __tablename__ = 'orders'
     id = db.Column(db.Integer, primary_key=True, index=True)
     orderdate = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    payment_type = db.Column(db.String(40),nullable=True)
     status = db.Column(db.String(40),nullable=False, default='pending')
     deliverytimeslot = db.Column(db.Integer, db.ForeignKey('delivery_time_slot.id'), nullable=True)
     deliverydate = db.Column(db.Date)

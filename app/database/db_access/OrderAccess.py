@@ -11,8 +11,8 @@ import time
 
 class OrderAccess:
 
-    def createOrder(self, custId):
-        order = Order(customer_id=custId)
+    def createOrder(self, custId, type_):
+        order = Order(customer_id=custId, payment_type=type_)
         db.session.add(order)
         db.session.commit()
         # return self.getOrderById(order.id)
@@ -57,7 +57,7 @@ class OrderAccess:
         if order:
             order.status = status
             db.session.commit()
-            return True
+            return order
         else:
             return  False
 
@@ -107,7 +107,7 @@ class OrderAccess:
 
     def getOrders(self,custId=None, status=None, min_order_timestamp=None,\
                             max_order_timestamp=None, min_delivery_date=None,\
-                            max_delivery_date=None, delivery_town=None,delivery_parish=None):
+                            max_delivery_date=None, delivery_town=None,delivery_parish=None, payment_type=None):
         
         if status is None:
             status = ''
@@ -146,6 +146,13 @@ class OrderAccess:
             delivery_parish = ''
         delivery_parish = '%{}%'.format(delivery_parish)
 
+        payment_type_provided = ''
+        if payment_type is None:
+            parish_provided = None
+            payment_type = ''
+        payment_type = '%{}%'.format(payment_type)
+        
+
         if custId is not None:
             orders = Order.query.filter(
                 and_(
@@ -153,6 +160,7 @@ class OrderAccess:
                     Order.status.ilike(status),\
                     or_(Order.deliverytown.ilike(delivery_town), Order.deliverytown == town_provided),\
                     or_(Order.deliveryparish.ilike(delivery_parish), Order.deliveryparish == parish_provided),\
+                    or_(Order.payment_type.ilike(delivery_parish), Order.payment_type == payment_type_provided),\
                     and_(Order.orderdate >= min_order_timestamp, Order.orderdate <= max_order_timestamp),\
                     or_(
                         and_(Order.deliverydate >= min_delivery_date, Order.deliverydate <= max_delivery_date),\
@@ -166,6 +174,7 @@ class OrderAccess:
                     Order.status.ilike(status),\
                     or_(Order.deliverytown.ilike(delivery_town), Order.deliverytown == town_provided),\
                     or_(Order.deliveryparish.ilike(delivery_parish), Order.deliveryparish == parish_provided),\
+                    or_(Order.payment_type.ilike(delivery_parish), Order.payment_type == payment_provided),\
                     and_(Order.orderdate >= min_order_timestamp, Order.orderdate <= max_order_timestamp),\
                     or_(
                         and_(Order.deliverydate >= min_delivery_date, Order.deliverydate <= max_delivery_date),\

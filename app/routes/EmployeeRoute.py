@@ -31,6 +31,7 @@ def login():
     else:
         return {'error': 'employee not found'}
     
+
 """register an employee"""
 @manage_employee_account.route('/register', methods=['GET','POST'])
 @jwt_required()
@@ -47,6 +48,7 @@ def register():
             return {'msg':'only admin can perform this task'}
     else:
         return {'msg': 'you are not logged in as an employee'}
+
 
 """get employees"""
 @manage_employee_account.route('/get_employees', methods=['GET','POST'])
@@ -90,6 +92,7 @@ def update_employee():
     else:
         return {'msg': 'you are not logged in as an employee'}
 
+
 """delete an employee"""
 @manage_employee_account.route('/delete_employee', methods=['GET','POST'])
 @jwt_required()
@@ -111,3 +114,4 @@ def logout():
     if 'admin_id' in session:
         session.pop('admin_id', None)
     return redirect(url_for('manage_employee_account.index'))
+

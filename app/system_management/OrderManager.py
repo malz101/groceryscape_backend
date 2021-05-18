@@ -12,7 +12,24 @@ class OrderManager:
         self.orderAccess = orderAccess
         self.paymentAccess = paymentAccess
         self.deliveryAccess = deliveryAccess
+    
+    def updateStatus(self, request):
+        '''Updates the status of an order. Status of an order can be Pending, Checkout, Delivered, Canceled'''
+        getParam = self.getRequestType(request)
+        order_id = getParam('order_id')
+        status = getParam('status')
 
+        if order_id and status:
+            order = self.orderAccess.updateStatus(int(order_id), status)
+            if order:
+                emp = order.employee
+                if emp:
+                    empName = (emp.first_name + " " + emp.last_name)
+                else:
+                    empName = ''
+                return self.__getOrderDetails(order,empName)
+            return False
+        raise ValueError
 
     def getOrderPreview(self,request,order_preview):
         '''returns a preview or the order details from item in cart'''
@@ -265,11 +282,12 @@ class OrderManager:
         delivery_end_date = getParam('delivery_end_date')
         delivery_town = getParam('delivery_town')
         delivery_parish = getParam('delivery_parish')
+        payment_type = getParam('payment_type')
 
 
         orders = self.orderAccess.getOrders(cust_id, status, order_start_date, order_end_date,\
                                                     delivery_start_date, delivery_end_date, delivery_town,\
-                                                    delivery_parish)
+                                                    delivery_parish, payment_type)
 
         response = []
         if orders:
@@ -423,10 +441,9 @@ class OrderManager:
         response = []
         if orders:
             for order in orders:
-                empFname = order.employee
-                empLname = order.employee
-                if empFname:
-                    empName = (empFname.first_name + " " + empLname.last_name)
+                emp = order.employee
+                if emp:
+                    empName = (emp.first_name + " " + emp.last_name)
                 else:
                     empName = 'False'
                 response.append(self.__getOrderDetails(order,empName))
@@ -465,7 +482,8 @@ class OrderManager:
                     })
 
         result = {
-            'order_id': str(order.id), 
+            'order_id': str(order.id),
+            'payment_type': str(payment_type), 
             'order_date': str(order.orderdate),
             'status': str(order.status), 'customer_id': str(order.customer_id),
             'customer': (order.customer.first_name + " " + order.customer.last_name),
