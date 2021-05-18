@@ -82,7 +82,7 @@ def get_orders():
             print(e)
             response = {'msg':'', 'error':'ise-0001'}, 500
         finally:
-            return reponse
+            return response
     else:
         return {'msg':'you are not logged in as an employee', 'error':'auth-0001'}, 401
 
