@@ -195,7 +195,7 @@ class CardPayment(db.Model):
     def __init__(self, order_id, amount, intent_id):
         self.order_id = order_id
         self.amount_tendered = amount
-        self.intent_id = intent_id
+        self.intent_id = encrypter.encrypt(intent_id)
 
 
 class DeliveryParish(db.Model):
