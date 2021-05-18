@@ -40,9 +40,9 @@ class OrderAccess:
             return False
 
 
-    def addItemsToOrder(self, cart_summary,cust_id):
+    def addItemsToOrder(self, cart_summary,cust_id,type_):
         '''add items to created order'''
-        order = self.createOrder(cust_id)
+        order = self.createOrder(cust_id,type_)
 
         for item in cart_summary['items']:
             order_grocery = OrderGroceries(order_id=order.id, grocery_id=int(item['grocery_id']), quantity=int(item['quantity']))

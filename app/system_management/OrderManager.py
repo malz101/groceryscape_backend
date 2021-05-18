@@ -50,10 +50,12 @@ class OrderManager:
     def create_order(self,user,cart_items):
         '''create an order from the cart items'''
         cust_id = user['cust_id']
+        getParam = getRequestType()
+        payment_type = getParam('payment_type')
 
         # 2) get all cart items
         if cart_items:
-            order = self.orderAccess.addItemsToOrder(cart_items,int(cust_id))
+            order = self.orderAccess.addItemsToOrder(cart_items,int(cust_id),payment_type)
             if order:
                 return {
                     'order_id':str(order.id),
