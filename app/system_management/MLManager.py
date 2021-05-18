@@ -152,8 +152,8 @@ class MLManager:
             list of pairs with the frequency of occurence """
 
         test = self.customerAccess.getOrders()[0]
-        print('Test: ', test)
-        print('Test: ', test.groceries)
+        # print('Test: ', test)
+        # print('Test: ', test.groceries)
         pairDict = self.orderAccess.getGroceryPairFreq(gid)
         pairFreq = []
         for g1, pairCnt in pairDict.items():
