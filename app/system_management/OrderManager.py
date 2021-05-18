@@ -228,12 +228,13 @@ class OrderManager:
         delivery_end_date = getParam('delivery_end_date')
         delivery_town = getParam('delivery_town')
         delivery_parish = getParam('delivery_parish')
+        payment_type = getParam('payment_type')
 
         cust_id = user['cust_id']
 
         orders = self.orderAccess.getOrders(cust_id, status, order_start_date, order_end_date,\
                                                     delivery_start_date, delivery_end_date, delivery_town,\
-                                                    delivery_parish)
+                                                    delivery_parish, payment_type)
         response = []
         if orders:
             print('Orders',orders)
@@ -483,7 +484,7 @@ class OrderManager:
 
         result = {
             'order_id': str(order.id),
-            'payment_type': str(payment_type), 
+            'payment_type': str(order.payment_type), 
             'order_date': str(order.orderdate),
             'status': str(order.status), 'customer_id': str(order.customer_id),
             'customer': (order.customer.first_name + " " + order.customer.last_name),
