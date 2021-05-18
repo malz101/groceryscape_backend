@@ -18,16 +18,16 @@ class Encrypt():
         return AES.new(key=cipherKey, mode=AES.MODE_CBC, IV=iv)
     
     def __bloatString(self,string, salt):
-        return hashlib.pbkdf2_hmac('sha512', string.encode('utf8') , salt , 100000)
+        return hashlib.pbkdf2_hmac('sha512', string.encode('utf8') , salt , 1000).hex()
     
     def __keyFromPassword(self,password):
         bloated_string = self.__bloatString(password, base64.b64encode(os.urandom(16)))
         return {"cipherKey": bloated_string[:24]," hashingSalt": bloated_string[24:]}
     
     def encrypt(self,data):
-        return self.__cipher(self.key["cipherKey"]).encrypt(self.__pad(data))
+        return self.__cipher(self.key["cipherKey"]).encrypt(self.__pad(data)).hex()
 
     def decrypt(self,hex_data):
-        data = hex_data
+        data = bytes.fromhex(hex_data)
         return self.__unpad(self.__cipher(self.key["cipherKey"]).decrypt(data).decode())
     
