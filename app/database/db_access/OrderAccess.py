@@ -234,7 +234,7 @@ class OrderAccess:
     #     return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getDeliveryCost(orderId)
 
     def getGroceryPairFreq(self, groceryId):
-        """ Returns a list of the number of times a pair of groceries
+        """ Returns a dictionary of the number of times a pair of groceries
             occurs in the orders made """
 
         def countPairs(gid, groceryOrder, orderGrocery, result):
@@ -253,8 +253,11 @@ class OrderAccess:
                 result[gid] = {}
                 pass
 
+        orders = Order.query.filter(Order.status != 'cancelled').all()
+        orderLst = [o.id for o in orders]
+        groceries = OrderGroceries.query.filter(OrderGroceries.order_id.in_(orderLst)).all()
+
         # Maping groceries to orders and vice versa
-        groceries = OrderGroceries.query.all()
         groceryOrder = {}
         orderGrocery = {}
         for g in groceries:
@@ -276,4 +279,35 @@ class OrderAccess:
         elif (type(groceryId) == list):
             for gid in groceryId:
                 countPairs(gid, groceryOrder, orderGrocery, result)
+        return result
+
+
+    def getTotalQuantityPurchased(groceryId=None):
+        """ Returns a list of the total quantity of the grocery item that has
+            ever been purchased """
+
+        orders = Order.query.filter(Order.status != 'cancelled').all()
+        orderLst = [o.id for o in orders]
+        quantities = OrderGroceries.query.filter(OrderGroceries.order_id.in_(orderLst)).all()
+
+        result = {}
+        gids = set()
+        if (groceryId == None):
+            for q in quantities:
+                try:
+                    result[q.grocery_id] += q.quantity
+                except KeyError:
+                    result[q.grocery_id] = q.quantity
+            return result
+        elif (type(groceryId) == str):
+            gids.add(groceryId)
+        elif(type(groceryId) == list):
+            gids.update(groceryId)
+
+        for q in quantities:
+            if (q.grocery_id in gids):
+                try:
+                    result[q.grocery_id] += q.quantity
+                except KeyError:
+                    result[q.grocery_id] = q.quantity
         return result

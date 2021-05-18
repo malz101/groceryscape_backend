@@ -2,13 +2,14 @@ from flask import Blueprint
 from flask import redirect, url_for, session, request, render_template
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from ..system_management.GroceryManager import GroceryManager
-from ..database.db_access import grocery_access, rating_access
-
+from ..system_management.MLManager import MLManager
+from ..database.db_access import customer_access,grocery_access, rating_access,\
+                                    order_access, cart_access,payment_access,delivery_access, grocery_access
 """This blueprint will handle all requests related to the management of groceries"""
 manage_groceries = Blueprint("manage_groceries", __name__)
 
 """object used to manipulate all grocery operations"""
-grocery_manager = GroceryManager(grocery_access, rating_access)
+grocery_manager = GroceryManager(grocery_access, rating_access, MLManager(customer_access, order_access, rating_access, cart_access))
 
 @manage_groceries.route('/create_grocery')
 @jwt_required()
@@ -65,4 +66,15 @@ def get_grocery():
 @manage_groceries.route('/get_featured_items', methods=['POST','GET'])
 def getFeaturedItems():
     response = grocery_manager.getFeaturedItems()
+    return response
+
+
+@manage_groceries.route('/get_popular_items', methods=['GET'])
+def get_popular_items():
+    response = grocery_manager.getPopularItems()
+    return response
+
+@manage_groceries.route('/get_freq_bought_with/<item_id>', methods=['GET'])
+def get_freq_bought_with():
+    response = grocery_manager.getgetFreqBoughtWith()
     return response

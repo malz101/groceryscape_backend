@@ -420,7 +420,7 @@ class OrderManager:
             print('Payment intent', intent.amount)
             self.paymentAccess.recordCardPayment(order_id, intent.amount/100, intent.id)
             print("passed payment access")
-            self.orderAccess.updateStatus(order_id,'delivered')
+            # self.orderAccess.updateStatus(order_id,'delivered')
             print("passed updatestatus")
             # self.__sendEmail(order_id,mail)
             print("passed send email")

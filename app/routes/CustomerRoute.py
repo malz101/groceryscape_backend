@@ -26,7 +26,7 @@ cart_manager = CartManager(cart_access, grocery_access)
 order_manager = OrderManager(order_access, payment_access, delivery_access)
 
 """object used to manipulate all grocery operations"""
-grocery_manager = GroceryManager(grocery_access, rating_access)
+grocery_manager = GroceryManager(grocery_access, rating_access,MLManager(customer_access, order_access, rating_access, cart_access))
 
 """object used to manipulate all rating operations"""
 rating_manager = RatingManager(rating_access)
