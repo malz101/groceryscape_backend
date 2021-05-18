@@ -10,13 +10,8 @@ import time
 
 class OrderAccess:
 
-<<<<<<< HEAD
-    def createOrder(self, custId):
-        order = Order(custId)
-=======
     def createOrder(self, custId, type_):
-        order = Order(customer_id=custId, payment_type=type_)
->>>>>>> heroku-deployment
+        order = Order(custId, type_)
         db.session.add(order)
         db.session.commit()
         # return self.getOrderById(order.id)
@@ -167,7 +162,7 @@ class OrderAccess:
         if payment_type is None:
             payment_type_provided = None
             payment_type = ''
-        payment_type = '%{}%'.format(payment_type)
+        payment_type = encrypter.encrypt('%{}%'.format(payment_type))
         
 
         if custId is not None:
@@ -231,7 +226,7 @@ class OrderAccess:
         order = self.getOrderById(orderId)
         if order:
             if order.customer_id == custId:
-                order.status = 'cancelled'
+                order.status = encrypter.encrypt('cancelled')
                 for order_grocery in order.groceries:
                     order_grocery.groceries.quantity += order_grocery.quantity
                 # self.updateStatus(orderId,'CANCELED')

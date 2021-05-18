@@ -128,7 +128,7 @@ class AccountManager:
             'email': encrypter.decrypt(customer.email), 
             'gender': encrypter.decrypt(customer.gender),
             'street': encrypter.decrypt(customer.street),
-            'town': encrypter.decrypt(customer.town_,
+            'town': encrypter.decrypt(customer.town),
             'parish': encrypter.decrypt(customer.parish)
         }
 

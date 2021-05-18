@@ -15,7 +15,7 @@ app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
 # CORS(app)
 mail = Mail(app)
-cors = CORS(app, resources={r"/*": {"origins": ["https://groceryscape.web.app"]}})
+cors = CORS(app, resources={r"/*": {"origins": ["https://groceryscape.web.app","https://groceryscape-admin.web.app"]}})
 # csrf = CSRFProtect(app)
 uploaddir = app.config['UPLOAD_FOLDER']
 encrypter = Encrypt(app.config['ENCRYPTION_PASSWORD'])

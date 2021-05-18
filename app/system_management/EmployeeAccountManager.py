@@ -1,3 +1,4 @@
+from app import encrypter
 class EmployeeAccountManager:
     def __init__(self, employee_access):
         self.employee_access = employee_access
@@ -117,13 +118,13 @@ class EmployeeAccountManager:
 
         return {
             "emp_id": employee.id,
-            'first_name': employee.first_name, 
-            'last_name': employee.last_name,
-            'email': employee.email,
-            'password': employee.password, 
-            'role': employee.role,\
+            'first_name': encrypter.decrypt(employee.first_name), 
+            'last_name': encrypter.decrypt(employee.last_name),
+            'email': encrypter.decrypt(employee.email),
+            'password': encrypter.decrypt(employee.password), 
+            'role': encrypter.decrypt(employee.role),\
             'salary': float(employee.salary), 
-            'address':employee.address
+            'address': encrypter.decrypt(employee.address)
         }
             
     def getRequestType(self, request):

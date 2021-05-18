@@ -1,5 +1,5 @@
 from sqlalchemy import exc
-from ... import db
+from ... import db, encrypter
 from ..Models import Customer, Order, OrderGroceries, TotalAmountPurchased
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash
@@ -8,17 +8,17 @@ class CustomerAccess:
 
     """retrieve a customer record from the database given their email and password"""
     def login(self, email, password):
-        customer = Customer.query.filter_by(email=email).first()
+        customer = Customer.query.filter_by(email=encrypter.decrypt(email)).first()
         if customer is not None and check_password_hash(customer.password, password):
             return customer
         else:
             return False
 
     """register a customer to the db"""
-    def registerCustomer(self, firstName, lastName, telephone, email, gender, password,street, town, parish):
+    def registerCustomer(self,firstName, lastName, telephone, email, gender, password,street, town, parish):
         customer = {}
         try:
-            customer = Customer(self, firstName, lastName, telephone, email, gender,password,street, town, parish)
+            customer = Customer(firstName, lastName, telephone, email, gender,password,street, town, parish)
             db.session.add(customer)
             db.session.commit()
             customer = self.getCustomerById(customer.id)
@@ -29,7 +29,7 @@ class CustomerAccess:
             return False
 
     def confirmEmail(self,email):
-        customer = Customer.query.filter_by(email=email).first()
+        customer = Customer.query.filter_by(email=encrypter.encrypt(email)).first()
         if customer:
             customer.email_confirmed = True
             db.session.commit()

@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash
 from app import encrypter
 class EmployeeAccess:
 
-    def def registerEmployee(self, first_name, last_name, telephone, email, password, street, town, parish, role, salary):
+    def registerEmployee(self, first_name, last_name, telephone, email, password, street, town, parish, role, salary):
 
         new_employee = Employee(self, first_name, last_name, telephone, email, password, street, town, parish, role, salary)
         db.session.add(new_employee)
@@ -14,9 +14,9 @@ class EmployeeAccess:
         return new_employee
 
     def login(self, email, password):
-        employee = Employee.query.filter_by(email=email).first()
+        employee = Employee.query.filter_by(email=encrypter.decrypt(email)).first()
         try:
-            if if employee is not None and check_password_hash(employee.password, password):
+            if employee is not None and check_password_hash(employee.password, password):
                 return employee
             else:
                 return False

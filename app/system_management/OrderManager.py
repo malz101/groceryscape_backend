@@ -24,7 +24,7 @@ class OrderManager:
             if order:
                 emp = order.employee
                 if emp:
-                    empName = (emp.first_name + " " + emp.last_name)
+                    empName = (encrypter.decrypt(emp).first_name + " " + encrypter.decrypt(emp.last_name))
                 else:
                     empName = ''
                 return self.__getOrderDetails(order,empName)
@@ -38,7 +38,7 @@ class OrderManager:
         
         if order_preview:
             deliveryparish = self.deliveryAccess.getDeliveryParish(parish)
-            order_preview['delivery_parish'] = str(deliveryparish.parish) 
+            order_preview['delivery_parish'] = str(encryter.decryt(deliveryparish.parish)) 
             delivery_cost = deliveryparish.delivery_rate
             order_preview['delivery_cost'] = str(delivery_cost)
             order_preview['total'] = order_preview['sub_total']+order_preview['total_sct']+order_preview['total_gct']+ float(delivery_cost)
@@ -60,9 +60,9 @@ class OrderManager:
                 return {
                     'order_id':str(order.id),
                     'order_date':order.orderdate,
-                    'status':str(order.status),
+                    'status':str(encrypter.decrypt(order.status)),
                     'customer_id':str(order.customer_id), 
-                    'customer':(order.customer.first_name + " "+ order.customer.last_name)
+                    'customer':(encrypter.decrypt(order.customer.first_name) + " "+ encrypter.decrypt(order.customer.last_name))
                 }
         return False
     
@@ -77,7 +77,7 @@ class OrderManager:
             # GroceryAccess.adjustStockCount(cancelled_order.)
             emp = cancelled_order.employee
             if emp:
-                empName = (emp.first_name + " " + emp.last_name)
+                empName = (encrypter.decrypt(emp).first_name + " " + encrypter.decrypt(emp.last_name))
             else:
                 empName = 'False'
             return self.__getOrderDetails(cancelled_order, empName)
@@ -100,7 +100,7 @@ class OrderManager:
                     if order:
                         emp = order.employee
                         if emp:
-                            empName = (emp.first_name + " " + emp.last_name)
+                            empName = (encrypter.decrypt(emp).first_name + " " + encrypter.decrypt(emp.last_name))
                         else:
                             empName = 'False'
                         return {'msg':'success','data':{'order':self.__getOrderDetails(order,empName)}}, 200
@@ -205,6 +205,7 @@ class OrderManager:
                 return order
         return False
     
+
     def getOrderCustomer(self,user, orderId):
         # getParam = self.getRequestType(request)
         # orderId = getParam('order_id')
@@ -215,7 +216,7 @@ class OrderManager:
             emp = order.employee
 
             if emp:
-                empName = ( encrypter.decrypt(emp.first_name)+ " " +encrypter.decrypt(emp.last_name))
+                empName = (encrypter.decrypt(emp.first_name)+ " " +encrypter.decrypt(emp.last_name))
             else:
                 empName = 'False'
 
@@ -254,7 +255,7 @@ class OrderManager:
             for order in orders:
                 emp = order.employee
                 if emp:
-                    empName = (emp.first_name + " " + emp.last_name)
+                    empName = (encrypter.decrypt(emp).first_name + " " + encrypter.decrypt(emp.last_name))
                 else:
                     empName = 'False'
                 response.append(self.__getOrderDetails(order, empName))
@@ -269,7 +270,7 @@ class OrderManager:
         if order:
             emp = order.employee
             if empFname:
-                empName = ( emp.first_name+ " " +emp.last_name )
+                empName = (encrypter.decrypt(emp).first_name + " " + encrypter.decrypt(emp.last_name))
             else:
                 empName = 'False'
 
@@ -424,7 +425,7 @@ class OrderManager:
             # Handle post-payment fulfillment
             order_id = int(intent.metadata['order_id'])
             print('Payment intent', intent.amount)
-            self.paymentAccess.recordCardPayment(order_id, intent.amount/100, intent.id)
+            self.paymentAccess.recordCardPayment(order_id, intent.amount/100, encrypter.encrypt(intent.id))
             print("passed payment access")
             # self.orderAccess.updateStatus(order_id,'delivered')
             print("passed updatestatus")
@@ -444,7 +445,7 @@ class OrderManager:
         print('passed get order details')
         customer = order.customer
 
-        msg = Message(recipients=[str(customer.email)])
+        msg = Message(recipients=[str(encrypter.decrypt(customer.email))])
         print('passed Message')
         msg.subject = "Payment Confirmation for Order "+str(order_id)
         if order:

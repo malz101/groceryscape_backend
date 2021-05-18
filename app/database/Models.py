@@ -12,15 +12,15 @@ from werkzeug.security import generate_password_hash
 class Customer(db.Model):
     __tablename__ = 'customer'
     id = db.Column(db.Integer, primary_key=True, index=True)
-    first_name = db.Column(db.String(45), nullable=False)
-    last_name = db.Column(db.String(45), nullable=False)
-    telephone = db.Column(db.String(11), nullable=False)
-    email = db.Column(db.String(45), nullable=False, unique=True)
-    gender = db.Column(db.String(45), nullable=False)
-    password = db.Column(db.String(256), nullable=False)
-    street = db.Column(db.String(45))
-    town = db.Column(db.String(45), nullable=False)
-    parish = db.Column(db.String(45), nullable=False)
+    first_name = db.Column(db.String(200), nullable=False)
+    last_name = db.Column(db.String(200), nullable=False)
+    telephone = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(200), nullable=False, unique=True)
+    gender = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(300), nullable=False)
+    street = db.Column(db.String(300))
+    town = db.Column(db.String(300), nullable=False)
+    parish = db.Column(db.String(300), nullable=False)
     email_confirmed = db.Column(db.Boolean,nullable=False, default=False)
 
     orders = db.relationship('Order', back_populates='customer', cascade="all,delete")
@@ -37,7 +37,7 @@ class Customer(db.Model):
         self.telephone = encrypter.encrypt(telephone)
         self.gender = encrypter.encrypt(gender)
         self.email = encrypter.encrypt(email)
-        self.password = generate_password_hash(password, method='pbkdf2:sha256:310000', salt_length=256)
+        self.password = generate_password_hash(password, method='pbkdf2:sha256')
         self.street = encrypter.encrypt(street)
         self.town = encrypter.encrypt(town)
         self.parish = encrypter.encrypt(parish)
@@ -46,15 +46,15 @@ class Customer(db.Model):
 class Employee(db.Model):
     __tablename__ = 'employee'
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(45), nullable=False)
-    last_name = db.Column(db.String(45), nullable=False)
-    telephone = db.Column(db.String(11), nullable=False)
-    email = db.Column(db.String(45), nullable=False, unique=True)
-    password = db.Column(db.String(45), nullable=False)
-    street = db.Column(db.String(200), nullable=False)
-    town = db.Column(db.String(200), nullable=False)
-    parish = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(20), nullable=False)
+    first_name = db.Column(db.String(200), nullable=False)
+    last_name = db.Column(db.String(200), nullable=False)
+    telephone = db.Column(db.String(100), nullable=True)
+    email = db.Column(db.String(200), nullable=False, unique=True)
+    password = db.Column(db.String(300), nullable=False)
+    street = db.Column(db.String(300), nullable=False)
+    town = db.Column(db.String(300), nullable=False)
+    parish = db.Column(db.String(300), nullable=False)
+    role = db.Column(db.String(100), nullable=False)
     salary = db.Column(db.Numeric(10,2), nullable=True)
 
     # represent the payment collected an employee (many to one relationship)
@@ -67,7 +67,7 @@ class Employee(db.Model):
         self.last_name = encrypter.encrypt(last_name)
         self.telephone = encrypter.encrypt(telephone)
         self.email = encrypter.encrypt(email)
-        self.password = generate_password_hash(password, method='pbkdf2:sha256:310000', salt_length=256)
+        self.password = generate_password_hash(password, method='pbkdf2:sha256')
         self.town = encrypter.encrypt(town)
         self.town = encrypter.encrypt(town)
         self.parish = encrypter.encrypt(parish)
@@ -82,10 +82,11 @@ class Order(db.Model):
     status = db.Column(db.Enum(encrypter.encrypt('canceled'),encrypter.encrypt('served'),\
                         encrypter.encrypt('checked out'),encrypter.encrypt('pending'),default='pending', name='OrderStatus'))
     deliverytimeslot = db.Column(db.Integer, db.ForeignKey('delivery_time_slot.id'), nullable=True)
+    payment_type = db.Column(db.String(100),nullable=True)
     deliverydate = db.Column(db.Date)
-    deliverystreet = db.Column(db.String(100))
-    deliverytown = db.Column(db.String(100))
-    deliveryparish = db.Column(db.String(100),db.ForeignKey('delivery_parish.parish'), default='None')
+    deliverystreet = db.Column(db.String(300))
+    deliverytown = db.Column(db.String(300))
+    deliveryparish = db.Column(db.String(300),db.ForeignKey('delivery_parish.parish'), default='None')
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id'))# represents a one to many-to-many relationship between employee and orders
     details = db.Column(db.UnicodeText(), nullable=False)
@@ -106,7 +107,8 @@ class Order(db.Model):
     employee = db.relationship('Employee', back_populates='checkouts')
 
     timeslot = db.relationship('DeliveryTimeSlot', back_populates='orders')
-    def __init__(self, customer_id):
+    def __init__(self, customer_id, payment_type):
+        self.payment_type = encrypter.encrypt(payment_type)
         self.customer_id = customer_id
     
 
