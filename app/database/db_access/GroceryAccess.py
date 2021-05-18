@@ -99,6 +99,7 @@ class GroceryAccess:
     
     def getGroceriesInList(self,ids):
         groceries = Grocery.query.filter(Grocery.id.in_(ids)).all()
+        print('Groceries in grcoery access',groceries)
         return groceries
 
     def removeGroceryItem(self, groceryId):

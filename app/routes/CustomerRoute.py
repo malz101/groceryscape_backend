@@ -152,7 +152,8 @@ def get_recommended_groceries():
             grocery_ids = customer_manager.getRecommendedGroceries(user['cust_id'])
             groceries = grocery_manager.getGroceriesInList(grocery_ids)
             response = {'msg': '', 'data':{'groceries':groceries}}, 200
-        except NameError:
+        except NameError as e:
+            print(e)
             response = {'msg': 'customer not found', 'data': {}}, 200
         except Exception as e:
             print(e)
