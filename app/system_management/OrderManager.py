@@ -50,7 +50,7 @@ class OrderManager:
     def create_order(self,user,cart_items):
         '''create an order from the cart items'''
         cust_id = user['cust_id']
-        getParam = getRequestType()
+        getParam = self.getRequestType()
         payment_type = getParam('payment_type')
 
         # 2) get all cart items
