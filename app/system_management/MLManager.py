@@ -151,7 +151,7 @@ class MLManager:
         """ Accepts a groceryID or list of grocery IDs and returns a sorted
             list of pairs with the frequency of occurence """
 
-        test = self.customerAccess.getOrders()[0]
+        # test = self.customerAccess.getOrders()[0]
         # print('Test: ', test)
         # print('Test: ', test.groceries)
         pairDict = self.orderAccess.getGroceryPairFreq(gid)
