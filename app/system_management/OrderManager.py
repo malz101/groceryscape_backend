@@ -12,7 +12,24 @@ class OrderManager:
         self.orderAccess = orderAccess
         self.paymentAccess = paymentAccess
         self.deliveryAccess = deliveryAccess
+    
+    def updateStatus(self, request):
+        '''Updates the status of an order. Status of an order can be Pending, Checkout, Delivered, Canceled'''
+        getParam = self.getRequestType(request)
+        order_id = getParam('order_id')
+        status = getParam('status')
 
+        if order_id and status:
+            order = self.orderAccess.updateStatus(int(order_id), status)
+            if order:
+                emp = order.employee
+                if emp:
+                    empName = (emp.first_name + " " + emp.last_name)
+                else:
+                    empName = ''
+                return self.__getOrderDetails(order,empName)
+            return False
+        raise ValueError
 
     def getOrderPreview(self,request,order_preview):
         '''returns a preview or the order details from item in cart'''
@@ -30,13 +47,15 @@ class OrderManager:
 
 
 
-    def create_order(self,user,cart_items):
+    def create_order(self,user,request,cart_items):
         '''create an order from the cart items'''
         cust_id = user['cust_id']
+        getParam = self.getRequestType(request)
+        payment_type = getParam('payment_type')
 
         # 2) get all cart items
         if cart_items:
-            order = self.orderAccess.addItemsToOrder(cart_items,int(cust_id))
+            order = self.orderAccess.addItemsToOrder(cart_items,int(cust_id),payment_type)
             if order:
                 return {
                     'order_id':str(order.id),
@@ -73,6 +92,7 @@ class OrderManager:
         orderId = getParam('order_id')
         custId = user['cust_id']
         
+        state = True #tracks status order to knw if to delete
         if custId and deliverydate and deliverytimeslot and orderId:
             if datetime.strptime(deliverydate,'%Y-%m-%d').date() < (datetime.now().date()+timedelta(days=2)):
                 if self.validSlot(deliverytimeslot, deliverydate):
@@ -84,8 +104,12 @@ class OrderManager:
                         else:
                             empName = 'False'
                         return {'msg':'success','data':{'order':self.__getOrderDetails(order,empName)}}, 200
+
+                    self.orderAccess.deleteOrderByID(int(order_id))
                 return {'msg':'no more orders can be scheduled for this slot', 'error':'create-0001'}, 200
+                self.orderAccess.deleteOrderByID(int(order_id))
             return {'msg':'a slot cannot be booked more than two days in advance', 'error':'create-0001'}, 200
+            self.orderAccess.deleteOrderByID(int(order_id))
         return  {'msg':'either date, timeslot or order_id is empty', 'error':'create-0001'}, 200
     
 
@@ -152,6 +176,11 @@ class OrderManager:
             else:
                 empName = 'False'
             return self.__getOrderDetails(order,empName)
+        try:
+            self.orderAccess.deleteOrderByID(int(order_id))
+        except Exception as e:
+            print(e)
+            return False
         return False
 
 
@@ -212,12 +241,13 @@ class OrderManager:
         delivery_end_date = getParam('delivery_end_date')
         delivery_town = getParam('delivery_town')
         delivery_parish = getParam('delivery_parish')
+        payment_type = getParam('payment_type')
 
         cust_id = user['cust_id']
 
         orders = self.orderAccess.getOrders(cust_id, status, order_start_date, order_end_date,\
                                                     delivery_start_date, delivery_end_date, delivery_town,\
-                                                    delivery_parish)
+                                                    delivery_parish, payment_type)
         response = []
         if orders:
             print('Orders',orders)
@@ -267,11 +297,12 @@ class OrderManager:
         delivery_street = getParam('delivery_street')
         delivery_town = getParam('delivery_town')
         delivery_parish = getParam('delivery_parish')
+        payment_type = getParam('payment_type')
 
 
         orders = self.orderAccess.getOrders(cust_id, status, order_start_date, order_end_date,\
-                                                    delivery_start_date, delivery_end_date,delivery_street,\
-                                                    delivery_town,delivery_parish)
+                                                    delivery_start_date, delivery_end_date, delivery_town,\
+                                                    delivery_parish, payment_type)
 
         response = []
         if orders:
@@ -298,7 +329,7 @@ class OrderManager:
         if order:
             payment = self.paymentAccess.recordCashPayment(order['total'], empId, amountTendered)
             if payment:
-                self.orderAccess.updateStatus(orderId,'served')
+                self.orderAccess.updateStatus(orderId,'delivered')
                 self.__sendEmail(order_id, mail)
                 return {
                     'order_id': payment.order_id,
@@ -347,24 +378,30 @@ class OrderManager:
             # Since it's a decline, stripe.error.CardError will be caught
             print(e.message)
             # Display error on client
+            self.orderAccess.deleteOrderByID(intent.metadata['order_id'])
             return {'msg': e.user_message, 'error':e.code}, 200
         except stripe.error.APIConnectionError as e:
+
             # Network communication with Stripe failed
             print(e.message)
+            self.orderAccess.deleteOrderByID(intent.metadata['order_id'])
             return {'msg':e.user_message, 'error':e.code}, 200
         except stripe.error.InvalidRequestError as e:
             # Invalid parameters were supplied to Stripe's API
             print(e.message)
+            self.orderAccess.deleteOrderByID(intent.metadata['order_id'])
             return {'msg':e.user_message, 'error':e.code}, 200
         except stripe.error.AuthenticationError as e:
             # Authentication with Stripe's API failed
             # (maybe you changed API keys recently)
             print(e.message)
+            self.orderAccess.deleteOrderByID(intent.metadata['order_id'])
             return {'msg':e.user_message, 'error':e.code}, 200
         except stripe.error.StripeError as e:
             # Display a very generic error to the user, and maybe send
             # yourself an email
             print(e.message)
+            self.orderAccess.deleteOrderByID(intent.metadata['order_id'])
             return {'msg':e.user_message, 'error':e.code}, 200
 
         return self.__generate_response(intent,mail)
@@ -389,7 +426,7 @@ class OrderManager:
             print('Payment intent', intent.amount)
             self.paymentAccess.recordCardPayment(order_id, intent.amount/100, intent.id)
             print("passed payment access")
-            self.orderAccess.updateStatus(order_id,'served')
+            # self.orderAccess.updateStatus(order_id,'delivered')
             print("passed updatestatus")
             # self.__sendEmail(order_id,mail)
             print("passed send email")
@@ -471,7 +508,8 @@ class OrderManager:
                     })
 
         result = {
-            'order_id': str(order.id), 
+            'order_id': str(order.id),
+            'payment_type': str(order.payment_type), 
             'order_date': str(order.orderdate),
             'status': str(encrypter.decrypt(order.status)), 'customer_id': str(order.customer_id),
             'customer': (encrypter.decrypt(order.customer.first_name) + " " + encrypter.decrypt(order.customer.last_name)),

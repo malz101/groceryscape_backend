@@ -98,7 +98,10 @@ class CartAccess:
             
             if (grocery.quantity > 0) and (quantity <= grocery.quantity) and quantity>-1:
                     cartItem.quantity = quantity
-                    updated_cart.append(cartItem)
+                    if quantity > 0:
+                        updated_cart.append(cartItem)
+                    else:
+                        db.session.delete(cartItem)
             else:
                 # cartItem.quantity = quantity
                 db.session.rollback()

@@ -26,7 +26,7 @@ cart_manager = CartManager(cart_access, grocery_access)
 order_manager = OrderManager(order_access, payment_access, delivery_access)
 
 """object used to manipulate all grocery operations"""
-grocery_manager = GroceryManager(grocery_access, rating_access)
+grocery_manager = GroceryManager(grocery_access, rating_access,MLManager(customer_access, order_access, rating_access, cart_access))
 
 """object used to manipulate all rating operations"""
 rating_manager = RatingManager(rating_access)
@@ -152,7 +152,8 @@ def get_recommended_groceries():
             grocery_ids = customer_manager.getRecommendedGroceries(user['cust_id'])
             groceries = grocery_manager.getGroceriesInList(grocery_ids)
             response = {'msg': '', 'data':{'groceries':groceries}}, 200
-        except NameError:
+        except NameError as e:
+            print(e)
             response = {'msg': 'customer not found', 'data': {}}, 200
         except Exception as e:
             print(e)
@@ -220,7 +221,7 @@ def create_order():
         if bool(user['email_confirmed']):
             try:
                 cart_items = cart_manager.getAllCartItems(user)
-                order = order_manager.create_order(user, cart_items)
+                order = order_manager.create_order(user,request, cart_items)
                 if order:
                     response = {'msg':'success', 'data':{'order':order}},200
                 else:
@@ -368,3 +369,15 @@ def get_payment_key():
     else:
         return redirect(url_for('index'))
 
+
+
+
+@manage_customer_account.route('/rate_grocery', methods=['POST','GET'])
+@jwt_required()
+def rate_grocery():
+    user = get_jwt_identity()
+    if user and (not 'role' in user):
+        response = rating_manager.rateGrocery(user, request)
+        return response
+    else:
+        return redirect(url_for('index'))

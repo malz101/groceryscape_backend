@@ -46,8 +46,17 @@ class RatingAccess:
 
     def getAllRatings(self):
         ratings = Rating.query.all()
-        return ratings
-    
+
+        ratingsDict = {}
+        for r in ratings:
+            # Organizes the data in a dictionary indexed by customerID
+            try:
+                ratingsDict[r.cust_id][r.item_id] = r.rating
+            except KeyError:
+                ratingsDict[r.cust_id] = {}
+                ratingsDict[r.cust_id][r.item_id] = r.rating
+        return ratingsDict
+
     def getTopItems(self, ):
         top_items = ItemTotalRating.query.order_by(ItemTotalRating.coefficient.desc()).limit(50).all()
         num_to_select = 20                           # set the number to select here.

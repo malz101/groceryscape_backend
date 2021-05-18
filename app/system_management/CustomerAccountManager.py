@@ -74,13 +74,13 @@ class AccountManager:
         if customer:
             return {
                 "cust_id": str(customer.id),
-                'first_name': customer.first_name,
-                'last_name': customer.last_name,
-                'telephone': customer.telephone,
-                'town': customer.town,
-                'street': customer.street,
+                'first_name': encrypter.decrypt(customer.first_name),
+                'last_name': encrypter.decrypt(customer.last_name),
+                'telephone': encrypter.decrypt(customer.telephone),
+                'town': encrypter.decrypt(customer.town),
+                'street': encrypter.decrypt(customer.street),
                 'email_confirmed': customer.email_confirmed,
-                'parish': customer.parish
+                'parish': encrypter.decrypt(customer.parish)
             }
         return False
 
@@ -114,7 +114,7 @@ class AccountManager:
             groceries = self.MLManager.getRecommendGroceries(custId)
             if groceries:
                 return groceries
-            return False
+            return []
         raise NameError
 
 

@@ -2,9 +2,10 @@ from app import uploaddir
 import os
 from werkzeug.utils import secure_filename
 class GroceryManager:
-    def __init__(self, grocery_access, rating_access):
+    def __init__(self, grocery_access, rating_access, ml_access):
         self.grocery_access = grocery_access
         self.rating_access = rating_access
+        self.ml_access = ml_access
 
 
     def addGrocery(self, request):
@@ -145,6 +146,28 @@ class GroceryManager:
                     result.append(self.__getGroceryDetails(item,rating))
                 return {'msg':'success','data':{'groceries':result}}
             return False
+        except Exception as e:
+            print(e)
+            return {'msg':'request failed', 'error':'ise-0001'}, 500
+        
+    def getPopularItems(self):
+        try:
+            ids = self.ml_access.getPopularItems()
+            print('gh',ids)
+            if ids:
+                return {'msg':'success','data':{'groceries':self.getGroceriesInList(ids)}}, 200
+            return {'msg':'no groceries found','data':{}}, 200
+        except Exception as e:
+            print(e)
+            return {'msg':'request failed', 'error':'ise-0001'}, 500
+
+    def getFreqBoughtWith(self,id):
+        try:
+            ids = self.ml_access.getFreqBoughtWith(int(id))
+            print('here',ids)
+            if ids:
+                return {'msg':'success','data':{'groceries':self.getGroceriesInList(ids)}}, 200
+            return {'msg':'no groceries found','data':{}}, 200
         except Exception as e:
             print(e)
             return {'msg':'request failed', 'error':'ise-0001'}, 500

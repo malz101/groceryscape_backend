@@ -1,7 +1,6 @@
 from ... import db, encrypter
 from datetime import datetime, timedelta, timezone, date
-from ..Models import Order
-from ..Models import OrderGroceries
+from ..Models import Order, OrderGroceries, Customer, TotalQuantityPurchased, CountPairs
 # from .OrderGroceriesAccess import OrderGroceriesAccess
 from .CustomerAccess import CustomerAccess
 from .GroceryAccess import GroceryAccess
@@ -11,12 +10,23 @@ import time
 
 class OrderAccess:
 
+<<<<<<< HEAD
     def createOrder(self, custId):
         order = Order(custId)
+=======
+    def createOrder(self, custId, type_):
+        order = Order(customer_id=custId, payment_type=type_)
+>>>>>>> heroku-deployment
         db.session.add(order)
         db.session.commit()
         # return self.getOrderById(order.id)
         return order
+    
+
+    def deleteOrderByID(self, order_id):
+        Order.query.filter(id == order_id).delete()
+        db.session.commit()
+
 
     def getOrderById(self, orderId):
         order = Order.query.filter_by(id=orderId).first()
@@ -35,9 +45,9 @@ class OrderAccess:
             return False
 
 
-    def addItemsToOrder(self, cart_summary,cust_id):
+    def addItemsToOrder(self, cart_summary,cust_id,type_):
         '''add items to created order'''
-        order = self.createOrder(cust_id)
+        order = self.createOrder(cust_id,type_)
 
         for item in cart_summary['items']:
             order_grocery = OrderGroceries(order_id=order.id, grocery_id=int(item['grocery_id']), quantity=int(item['quantity']))
@@ -57,7 +67,7 @@ class OrderAccess:
         if order:
             order.status = encrypter.encrypt(status)
             db.session.commit()
-            return True
+            return order
         else:
             return  False
 
@@ -108,7 +118,7 @@ class OrderAccess:
 
     def getOrders(self,custId=None, status=None, min_order_timestamp=None,\
                             max_order_timestamp=None, min_delivery_date=None,\
-                            max_delivery_date=None,delivery_street=None, delivery_town=None,delivery_parish=None):
+                            max_delivery_date=None, delivery_town=None,delivery_parish=None, payment_type=None):
         
         if status is None:
             status = ''
@@ -153,6 +163,13 @@ class OrderAccess:
             delivery_parish = ''
         delivery_parish = encrypter.encrypt('%{}%'.format(delivery_parish))
 
+        payment_type_provided = ''
+        if payment_type is None:
+            payment_type_provided = None
+            payment_type = ''
+        payment_type = '%{}%'.format(payment_type)
+        
+
         if custId is not None:
             orders = Order.query.filter(
                 and_(
@@ -161,27 +178,29 @@ class OrderAccess:
                     or_(Order.deliverystreet.ilike(delivery_street), Order.deliverystreet == street_provided),\
                     or_(Order.deliverytown.ilike(delivery_town), Order.deliverytown == town_provided),\
                     or_(Order.deliveryparish.ilike(delivery_parish), Order.deliveryparish == parish_provided),\
+                    or_(Order.payment_type.ilike(payment_type), Order.payment_type == payment_type_provided),\
                     and_(Order.orderdate >= min_order_timestamp, Order.orderdate <= max_order_timestamp),\
                     or_(
                         and_(Order.deliverydate >= min_delivery_date, Order.deliverydate <= max_delivery_date),\
                         Order.deliverydate == delivery_range_provided\
                     )
                 )
-            ).all()
+            ).order_by(Order.orderdate.desc()).all()
         else:
-            orders = Order.query.filter(
+            orders = Order.query.join(Customer, Order.customer_id==Customer.id).filter(
                 and_(
                     Order.status.ilike(status),\
                     or_(Order.deliverystreet.ilike(delivery_street), Order.deliverystreet == street_provided),\
                     or_(Order.deliverytown.ilike(delivery_town), Order.deliverytown == town_provided),\
                     or_(Order.deliveryparish.ilike(delivery_parish), Order.deliveryparish == parish_provided),\
+                    or_(Order.payment_type.ilike(payment_type), Order.payment_type == payment_type_provided),\
                     and_(Order.orderdate >= min_order_timestamp, Order.orderdate <= max_order_timestamp),\
                     or_(
                         and_(Order.deliverydate >= min_delivery_date, Order.deliverydate <= max_delivery_date),\
                         Order.deliverydate == delivery_range_provided\
                     )
                 )
-            ).all()
+            ).order_by(Order.orderdate.desc()).order_by(Customer.last_name).order_by(Customer.first_name).all()
         # try:
         if orders:
             return orders
@@ -212,7 +231,7 @@ class OrderAccess:
         order = self.getOrderById(orderId)
         if order:
             if order.customer_id == custId:
-                order.status = 'canceled'
+                order.status = 'cancelled'
                 for order_grocery in order.groceries:
                     order_grocery.groceries.quantity += order_grocery.quantity
                 # self.updateStatus(orderId,'CANCELED')
@@ -237,57 +256,76 @@ class OrderAccess:
         else:
             return False
 
-    # def getItemsInOrder(self, orderId):
-    #     return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getAllItemsOnOrder(orderId)
+
 
     def getTax(self, groceryId, type):
         return GroceryAccess().getTax(groceryId, type)
 
-    
-    # def getDeliveryCost(self,orderId):
-    #     return OrderGroceriesAccess(self, GroceryAccess(), CustomerAccess()).getDeliveryCost(orderId)
 
-    def getGroceryPairFreq(self, groceryId):
-        """ Returns a list of the number of times a pair of groceries
-            occurs in the orders made """
-
-        def countPairs(gid, groceryOrder, orderGrocery, result):
-            try:
-                for o in groceryOrder[gid]:
-                    for g in orderGrocery[o]:
-                        if (gid != g):
-                            try:
-                                temp = result[gid][g]
-                            except KeyError:
-                                result[gid] = {}
-                                result[gid][g] = 0
-                            result[gid][g] += 1
-            except KeyError:
-                # The grocery likely has never been purchased before
-                result[gid] = {}
-                pass
-
-        # Maping groceries to orders and vice versa
-        groceries = OrderGroceries.query.all()
-        groceryOrder = {}
-        orderGrocery = {}
-        for g in groceries:
-            try:
-                groceryOrder[g.grocery_id].add(g.order_id)
-            except KeyError:
-                groceryOrder[g.grocery_id] = set()
-                groceryOrder[g.grocery_id].add(g.order_id)
-
-            try:
-                orderGrocery[g.order_id].add(g.grocery_id)
-            except KeyError:
-                orderGrocery[g.order_id] = set()
-                orderGrocery[g.order_id].add(g.grocery_id)
-
-        result = {}
-        if (type(groceryId) == str):
-            countPairs(groceryId, groceryOrder, orderGrocery, result)
+    def getGroceryPairFreq(self,groceryId):
+        """ Returns a dictionary of the number of times a pair of groceries
+             occurs in the orders made """
+        gids = set()
+        if (type(groceryId) == int):
+            gids.add(int(groceryId))
         elif (type(groceryId) == list):
-            for gid in groceryId:
-                countPairs(gid, groceryOrder, orderGrocery, result)
+            gids.update(groceryId)
+
+        pairs = CountPairs.query.all()
+        # print('Count Pairs', pairs)
+        result = {}
+        for p in pairs:
+            if (p.item1 in gids):
+                try:
+                    result[p.item1][p.item2] = p.count
+                except KeyError:
+                    result[p.item1] = {p.item2: p.count}
+
         return result
+
+
+    def getTotalQuantityPurchased(groceryId=None):
+        """ Returns a list of the total quantity of the grocery item that has
+             ever been purchased """
+        
+        items_total = TotalQuantityPurchased.query.all()
+        if items_total:
+            result = {}
+            for item_total in items_total:
+                result[item_total.grocery_id] = item_total.total
+            return result
+        return {}
+
+
+    # def getTotalQuantityPurchased(groceryId=None):
+    #     """ Returns a list of the total quantity of the grocery item that has
+    #         ever been purchased """
+
+    #     orders = Order.query.filter(Order.status.in_(('pending', 'cancelled', 'checked out')))
+    #     print(orders)
+    #     orders = orders.all()
+    #     print(orders)
+    #     orderLst = [o.id for o in orders]
+    #     quantities = OrderGroceries.query.filter(OrderGroceries.order_id.in_(orderLst)).all()
+
+    #     result = {}
+    #     gids = set()
+    #     if (groceryId == None):
+    #         for q in quantities:
+    #             try:
+    #                 result[q.grocery_id] += q.quantity
+    #             except KeyError:
+    #                 result[q.grocery_id] = q.quantity
+    #         return result
+    #     elif (type(groceryId) == str):
+    #         gids.add(groceryId)
+    #     elif(type(groceryId) == list):
+    #         gids.update(groceryId)
+
+    #     for q in quantities:
+    #         if (q.grocery_id in gids):
+    #             try:
+    #                 result[q.grocery_id] += q.quantity
+    #             except KeyError:
+    #                 result[q.grocery_id] = q.quantity
+    #     return result

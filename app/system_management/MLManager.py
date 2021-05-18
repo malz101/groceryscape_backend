@@ -2,12 +2,12 @@
 import numpy as np
 class MLManager:
 
-    def __init__(self, customerAccess, orderAccess, \
-                ratingAccess, cartAccess):
+    def __init__(self, customerAccess, orderAccess, ratingAccess, cartAccess):
         self.customerAccess = customerAccess
         self.orderAccess = orderAccess
         self.ratingAccess = ratingAccess
         self.cartAccess = cartAccess
+        self.recommend_count = 30
 
     def getRecommendGroceries(self, customerId):
         """ Uses a Pearson product-moment correlation coefficient matrix
@@ -15,24 +15,15 @@ class MLManager:
             specified by ratings then by the amount of items purchased over
             the lifetime of the account. """
 
-        def organize(rawData, getRow, getCol, getData):
-            """ Organizes the data into a 2D dictionary and returns the dictionary
-                along with a list of all the unique keys that occur in the
-                sub-dictionaries """
+        def getColumns(dataDict):
+            """ Returns a list of distinct keys in the sub-dictionaries
+                of a 2D dictionary """
 
-            dataDict = {}
-            columns = set()
-            for rd in rawData:
-                # Organizes the data in a dictionary indexed by customerID
-                try:
-                    dataDict[getRow(rd)][getCol(rd)] = getData(rd)
-                except KeyError:
-                    dataDict[getRow(rd)] = {}
-                    dataDict[getRow(rd)][getCol(rd)] = getData(rd)
-
-                # List of all the items encountered
-                columns.add(getCol(rd))
-            return (dataDict, [i for i in columns])
+            itemSet = set()
+            for q in dataDict.values():
+                itemSet.update(q.keys())
+            itemLst =  [i for i in itemSet]
+            return itemLst
 
         def genMatrix(id, rowIndexLst, colIndexLst, custDict, defaultVal):
             """ Converts a 2D dictionary into a 2D list """
@@ -57,29 +48,19 @@ class MLManager:
                 to determine the most similar elements of a matrix """
 
             closest = []
-            batchSize = 10000
-
-            for i in range(0, len(matrix), batchSize):
-                batch = []
-                batch.extend(matrix[i:(i + batchSize)])
-                batch.append(element)
-                correlMatrix = np.corrcoef(batch)
-
-                for j in range(len(correlMatrix) - 1):
-                    correl = correlMatrix[-1][j]
-                    if ((correl < 1) and (correl > 0.75)):
-                        closest.append((indexToIdMap[i + j], correl))
+            for i in range(len(matrix)):
+                correlMatrix = np.corrcoef(element, matrix[i])
+                correl = correlMatrix[0][1]
+                if ((correl < 1) and (correl > 0.75)):
+                    closest.append((indexToIdMap[i], correl))
             closest.sort(key=lambda x: x[1], reverse=True)
             closest = list(map(lambda x: x[0], closest))
             return closest
 
         custId = int(customerId)
-        recommendCount = 30
 
         # Find similar customers based on ratings provided
-        ratings = self.ratingAccess.getAllRatings()
-        ratingsDict, itemLst = organize(ratings, lambda d: d.cust_id, \
-                                lambda d: d.item_id, lambda d: d.rating)
+        ratingsDict = self.ratingAccess.getAllRatings()
         similarCustomers = []
         if (custId in ratingsDict): # ie: if the customer has rated something in the past
             # Ratings range from 1 to 10. Ratings < 5 are thought to be
@@ -87,6 +68,7 @@ class MLManager:
             # hence using a default value of 5 implies an average or
             # indifferent perception of an item
             custLst = list(ratingsDict.keys())
+            itemLst = getColumns(ratingsDict)
             ratingsLst, custIndex = genMatrix(custId, custLst, itemLst, ratingsDict, 5)
             similarCustomers = getMostSimilar(ratingsLst[custIndex], ratingsLst, custLst)
 
@@ -97,13 +79,7 @@ class MLManager:
         quantityDict = self.customerAccess.getTotalAmtPurchased(similarCustomers)
         if (custId in quantityDict): # ie: if the customer has ordered something in the past
             custLst = list(quantityDict.keys())
-
-            # Generate list of items
-            itemSet = set()
-            for q in quantityDict.values():
-                itemSet.update(q.keys())
-            itemLst =  [c for c in itemSet]
-
+            itemLst = getColumns(quantityDict)
             quantityLst, custIndex = genMatrix(custId, custLst, itemLst, quantityDict, 0)
             similarCustomers = getMostSimilar(quantityLst[custIndex], quantityLst, custLst)
 
@@ -112,7 +88,7 @@ class MLManager:
         if (type(cart) == list):
             cart = set(list(map(lambda i: i.item_id, cart)))
         else:
-            cart = []
+            cart = set()
 
         # Extracts a list of items bought by similar customers that haven't
         # been bought by the current customer. Items in the customers cart
@@ -127,7 +103,7 @@ class MLManager:
                         recommendedItems.add(gid)
 
         # Pad the rest with items frequently bought together.
-        if (len(recommendedItems) < recommendCount):
+        if (len(recommendedItems) < self.recommend_count):
             groceries = set(cart)
             if (custId in ratingsDict):
                 # Finds all items that the customer has rated positively
@@ -137,38 +113,42 @@ class MLManager:
             elif (custId in quantityDict):
                 # Adds all items that the customer has ever bought
                 groceries.update(quantityDict[custId].keys())
-            groceries = [g for g in groceries]
 
-            pairDict = self.orderAccess.getGroceryPairFreq(groceries)
-            pairFreq = []
-            for g1, pairCnt in pairDict.items():
-                for g2 in pairCnt.keys():
-                    if (g2 not in cart):
-                        pairFreq.append((g1, g2, pairCnt[g2]))
-            pairFreq.sort(key=lambda p: p[2], reverse=True)
-
+            pairFreq = self.getFreqBoughtWith(list(groceries))
             i = 0
-            while ((len(recommendedItems) < recommendCount) and \
-                    (i < len(pairFreq))):
-                recommendedItems.add(pairFreq[i][0])
+            while ((len(recommendedItems) < self.recommend_count) and (i < len(pairFreq))):
+                recommendedItems.add(pairFreq[i])
                 i += 1
 
         # Pad the list with the most purchased items
-        if (len(recommendedItems) < recommendCount):
-            popularItems = {}
-            for gDict in quantityDict.values():
-                for g, q in gDict.items():
-                    try:
-                        popularItems[g] += q
-                    except KeyError:
-                        popularItems[g] = q
-
-            popularLst = [g for g in popularItems.items()]
-            popularLst.sort(key=lambda d: d[1], reverse=True)
+        if (len(recommendedItems) < self.recommend_count):
+            popularItems = self.getPopularItems()
             i = 0
-            while ((len(recommendedItems) < recommendCount) and \
-                    (i < len(popularLst))):
-                recommendedItems.add(popularLst[i][0])
+            while ((len(recommendedItems) < self.recommend_count) and (i < len(popularItems))):
+                recommendedItems.add(popularItems[i])
                 i += 1
 
         return [r for r in recommendedItems]
+
+    def getFreqBoughtWith(self, gid):
+        """ Accepts a groceryID or list of grocery IDs and returns a sorted
+            list of pairs with the frequency of occurence """
+
+        pairDict = self.orderAccess.getGroceryPairFreq(gid)
+        #print('Frequent Pairs: ', pairDict)
+        pairFreq = []
+        for g1, pairCnt in pairDict.items():
+            for g2, freq in pairCnt.items():
+                pairFreq.append((g1, g2, freq))
+        pairFreq.sort(key=lambda p: p[2], reverse=True)
+
+        return list(map(lambda p: p[1], pairFreq[:self.recommend_count]))
+
+    def getPopularItems(self):
+        """ Returns the top 30 most purchased items in the system """
+
+        quantities = self.orderAccess.getTotalQuantityPurchased()
+        #print('Popular Items: ', quantities)
+        quantityLst = list(quantities.items())
+        quantityLst.sort(key=lambda q: q[1], reverse=True)
+        return list(map(lambda q: q[0], quantityLst[:self.recommend_count]))
