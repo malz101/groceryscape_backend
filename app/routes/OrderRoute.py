@@ -128,6 +128,7 @@ def record_payment():
 
 
 @manage_order.route('/update_order_status', methods=['POST'])
+@jwt_required()
 def update_order_status():
     user = get_jwt_identity()
     if user and ('role' in user):

@@ -1,7 +1,6 @@
 from ... import db
 from datetime import datetime, timedelta, timezone, date
-from ..Models import Order
-from ..Models import OrderGroceries
+from ..Models import Order, OrderGroceries
 # from .OrderGroceriesAccess import OrderGroceriesAccess
 from .CustomerAccess import CustomerAccess
 from .GroceryAccess import GroceryAccess
@@ -17,6 +16,12 @@ class OrderAccess:
         db.session.commit()
         # return self.getOrderById(order.id)
         return order
+    
+    
+    def deleteOrderByID(self, order_id):
+        Order.query.filter(id == order_id).delete()
+        db.session.commit()
+
 
     def getOrderById(self, orderId):
         order = Order.query.filter_by(id=orderId).first()
@@ -188,24 +193,6 @@ class OrderAccess:
         # except:
         return False
 
-    def getCustomerPendingOrder(self,custId):
-        orders = Order.query.filter(and_(Order.customer_id==int(custId),\
-                                            or_(Order.status=='PENDING',Order.status=='CHECKED OUT'))).all()
-        try:
-            if orders[0].id:
-                # orders = [order for order in orders if order.customer_id == custId]
-                newOrder = []
-                for order in orders:
-                    if order.status == 'PENDING':
-                        newOrder.append(order)
-                if not newOrder == []:
-                    return newOrder
-                else:
-                    return False
-            else:
-                return False
-        except:
-            return False
 
     def cancelOrder(self, custId, orderId):
         order = self.getOrderById(orderId)
