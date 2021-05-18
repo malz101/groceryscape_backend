@@ -112,7 +112,7 @@ class AccountManager:
         groceries = ''
         if self.customer_access.getCustomerById(custId):
             groceries = self.MLManager.getRecommendGroceries(custId)
-            print('get recommend in account manager',groceries)
+            # print('get recommend in account manager',groceries)
             if groceries:
                 return groceries
             return []
