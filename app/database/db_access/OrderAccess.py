@@ -17,7 +17,7 @@ class OrderAccess:
         # return self.getOrderById(order.id)
         return order
     
-    
+
     def deleteOrderByID(self, order_id):
         Order.query.filter(id == order_id).delete()
         db.session.commit()
@@ -95,14 +95,14 @@ class OrderAccess:
         order = self.getOrderById(orderId)
         if order:
             order.checkout_by = employee
-            order.status = 'CHECKED OUT'
+            order.status = 'checked out'
             db.session.commit()
             return  order
         else:
             return False
 
     def getSchedule(self):
-        orders = Order.query.filter(or_(Order.status.ilike('PENDING'),Order.status.ilike('CHECKED OUT'))).all()
+        orders = Order.query.filter(or_(Order.status.ilike('pending'),Order.status.ilike('checked out'))).all()
         try:
             if orders[0].id:
                 return orders
@@ -172,7 +172,7 @@ class OrderAccess:
                         Order.deliverydate == delivery_range_provided\
                     )
                 )
-            ).all()
+            ).order_by(Order.orderdate.desc()).all()
         else:
             orders = Order.query.filter(
                 and_(
@@ -186,7 +186,7 @@ class OrderAccess:
                         Order.deliverydate == delivery_range_provided\
                     )
                 )
-            ).all()
+            ).order_by(Order.orderdate.desc()).all()
         # try:
         if orders:
             return orders
