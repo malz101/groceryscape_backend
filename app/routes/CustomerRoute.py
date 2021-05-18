@@ -221,7 +221,7 @@ def create_order():
         if bool(user['email_confirmed']):
             try:
                 cart_items = cart_manager.getAllCartItems(user)
-                order = order_manager.create_order(user, cart_items)
+                order = order_manager.create_order(user,request, cart_items)
                 if order:
                     response = {'msg':'success', 'data':{'order':order}},200
                 else:
