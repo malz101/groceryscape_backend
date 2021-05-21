@@ -21,8 +21,10 @@ CREATE TABLE  customer  (
    email  varchar(45) NOT NULL UNIQUE,
    gender  varchar(45) NOT NULL,
    password  varchar(45) NOT NULL,
+   street  varchar(45) NOT NULL,
    town  varchar(45) NOT NULL,
-   parish  varchar(45) NOT NULL
+   parish  varchar(45) NOT NULL,
+   email_confirmed boolean NOT NULL
 );
 
 DROP TABLE IF EXISTS delivery_parish;

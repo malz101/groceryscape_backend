@@ -1,5 +1,5 @@
 import os
-from app import app
+from app import app, db
 from flask import Flask, render_template, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask import session
@@ -30,7 +30,40 @@ app.register_blueprint(manage_cart, url_prefix="/manage_cart")
 app.register_blueprint(manage_rating, url_prefix="/manage_rating")
 app.register_blueprint(manage_order, url_prefix="/manage_order")
 
-
+# from app import encrypter
+# from app.database.Models import Customers, Employees, Order, Customer, Employee, Orders,DeliveryParish, DeliveryParishes
+# @app.route('/rename')
+# def rename():
+#     # customers = Customer.query.all()
+#     # for customer in customers:
+#     #     new = Customers(customer.first_name, customer.last_name,\
+#     #     customer.telephone, customer.email,customer.gender, customer.password, customer.street, \
+#     #     customer.town, customer.parish)
+#     #     db.session.add(new)
+#     # db.session.commit()
+#     ps = DeliveryParish.query.all()
+#     for p in ps:
+#         newd= DeliveryParishes(str(p.parish),p.delivery_rate)
+#         db.session.add(newd)
+#     db.session.commit()
+#     return 'success'
+#     # employees = Employee.query.all()
+#     # for employee in employees:
+#     #     newe = Employees(employee.first_name, employee.last_name,\
+#     #     employee.telephone, employee.email, employee.password, employee.street, \
+#     #     employee.town, employee.parish, employee.role, employee.salary)
+#     #     db.session.add(newe)
+#     # db.session.commit()
+#     orders = Order.query.all()
+#     for order in orders:
+#         newo = Orders(order.customer_id, order.payment_type)
+#         newo.status=encrypter.encrypt(order.status)
+#         newo.deliverystreet=encrypter.encrypt(order.deliverystreet)
+#         newo.deliverytown=encrypter.encrypt(order.deliverytown) 
+#         newo.deliveryparish=encrypter.encrypt(order.deliveryparish)
+#         db.session.add(newo)
+#     db.session.commit()
+#     return 'success'
 
 """serves the index page for users"""
 @app.route('/', defaults={'path': ''})
