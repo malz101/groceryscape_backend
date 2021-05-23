@@ -125,8 +125,29 @@ CREATE TABLE  rating  (
 );
 
 create view item_total_rating as
-    select item_id, sum(rating) as total_rating, count(*) as num_customer, (sum(rating)*((count(*)*1.0)/10000))  as coefficient
-    from rating group by item_id
+  select item_id, sum(rating) as total_rating, count(*) as num_customer, (sum(rating)*((count(*)*1.0)/10000))  as coefficient
+  from rating group by item_id
+;
+
+create view count_pairs as
+select g1.grocery_id as item1, g2.grocery_id as item2, count(g2.order_id) as count
+  from order_groceries as g1 join order_groceries as g2 on g1.order_id = g2.order_id
+  where g1.grocery_id != g2.grocery_id
+  group by g1.grocery_id, g2.grocery_id
+  order by count(g2.grocery_id)
+;
+
+create view total_quantity_purchased as
+select grocery_id, sum(quantity) as quantity
+  from order_groceries
+  group by grocery_id
+;
+
+create view total_amount_purchased
+select c.id as cust_id,og.grocery_id as grocery_id,sum(og.quantity)
+  from customer as c join orders as o on c.id = o.customer_id
+  join order_groceries as og on o.id = og.order_id
+  group by c.id,og.grocery_id
 ;
 
 INSERT INTO  employee  (first_name ,  last_name ,  email ,  password ,  street, town , parish,   role ,  salary ) VALUES
