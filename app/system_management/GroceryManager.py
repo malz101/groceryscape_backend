@@ -161,6 +161,7 @@ class GroceryManager:
             print(e)
             return {'msg':'request failed', 'error':'ise-0001'}, 500
 
+
     def getFreqBoughtWith(self,id):
         try:
             ids = self.ml_access.getFreqBoughtWith(int(id))

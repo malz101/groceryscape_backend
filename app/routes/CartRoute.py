@@ -15,8 +15,8 @@ def addToCart():
     user = get_jwt_identity()
     if not 'role' in user:
         try:
-            cart = cart_manager.addToCart(request, user)
-            if cart:
+            result = cart_manager.addToCart(request, user)
+            if result:
                 response = {'msg':'success','data':{}}, 201
             else:
                 response = {'msg':'Item not added. Duplicate Item or Grocery Item not in database','error':'create-0001'}, 404
@@ -39,9 +39,9 @@ def removeFromCart(grocery_id):
     user = get_jwt_identity()
     if not 'role' in user:
         try:
-            cartItems = cart_manager.removeItemFromCart(grocery_id, user)
-            if cartItems:
-                response = {'msg':'success', 'data':cartItems}, 200
+            result = cart_manager.removeItemFromCart(grocery_id, user)
+            if result:
+                response = {'msg':'success', 'data':{}}, 200
             else:
                 response = {'msg':'no item found', 'error':'notfound-0001'}, 404
         except Exception as e:

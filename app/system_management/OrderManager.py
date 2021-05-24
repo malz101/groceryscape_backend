@@ -9,10 +9,11 @@ from .. import encrypter
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 class OrderManager:
     
-    def __init__(self, orderAccess, paymentAccess, deliveryAccess):
+    def __init__(self, orderAccess, paymentAccess, deliveryAccess, cartAccess=None):
         self.orderAccess = orderAccess
         self.paymentAccess = paymentAccess
         self.deliveryAccess = deliveryAccess
+        self.cartAccess = cartAccess
     
     def updateStatus(self, request):
         '''Updates the status of an order. Status of an order can be Pending, Checkout, Delivered, Canceled'''
@@ -43,16 +44,28 @@ class OrderManager:
 
 
 
-    def create_order(self,user,request,cart_items):
+    def create_order(self,user,request):
         '''create an order from the cart items'''
-        cust_id = user['cust_id']
+        
         getParam = self.getRequestType(request)
-        payment_type = getParam('payment_type')
+        order_data = {
+            'customer_id': user['cust_id'],
+            'payment_type': getParam('payment_type'),
+            'deliverystreet': getParam('street'),
+            'deliverytown': getParam('town'),
+            'deliveryparish': getParam('parish'),
+            'deliverytimeslot': getParam('timeslot'),
+            'deliverydate': getParam('date'),
+            'notes': getParam('notes')
+        }
 
-        # 2) get all cart items
+        cart_items = self.cartAccess.getAllCartItems(int(cust_id))
         if cart_items:
-            order = self.orderAccess.addItemsToOrder(cart_items,int(cust_id),payment_type)
+            order = self.orderAcess.createOrder(order_data)
             if order:
+                # 2) get all cart items
+                self.orderAccess.addItemsToOrder(cart_items,order.id)
+                
                 return {
                     'order_id':str(order.id),
                     'order_date':order.orderdate,
@@ -299,7 +312,7 @@ class OrderManager:
         intent = None
         try:
             if  payment_method_id:
-                order = self.getOrderCustomer(user,order_id)
+                order = self.getOrderCustomer(user,int(order_id))
                 
                 if order:
                     print('Order Total',order['total'])

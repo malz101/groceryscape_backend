@@ -2,7 +2,7 @@ from .. import db, encrypter
 from flask import Flask 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
-from datetime import datetime
+from datetime import datetime, date
 from sqlalchemy import Column, Integer, String, Table, Numeric, ForeignKey
 # from sqlalchemy.ext.declarative import declarative_base
 from werkzeug.security import generate_password_hash
@@ -25,9 +25,9 @@ class Customer(db.Model):
     email_confirmed = db.Column(db.Boolean,nullable=False, default=False)
 
     #relationships
-    orders = db.relationship('Orders', back_populates='customer')
+    orders = db.relationship('Order', back_populates='customer')
     cart_items = db.relationship("Cart", back_populates="customer_carts")
-    grocery_ratings = db.relationship("Rating", back_populates="customer_ratings")
+    ratings = db.relationship("Rating", back_populates="customer")
 
     def __init__(self, first_name, last_name, telephone, email, gender, password,street, town, parish):
         self.first_name = encrypter.encrypt(first_name)
@@ -86,7 +86,7 @@ class Order(db.Model):
     deliveryparish = db.Column(db.Integer, db.ForeignKey('delivery_parish.id'))
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id',ondelete='CASCADE'), nullable=False)
     checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id',ondelete='SET NULL'))# represents a one to many-to-many relationship between employee and orders
-    details = db.Column(db.LargeBinary, nullable=True)
+    notes = db.Column(db.LargeBinary, nullable=True)
 
     # relationship
     customer = db.relationship('Customer', back_populates='orders', passive_deletes=True)
@@ -97,10 +97,16 @@ class Order(db.Model):
     employee = db.relationship('Employee', back_populates='checkouts')
     timeslot = db.relationship('DeliveryTimeSlot', back_populates='orders')
 
-
-    def __init__(self, customer_id, payment_type):
-        self.payment_type = encrypter.encrypt(payment_type)
+    def __init__(self, customer_id,deliverydate,deliverytimeslot,deliverystreet,deliverytown,deliveryparish, payment_type, notes):
         self.customer_id = customer_id
+        self.deliverydate = datetime.strptime(deliverydate,'%Y-%m-%d').date()
+        self.deliverytimeslot = deliverytimeslot
+        self.deliverystreet = encrypter.encrypt(deliverystreet)
+        self.deliverytown = encrypter.encrypt(deliverytown)
+        self.deliveryparish = deliveryparish
+        self.payment_type = encrypter.encrypt(payment_type)
+        if not notes is None:
+            self.notes = encrypter.encrypt(notes)
 
 
 class Grocery(db.Model):
@@ -123,7 +129,7 @@ class Grocery(db.Model):
     customer_carts = db.relationship("Cart", back_populates="cart_items")
 
     #ratings associated many to many
-    customer_ratings = db.relationship("Rating", back_populates="grocery_ratings")
+    ratings = db.relationship("Rating", back_populates="grocery")
 
     taxes = db.relationship("Taxes_on_goods", back_populates="grocery")
 
@@ -156,7 +162,8 @@ class Rating(db.Model):
     item_id = db.Column(db.Integer, db.ForeignKey('grocery.id',ondelete='CASCADE'), primary_key=True)
     rating = db.Column(db.Integer, nullable=False)
 
-    grocery_ratings = db.relationship("Grocery", back_populates="customer_ratings", passive_deletes=True)
+    grocery = db.relationship("Grocery", back_populates="ratings", passive_deletes=True)
+    customer = db.relationship("Customer", back_populates="ratings", passive_deletes=True)
 
 
 class CashPayment(db.Model):
@@ -193,7 +200,7 @@ class DeliveryParish(db.Model):
     parish = db.Column(db.LargeBinary, unique=True)
     delivery_rate = db.Column(db.Numeric(10,2), nullable=False)
 
-    orders = db.relationship("Orders", back_populates="parish")
+    orders = db.relationship("Order", back_populates="parish")
 
     def __init__(self,parish,delivery_rate):
         self.parish = encrypter.encrypt(parish)

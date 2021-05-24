@@ -55,17 +55,13 @@ class CartAccess:
             return False
 
     def removeItem(self, cartId, itemId):
-        # 1) check if the grocery is already in the customers cart
-        cartEntry = self.getCartItem(cartId, itemId)
-        if cartEntry:
-            grocery = self.groceryAccess.searchForGrocery(cartEntry.item_id)
-            self.groceryAccess.updateGrocery(grocery.id, 'quantity', grocery.quantity + cartEntry.quantity)
-            db.session.delete(cartEntry)
+        cart_item = Cart.query.filter_by(cart_id=cartId, item_id=itemId).first()
+        if cart_item:
+            db.session.delete(cart_item)
             db.session.commit()
-            return self.getAllCartItems(cartId)
-        else:
-            # 3) otherwise return error msg
-            return False
+            return True
+        return False
+
 
     def getCartItem(self, cartId, itemId):
         # 1) check if cart entry is in db
@@ -78,19 +74,17 @@ class CartAccess:
         except:
             return False
 
+
     def getAllCartItems(self, cartId):
-        cartItems = Cart.query.filter_by(cart_id=cartId).all()
-        try:
-            if cartItems[0].cart_id:
-                return cartItems
-        except:
-            return False
+        cartItems = Cart.query.filter_by(cart_id=cartId).all() 
+        return cartItems
+
 
     def updateCart(self, cartId, new_values):
         item_ids = [int(key) for key in new_values.keys()]
-        print('item_ids',item_ids)
+        # print('item_ids',item_ids)
         cart_items = Cart.query.filter(and_(Cart.cart_id==cartId,Cart.item_id.in_(item_ids))).all()
-        print('cart items',str(cart_items))
+        # print('cart items',str(cart_items))
         updated_cart = []
         for cartItem in cart_items:
             quantity = int(new_values[str(cartItem.item_id)])

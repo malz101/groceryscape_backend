@@ -6,7 +6,7 @@ from flask import session
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
 
 """import blueprints (routes) for different sections of the system"""
-from .CustomerRoute import manage_customer_account
+from .CustomerRoute import customer
 from .EmployeeRoute import manage_employee_account
 from .GroceryRoute import manage_groceries
 from .CartRoute import manage_cart
@@ -23,7 +23,7 @@ account_manager = AccountManager(customer_access, MLManager(customer_access, ord
 
 
 """register blueprints"""
-app.register_blueprint(manage_customer_account, url_prefix="/manage_customer_account")
+app.register_blueprint(customer, url_prefix="/customer")
 app.register_blueprint(manage_employee_account, url_prefix="/manage_employee_account")
 app.register_blueprint(manage_groceries, url_prefix="/manage_groceries")
 app.register_blueprint(manage_cart, url_prefix="/manage_cart")

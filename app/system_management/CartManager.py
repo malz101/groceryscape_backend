@@ -33,30 +33,8 @@ class CartManager:
         # getParam = self.getRequestType(request)
         # itemId = getParam('grocery_id')
         cartId = user['cust_id']
-
-        cartItems = self.cartAccess.removeItem(cartId, grocery_id)
-        response = []
-        if cartItems:
-            for grocery in cartItems:
-                cost_before_tax = grocery.quantity * grocery.cart_items.cost_per_unit
-                GCT = self.groceryAccess.getTax(grocery.item_id, 'GCT') * grocery.quantity
-                SCT = self.groceryAccess.getTax(grocery.item_id, 'SCT') * grocery.quantity
-                total = float(cost_before_tax) + float(GCT) + float(SCT)
-                total_weight = str(grocery.quantity * grocery.cart_items.grams_per_unit) + " grams"
-                response.append({
-                    'grocery_id': str(grocery.item_id),
-                    'photo': str(grocery.cart_items.photo),
-                    'quantity': str(grocery.quantity),
-                    'inventory': str(grocery.cart_items.quantity),
-                    'cost_before_tax': str(cost_before_tax),
-                    'name': grocery.cart_items.name,
-                    'total_weight': total_weight, 
-                    'GCT': str(GCT), 
-                    'SCT': str(SCT),
-                    'total': str(total)
-                })
-            return {'items':response, 'grand_total':self.cartAccess.getTotalOnCart(cartId)}
-        return False
+        return self.cartAccess.removeItem(int(cartId),int(grocery_id))
+        
 
 
     def updateCart(self, request, user):
@@ -74,6 +52,7 @@ class CartManager:
             return False
         raise TypeError
 
+
     def getAllCartItems(self, user):
 
         cartId = user['cust_id']
@@ -83,7 +62,8 @@ class CartManager:
         if cartItems:
             return self.__getCartDetails(cartItems)
         return False
-    
+
+
     def __getCartDetails(self, cartItems):
         '''returns details about cart'''
 

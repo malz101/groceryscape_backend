@@ -13,8 +13,8 @@ from ..database.db_access import customer_access,grocery_access, rating_access,\
 from ..system_management.MLManager import MLManager
 
 
-"""All requests that are related to the management of a customer's account should come to this route"""
-manage_customer_account = Blueprint("manage_customer_account", __name__)
+"""All requests that are related to the a customer's request should come to this route"""
+customer = Blueprint("customer", __name__)
 
 """create an object that manages all operations on a customer's account"""
 customer_manager = AccountManager(customer_access, MLManager(customer_access, order_access, rating_access, cart_access))
@@ -23,7 +23,7 @@ customer_manager = AccountManager(customer_access, MLManager(customer_access, or
 cart_manager = CartManager(cart_access, grocery_access)
 
 """creates order manager"""
-order_manager = OrderManager(order_access, payment_access, delivery_access)
+order_manager = OrderManager(order_access, payment_access, delivery_access,cart_access)
 
 """object used to manipulate all grocery operations"""
 grocery_manager = GroceryManager(grocery_access, rating_access,MLManager(customer_access, order_access, rating_access, cart_access))
@@ -32,7 +32,7 @@ grocery_manager = GroceryManager(grocery_access, rating_access,MLManager(custome
 rating_manager = RatingManager(rating_access)
 
 """handles customers' account requests"""
-@manage_customer_account.route('/signup', methods=['POST'])
+@customer.route('/signup', methods=['POST'])
 def signup():
     """Pass all the responsibility of creating an account to the account manager"""
     try:
@@ -48,7 +48,7 @@ def signup():
         return response
 
 
-@manage_customer_account.route('/confirm_email/<token>', methods=['GET'])
+@customer.route('/confirm_email/<token>', methods=['GET'])
 def confirm_email(token):
     try:
         response = customer_manager.confirmEmail(token,app.config['SECRET_KEY'])
@@ -61,7 +61,7 @@ def confirm_email(token):
         return response
 
 
-@manage_customer_account.route('/login', methods=["POST"])
+@customer.route('/login', methods=["POST"])
 def login():
     try:
         customer = customer_manager.login(request)
@@ -82,7 +82,7 @@ def login():
         return response
 
 
-@manage_customer_account.route('/logout', methods=["GET","POST"])
+@customer.route('/logout', methods=["GET","POST"])
 @jwt_required()
 def logout():
     user = get_jwt_identity()
@@ -98,7 +98,7 @@ def logout():
         return {'msg': '', 'error':'internal server error'}, 500
 
 
-@manage_customer_account.route('/update_account', methods=["POST"])
+@customer.route('/update_account', methods=["POST"])
 @jwt_required()
 def update_account():
     user = get_jwt_identity()
@@ -121,7 +121,7 @@ def update_account():
     return redirect(url_for('index'))
 
 
-@manage_customer_account.route('/get_customer', methods=["GET"])
+@customer.route('/get_customer', methods=["GET"])
 @jwt_required()
 def get_customer():
     user = get_jwt_identity()
@@ -143,7 +143,7 @@ def get_customer():
     else:
         return redirect(url_for('index'))
 
-@manage_customer_account.route('/get_recommended_groceries', methods=["GET","POST"])
+@customer.route('/get_recommended_groceries', methods=["GET","POST"])
 @jwt_required()
 def get_recommended_groceries():
     user = get_jwt_identity()
@@ -164,7 +164,7 @@ def get_recommended_groceries():
         return redirect(url_for('index'))
 
 
-@manage_customer_account.route('/get_item_rating', methods=['POST','GET'])
+@customer.route('/get_item_rating', methods=['POST','GET'])
 @jwt_required()
 def get_item_rating():
     user = get_jwt_identity()
@@ -175,7 +175,7 @@ def get_item_rating():
         return redirect(url_for('index'))
 
 
-@manage_customer_account.route('/get_delivery_timeslots', methods=['GET'])
+@customer.route('/get_delivery_timeslots', methods=['GET'])
 @jwt_required()
 def get_delivery_timeslots():
     user = get_jwt_identity()
@@ -189,7 +189,7 @@ def get_delivery_timeslots():
         return redirect(url_for('index'))
 
 
-@manage_customer_account.route('/get_order_preview', methods=['POST', 'GET'])
+@customer.route('/get_order_preview', methods=['POST', 'GET'])
 @jwt_required()
 def get_order_preview():
     user = get_jwt_identity()
@@ -213,15 +213,15 @@ def get_order_preview():
         return redirect(url_for('index'))
 
 
-@manage_customer_account.route('/create_order', methods=['POST', 'GET'])
+@customer.route('/create_order', methods=['POST', 'GET'])
 @jwt_required()
 def create_order():
     user = get_jwt_identity()
     if user and (not 'role' in user):
         if bool(user['email_confirmed']):
             try:
-                cart_items = cart_manager.getAllCartItems(user)
-                order = order_manager.create_order(user,request, cart_items)
+                # cart_items = cart_manager.getAllCartItems(user)
+                order = order_manager.create_order(user,request)
                 if order:
                     response = {'msg':'success', 'data':{'order':order}},200
                 else:
@@ -237,7 +237,7 @@ def create_order():
         return redirect(url_for('index'))
 
 
-@manage_customer_account.route('/get_my_orders', methods=["GET"])
+@customer.route('/get_my_orders', methods=["GET"])
 @jwt_required()
 def get_my_orders():
     user = get_jwt_identity()
@@ -261,7 +261,7 @@ def get_my_orders():
         return redirect(url_for('index'))
 
 
-@manage_customer_account.route('/get_order/<order_id>', methods=['GET'])
+@customer.route('/get_order/<order_id>', methods=['GET'])
 @jwt_required()
 def get_order(order_id):
     user = get_jwt_identity()
@@ -284,7 +284,7 @@ def get_order(order_id):
         return redirect(url_for('index'))
     
 
-@manage_customer_account.route('/cancel_order/<order_id>', methods=["GET","POST"])
+@customer.route('/cancel_order/<order_id>', methods=["GET","POST"])
 @jwt_required()
 def cancel_order(order_id):
     user = get_jwt_identity()
@@ -307,7 +307,7 @@ def cancel_order(order_id):
         return redirect(url_for('index'))
 
 
-@manage_customer_account.route('/set_delivery_location/<order_id>', methods=["POST"])
+@customer.route('/set_delivery_location/<order_id>', methods=["POST"])
 @jwt_required()
 def set_delivery_location(order_id):
     user = get_jwt_identity()
@@ -331,7 +331,7 @@ def set_delivery_location(order_id):
         return redirect(url_for('index'))
 
 # AJAX endpoint when `/pay` is called from client
-@manage_customer_account.route('/pay', methods=['POST'])
+@customer.route('/pay', methods=['POST'])
 @jwt_required()
 def pay():
     user = get_jwt_identity()
@@ -351,7 +351,7 @@ def pay():
         return redirect(url_for('index'))
 
 
-@manage_customer_account.route('/get_pay_key', methods=['GET'])
+@customer.route('/get_pay_key', methods=['GET'])
 @jwt_required()
 def get_payment_key():
     user = get_jwt_identity()
@@ -372,7 +372,7 @@ def get_payment_key():
 
 
 
-@manage_customer_account.route('/rate_grocery', methods=['POST','GET'])
+@customer.route('/rate_grocery', methods=['POST','GET'])
 @jwt_required()
 def rate_grocery():
     user = get_jwt_identity()

@@ -10,8 +10,17 @@ import time
 
 class OrderAccess:
 
-    def createOrder(self, custId, type_):
-        order = Order(custId, type_)
+    def createOrder(self,data):
+        order = Order(
+            data['customer_id'],
+            data['deliverydate'],
+            data['deliverytimeslot'],
+            data['deliverystreet'],
+            data['deliverytown'],
+            data['deliveryparish'], 
+            data['payment_type'], 
+            data['notes']
+        )
         db.session.add(order)
         db.session.commit()
         # return self.getOrderById(order.id)
@@ -40,21 +49,21 @@ class OrderAccess:
             return False
 
 
-    def addItemsToOrder(self, cart_summary,cust_id,type_):
+    def addItemsToOrder(self, cart_items, order_id):
         '''add items to created order'''
-        order = self.createOrder(cust_id,type_)
-
-        for item in cart_summary['items']:
-            order_grocery = OrderGroceries(order_id=order.id, grocery_id=int(item['grocery_id']), quantity=int(item['quantity']))
+    
+        for item in cart_items:
+            order_grocery = OrderGroceries(order_id=order_id, grocery_id=item.item_id, quantity=item.quantity)
             db.session.add(order_grocery)
             db.session.flush()
             # print(item)
-            print('was here')
-            print('Order id',order_grocery.order_id)
-            print('Grocery id', order_grocery.grocery_id)
-            order_grocery.groceries.quantity -= int(item['quantity'])
+            # print('was here')
+            # print('Order id',order_grocery.order_id)
+            # print('Grocery id', order_grocery.grocery_id)
+            order_grocery.groceries.quantity -= item.quantity
+            
         db.session.commit()
-        return order
+        # return order
     
 
     def updateStatus(self,orderId, status):
