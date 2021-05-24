@@ -29,7 +29,8 @@ CREATE TABLE  customer  (
 
 DROP TABLE IF EXISTS delivery_parish;
 CREATE TABLE delivery_parish (
-  parish varchar(40) NOT NULL PRIMARY KEY,
+  id  SERIAL NOT NULL PRIMARY KEY,
+  parish varchar(40) NOT NULL UNIQUE,
   delivery_rate float NOT NULL
 );
 
@@ -60,13 +61,13 @@ CREATE TABLE orders  (
    status  varchar(40) NOT NULL,
    deliveryDate  timestamp DEFAULT NULL,
    deliveryTown  varchar(45) DEFAULT NULL,
-   deliveryParish  varchar(45) DEFAULT NULL,
+   deliveryParish  SERIAL,
    customer_id  integer,
    checkout_by  integer DEFAULT NULL,
 
   FOREIGN KEY( customer_id ) REFERENCES  customer ( id ) ON DELETE SET NULL,
   FOREIGN KEY( checkout_by ) REFERENCES  employee ( id ) ON DELETE SET NULL,
-  FOREIGN KEY(deliveryParish) REFERENCES delivery_parish (parish) ON DELETE SET NULL
+  FOREIGN KEY(deliveryParish) REFERENCES delivery_parish (id) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS taxes_on_goods;
@@ -143,8 +144,8 @@ select grocery_id, sum(quantity) as quantity
   group by grocery_id
 ;
 
-create view total_amount_purchased
-select c.id as cust_id,og.grocery_id as grocery_id,sum(og.quantity)
+create view total_amount_purchased as
+select c.id as cust_id,og.grocery_id as grocery_id,sum(og.quantity) as total
   from customer as c join orders as o on c.id = o.customer_id
   join order_groceries as og on o.id = og.order_id
   group by c.id,og.grocery_id

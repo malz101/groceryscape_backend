@@ -24,14 +24,10 @@ class Customer(db.Model):
     parish = db.Column(db.LargeBinary, nullable=False)
     email_confirmed = db.Column(db.Boolean,nullable=False, default=False)
 
-    orders = db.relationship('Orders', back_populates='customer', cascade="all,delete")
-    
-
-    #cart associated many to many
-    cart_items = db.relationship("Cart", back_populates="customer_carts", cascade="all,delete")
-
-    #ratings associated many to many
-    grocery_ratings = db.relationship("Rating", back_populates="customer_ratings", cascade="all,delete")
+    #relationships
+    orders = db.relationship('Orders', back_populates='customer')
+    cart_items = db.relationship("Cart", back_populates="customer_carts")
+    grocery_ratings = db.relationship("Rating", back_populates="customer_ratings")
 
     def __init__(self, first_name, last_name, telephone, email, gender, password,street, town, parish):
         self.first_name = encrypter.encrypt(first_name)
@@ -50,7 +46,7 @@ class Employee(db.Model):
     id = db.Column(db.Integer, primary_key=True, index=True)
     first_name = db.Column(db.LargeBinary, nullable=False)
     last_name = db.Column(db.LargeBinary, nullable=False)
-    telephone = db.Column(db.String(100), nullable=True)
+    telephone = db.Column(db.LargeBinary, nullable=True)
     email = db.Column(db.LargeBinary, nullable=False, unique=True)
     password = db.Column(db.LargeBinary, nullable=False)
     street = db.Column(db.LargeBinary, nullable=False)
@@ -60,8 +56,8 @@ class Employee(db.Model):
     salary = db.Column(db.Numeric(10,2), nullable=True)
 
     # represent the payment collected an employee (many to one relationship)
-    payments_collected = db.relationship('CashPayment', back_populates='employee', cascade="all,delete")
-    checkouts = db.relationship('Order', back_populates='employees', cascade="all,delete")
+    payments_collected = db.relationship('CashPayment', back_populates='employee')
+    checkouts = db.relationship('Order', back_populates='employee')
 
 
     def __init__(self, first_name, last_name, telephone, email, password, street, town, parish, role, salary):
@@ -87,29 +83,21 @@ class Order(db.Model):
     deliverydate = db.Column(db.Date)
     deliverystreet = db.Column(db.LargeBinary)
     deliverytown = db.Column(db.LargeBinary)
-    deliveryparish = db.Column(db.LargeBinary,db.ForeignKey('delivery_parish_.parish'), default=encrypter.encrypt('None'))
-    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
-    checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id'))# represents a one to many-to-many relationship between employee and orders
+    deliveryparish = db.Column(db.Integer, db.ForeignKey('delivery_parish.id'))
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id',ondelete='CASCADE'), nullable=False)
+    checkout_by = db.Column(db.Integer, db.ForeignKey('employee.id',ondelete='SET NULL'))# represents a one to many-to-many relationship between employee and orders
     details = db.Column(db.LargeBinary, nullable=True)
 
-    # represents one-to-many relationship between customer and orders
-    customer = db.relationship('Customer', back_populates='orders')
-
-    # represents the many-to-many relationship between  orders and groceries
-    groceries = db.relationship("OrderGroceries", back_populates="orders", cascade="all,delete")
-
-    # represents a one-to-one relationship between cash payment and order
-    cash_payment = db.relationship('CashPayment', back_populates='order', cascade="all,delete")
-
-    # represents a one-to-one relationship between card payment and order
-    card_payment = db.relationship('CardPayment', back_populate='order', cascade="all,delete")
-
-    # represents the one-to-many relationship between  orders and delivery_parish
-    parish = db.relationship("DeliveryParish", back_populates="orders_in_parish")
-
+    # relationship
+    customer = db.relationship('Customer', back_populates='orders', passive_deletes=True)
+    groceries = db.relationship("OrderGroceries", back_populates="orders")
+    cash_payment = db.relationship('CashPayment', back_populates='order')
+    card_payment = db.relationship('CardPayment', back_populates='order')
+    parish = db.relationship("DeliveryParish", back_populates="orders")
     employee = db.relationship('Employee', back_populates='checkouts')
-
     timeslot = db.relationship('DeliveryTimeSlot', back_populates='orders')
+
+
     def __init__(self, customer_id, payment_type):
         self.payment_type = encrypter.encrypt(payment_type)
         self.customer_id = customer_id
@@ -129,71 +117,70 @@ class Grocery(db.Model):
     sku = db.Column(db.String(50), unique=True, nullable=True)
 
     #order associated many to many
-    orders = db.relationship("OrderGroceries", back_populates="groceries", cascade="all,delete")
+    orders = db.relationship("OrderGroceries", back_populates="groceries")
 
     #cart associated many to many
-    customer_carts = db.relationship("Cart", back_populates="cart_items", cascade = "all,delete")
+    customer_carts = db.relationship("Cart", back_populates="cart_items")
 
     #ratings associated many to many
-    customer_ratings = db.relationship("Rating", back_populates="grocery_ratings", cascade="all,delete")
+    customer_ratings = db.relationship("Rating", back_populates="grocery_ratings")
 
-    taxes = db.relationship("Taxes_on_goods", back_populates="grocery", cascade="all,delete")
+    taxes = db.relationship("Taxes_on_goods", back_populates="grocery")
 
 
 class OrderGroceries(db.Model):
     __tablename__ = 'order_groceries'
-    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), primary_key=True, index=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id',ondelete='CASCADE'), primary_key=True, index=True)
     grocery_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True,index=True)
     quantity = db.Column(db.Integer)
 
-    orders = db.relationship("Order", back_populates="groceries")
+    orders = db.relationship("Order", back_populates="groceries", passive_deletes=True)
     groceries = db.relationship("Grocery", back_populates="orders")
 
 
 class Cart(db.Model):
     __tablename__ = 'cart'
-    cart_id = db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True, index=True)
-    # cart_id = db.Column(db.Integer, db.ForeignKey('customers.id'), primary_key=True, index=True)
-    item_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True, index=True)
+    cart_id = db.Column(db.Integer, db.ForeignKey('customer.id',ondelete='CASCADE'), primary_key=True, index=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('grocery.id',ondelete='CASCADE'), primary_key=True, index=True)
     quantity = db.Column(db.Integer, nullable=False)
     
-    cart_items = db.relationship("Grocery", back_populates="customer_carts")
-    customer_carts = db.relationship("Customer", back_populates="cart_items")
+    cart_items = db.relationship("Grocery", back_populates="customer_carts", passive_deletes=True)
+
+    customer_carts = db.relationship("Customer", back_populates="cart_items", passive_deletes=True)
     # customer_cart = db.relationship("Customers", back_populates="cart_items")#test
 
 
 class Rating(db.Model):
     __tablename__ = 'rating'
-    cust_id = db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True)
-    # cust_id = db.Column(db.Integer, db.ForeignKey('customers.id'), primary_key=True)
-    item_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True)
+    cust_id = db.Column(db.Integer, db.ForeignKey('customer.id',ondelete='CASCADE'), primary_key=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('grocery.id',ondelete='CASCADE'), primary_key=True)
     rating = db.Column(db.Integer, nullable=False)
 
-    grocery_ratings = db.relationship("Grocery", back_populates="customer_ratings")
-    customer_ratings = db.relationship("Customer", back_populates="grocery_ratings")
-    # customer_rating = db.relationship("Customers", back_populates="grocery_ratings")#test
+    grocery_ratings = db.relationship("Grocery", back_populates="customer_ratings", passive_deletes=True)
+
 
 class CashPayment(db.Model):
     __tablename__ = 'cash_payment'
-    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), primary_key=True)
-    recorded_by = db.Column(db.Integer, db.ForeignKey('employee.id'))
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id',ondelete='CASCADE'), primary_key=True)
+    recorded_by = db.Column(db.Integer, db.ForeignKey('employee.id', ondelete='SET NULL'))
     payment_date = db.Column(db.DateTime,default=datetime.utcnow)
     amount_tendered = db.Column(db.Numeric(10,2), nullable=False)
     change = db.Column(db.Numeric(10,2), nullable=True)
 
     employee = db.relationship('Employee', back_populates='payments_collected')
 
-    order = db.relationship('Order', back_populates='cash_payment')
+    order = db.relationship('Order', back_populates='cash_payment', passive_deletes=True)
 
 
 class CardPayment(db.Model):
     __tablename__ = 'card_payment'
-    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id',ondelete='CASCADE'), primary_key=True)
     payment_date = db.Column(db.DateTime(),default=datetime.utcnow)
     amount_tendered = db.Column(db.Numeric(10,2), nullable=False)
     intent_id = db.Column(db.String(100), unique=True, nullable = False)
 
-    order = db.relationship('Order', back_populates='card_payment')
+    order = db.relationship('Order', back_populates='card_payment', passive_deletes=True)
+
     def __init__(self, order_id, amount, intent_id):
         self.order_id = order_id
         self.amount_tendered = amount
@@ -202,10 +189,11 @@ class CardPayment(db.Model):
 
 class DeliveryParish(db.Model):
     __tablename__ = 'delivery_parish'
-    parish = db.Column(db.LargeBinary, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    parish = db.Column(db.LargeBinary, unique=True)
     delivery_rate = db.Column(db.Numeric(10,2), nullable=False)
 
-    orders_in_parish = db.relationship("Orders", back_populates="parish")
+    orders = db.relationship("Orders", back_populates="parish")
 
     def __init__(self,parish,delivery_rate):
         self.parish = encrypter.encrypt(parish)
@@ -230,6 +218,7 @@ class MaxDeliveriesPerSlot(db.Model):
     __tablename__ = 'max_deliveries_per_slot'
     max_deliveries_per_time_slot = db.Column(db.Integer,primary_key=True, nullable=False)
 
+
 class Taxes(db.Model):
     __tablename__ = 'taxes'
     tax = db.Column(db.String(50), nullable=False, primary_key=True)
@@ -240,10 +229,10 @@ class Taxes(db.Model):
 
 class Taxes_on_goods(db.Model):
     __tablename__ = "taxes_on_goods"
-    tax = db.Column(db.String, db.ForeignKey('taxes.tax'), primary_key=True)
-    grocery_id = db.Column(db.Integer, db.ForeignKey('grocery.id'), primary_key=True)
+    tax = db.Column(db.String, db.ForeignKey('taxes.tax',ondelete='SET NULL'), primary_key=True)
+    grocery_id = db.Column(db.Integer, db.ForeignKey('grocery.id',ondelete='CASCADE'), primary_key=True)
 
-    grocery = db.relationship("Grocery", back_populates="taxes")
+    grocery = db.relationship("Grocery", back_populates="taxes", passive_deletes=True)
     tax_type = db.relationship("Taxes", back_populates="groceries")
 
 
@@ -252,28 +241,28 @@ class Taxes_on_goods(db.Model):
 #                       Views
 ####################################################
 
-# class ItemTotalRating(db.Model):
-#     __tablename__ = 'item_total_rating'
-#     item_id = db.Column(db.Integer, primary_key=True)
-#     total_rating = db.Column(db.Integer)
-#     num_customer = db.Column(db.Integer)
-#     coefficient = db.Column(db.Numeric(15,10))
+class ItemTotalRating(db.Model):
+    __tablename__ = 'item_total_rating'
+    item_id = db.Column(db.Integer, primary_key=True)
+    total_rating = db.Column(db.Integer)
+    num_customer = db.Column(db.Integer)
+    coefficient = db.Column(db.Numeric(15,10))
 
 
-# class TotalQuantityPurchased(db.Model):
-#     __tablename__ = 'total_quantity_purchased'
-#     grocery_id = db.Column(db.Integer,db.ForeignKey('grocery.id'),primary_key=True)
-#     total = db.Column(db.Integer)
+class TotalQuantityPurchased(db.Model):
+    __tablename__ = 'total_quantity_purchased'
+    grocery_id = db.Column(db.Integer,db.ForeignKey('grocery.id'),primary_key=True)
+    total = db.Column(db.Integer)
 
 
-# class CountPairs(db.Model):
-#     __tablename__ = 'count_pairs'
-#     item1 = db.Column(db.Integer, db.ForeignKey('grocery.id'),primary_key=True)
-#     item2 = db.Column(db.Integer,db.ForeignKey('grocery.id'), primary_key=True)
-#     count = db.Column(db.Integer)
+class CountPairs(db.Model):
+    __tablename__ = 'count_pairs'
+    item1 = db.Column(db.Integer, db.ForeignKey('grocery.id'),primary_key=True)
+    item2 = db.Column(db.Integer,db.ForeignKey('grocery.id'), primary_key=True)
+    count = db.Column(db.Integer)
 
-# class TotalAmountPurchased(db.Model):
-#     __tablename__ = 'total_amount_purchased'
-#     cust_id = db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True)
-#     grocery_id = db.Column(db.Integer,db.ForeignKey('grocery.id'), primary_key=True)
-#     total = db.Column(db.Integer)
+class TotalAmountPurchased(db.Model):
+    __tablename__ = 'total_amount_purchased'
+    cust_id = db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True)
+    grocery_id = db.Column(db.Integer,db.ForeignKey('grocery.id'), primary_key=True)
+    total = db.Column(db.Integer)

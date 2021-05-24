@@ -30,10 +30,10 @@ app.register_blueprint(manage_cart, url_prefix="/manage_cart")
 app.register_blueprint(manage_rating, url_prefix="/manage_rating")
 app.register_blueprint(manage_order, url_prefix="/manage_order")
 
-from app import encrypter
-from app.database.Models import Customers, Employees, Order, Customer, Employee, Orders,DeliveryParish, DeliveryParishes
-@app.route('/rename')
-def rename():
+# from app import encrypter
+# from app.database.Models import Customers, Employees, Order, Customer, Employee, Orders,DeliveryParish, DeliveryParishes
+# @app.route('/rename')
+# def rename():
 #     # customers = Customer.query.all()
 #     # for customer in customers:
 #     #     new = Customers(customer.first_name, customer.last_name,\

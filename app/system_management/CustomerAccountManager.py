@@ -1,7 +1,7 @@
 import os
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
-from app import encrypter
+from .. import encrypter
 
 class AccountManager:
 

@@ -4,6 +4,7 @@ from flask_weasyprint import HTML, render_pdf
 import os
 import stripe
 from flask_mail import Message
+from .. import encrypter
 
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 class OrderManager:
@@ -22,12 +23,7 @@ class OrderManager:
         if order_id and status:
             order = self.orderAccess.updateStatus(int(order_id), status)
             if order:
-                emp = order.employee
-                if emp:
-                    empName = (encrypter.decrypt(emp).first_name + " " + encrypter.decrypt(emp.last_name))
-                else:
-                    empName = ''
-                return self.__getOrderDetails(order,empName)
+                return self.__getOrderDetails(order)
             return False
         raise ValueError
 
@@ -74,13 +70,7 @@ class OrderManager:
 
         cancelled_order = self.orderAccess.cancelOrder(int(custId), orderId)
         if cancelled_order:
-            # GroceryAccess.adjustStockCount(cancelled_order.)
-            emp = cancelled_order.employee
-            if emp:
-                empName = (encrypter.decrypt(emp).first_name + " " + encrypter.decrypt(emp.last_name))
-            else:
-                empName = 'False'
-            return self.__getOrderDetails(cancelled_order, empName)
+            return self.__getOrderDetails(cancelled_order)
         return False
 
 
@@ -98,12 +88,7 @@ class OrderManager:
                 if self.validSlot(deliverytimeslot, deliverydate):
                     order = self.orderAccess.scheduleDelivery(orderId,int(deliverytimeslot),deliverydate,int(custId))
                     if order:
-                        emp = order.employee
-                        if emp:
-                            empName = (encrypter.decrypt(emp).first_name + " " + encrypter.decrypt(emp.last_name))
-                        else:
-                            empName = 'False'
-                        return {'msg':'success','data':{'order':self.__getOrderDetails(order,empName)}}, 200
+                        return {'msg':'success','data':{'order':self.__getOrderDetails(order)}}, 200
 
                     self.orderAccess.deleteOrderByID(int(order_id))
                 return {'msg':'no more orders can be scheduled for this slot', 'error':'create-0001'}, 200
@@ -169,13 +154,7 @@ class OrderManager:
 
         order = self.orderAccess.setDeliveryLocation(int(cust_id),int(order_id),street, parish,town)
         if order:
-            emp = order.employee
-
-            if emp:
-                empName = (encrypter.decrypt(emp.first_name) + " " + encrypter.decrypt(emp.last_name))
-            else:
-                empName = 'False'
-            return self.__getOrderDetails(order,empName)
+            return self.__getOrderDetails(order)
         try:
             self.orderAccess.deleteOrderByID(int(order_id))
         except Exception as e:
@@ -194,13 +173,7 @@ class OrderManager:
         if orderId:
             order = self.orderAccess.checkoutOrder(orderId, empId)
             if order:
-                emp = order.employee
-
-                if emp:
-                    empName = (encrypter.decrypt(emp.first_name) + " " + encrypter.decrypt(emp.last_name))
-                else:
-                    empName = 'False'
-                return self.__getOrderDetails(order,empName)
+                return self.__getOrderDetails(order)
             else:
                 return order
         return False
@@ -213,14 +186,7 @@ class OrderManager:
         
         order = self.orderAccess.getOrderByIdCustomer(orderId, cust_id)
         if order:
-            emp = order.employee
-
-            if emp:
-                empName = (encrypter.decrypt(emp.first_name)+ " " +encrypter.decrypt(emp.last_name))
-            else:
-                empName = 'False'
-
-            return self.__getOrderDetails(order,empName)
+            return self.__getOrderDetails(order)
         return False
     
 
@@ -250,15 +216,8 @@ class OrderManager:
                                                     delivery_start_date, delivery_end_date, delivery_town,\
                                                     delivery_parish, payment_type)
         response = []
-        if orders:
-            print('Orders',orders)
-            for order in orders:
-                emp = order.employee
-                if emp:
-                    empName = (encrypter.decrypt(emp).first_name + " " + encrypter.decrypt(emp.last_name))
-                else:
-                    empName = 'False'
-                response.append(self.__getOrderDetails(order, empName))
+        for order in orders:
+            response.append(self.__getOrderDetails(order))
         return response
 
     def getOrder(self, orderId):
@@ -268,13 +227,7 @@ class OrderManager:
         
         order = self.orderAccess.getOrderById(orderId)
         if order:
-            emp = order.employee
-            if empFname:
-                empName = (encrypter.decrypt(emp).first_name + " " + encrypter.decrypt(emp.last_name))
-            else:
-                empName = 'False'
-
-            return self.__getOrderDetails(order,empName)
+            return self.__getOrderDetails(order)
         return False
         
     def getOrders(self, request, cust_id=None):
@@ -306,15 +259,8 @@ class OrderManager:
                                                     delivery_parish, payment_type)
 
         response = []
-        if orders:
-            for order in orders:
-                emp = order.employee
-
-                if emp:
-                    empName = (encrypter.decrypt(emp.first_name) + " " + encrypter.decrypt(emp.last_name))
-                else:
-                    empName = 'False'
-                response.append(self.__getOrderDetails(order,empName))
+        for order in orders:
+            response.append(self.__getOrderDetails(order))
 
         return response
     
@@ -379,30 +325,30 @@ class OrderManager:
             # Since it's a decline, stripe.error.CardError will be caught
             print(e.message)
             # Display error on client
-            self.orderAccess.deleteOrderByID(intent.metadata['order_id'])
+            self.orderAccess.deleteOrderByID(int(intent.metadata['order_id']))
             return {'msg': e.user_message, 'error':e.code}, 200
         except stripe.error.APIConnectionError as e:
 
             # Network communication with Stripe failed
             print(e.message)
-            self.orderAccess.deleteOrderByID(intent.metadata['order_id'])
+            self.orderAccess.deleteOrderByID(int(intent.metadata['order_id']))
             return {'msg':e.user_message, 'error':e.code}, 200
         except stripe.error.InvalidRequestError as e:
             # Invalid parameters were supplied to Stripe's API
             print(e.message)
-            self.orderAccess.deleteOrderByID(intent.metadata['order_id'])
+            self.orderAccess.deleteOrderByID(int(intent.metadata['order_id']))
             return {'msg':e.user_message, 'error':e.code}, 200
         except stripe.error.AuthenticationError as e:
             # Authentication with Stripe's API failed
             # (maybe you changed API keys recently)
             print(e.message)
-            self.orderAccess.deleteOrderByID(intent.metadata['order_id'])
+            self.orderAccess.deleteOrderByID(int(intent.metadata['order_id']))
             return {'msg':e.user_message, 'error':e.code}, 200
         except stripe.error.StripeError as e:
             # Display a very generic error to the user, and maybe send
             # yourself an email
             print(e.message)
-            self.orderAccess.deleteOrderByID(intent.metadata['order_id'])
+            self.orderAccess.deleteOrderByID(int(intent.metadata['order_id']))
             return {'msg':e.user_message, 'error':e.code}, 200
 
         return self.__generate_response(intent,mail)
@@ -441,7 +387,7 @@ class OrderManager:
         '''send invoice to customer for completed payment'''
         order = self.orderAccess.getOrderById(order_id)
         print("passed get by order id")
-        order_details = self.__getOrderDetails(order,'')
+        order_details = self.__getOrderDetails(order)
         print('passed get order details')
         customer = order.customer
 
@@ -477,7 +423,7 @@ class OrderManager:
         return response
 
 
-    def __getOrderDetails(self, order,empName):
+    def __getOrderDetails(self, order):
         order_items = []
         order_total_before_delivery_cost = 0
 
@@ -497,6 +443,7 @@ class OrderManager:
                         'grocery_id': str(order_item.grocery_id),
                         'photo': order_item.groceries.photo,
                         'category': order_item.groceries.category,
+                        'unit_price':str(order_item.groceries.cost_per_unit),
                         'sku': str(order_item.groceries.sku),
                         'inventory': str(order_item.groceries.quantity),
                         'quantity': str(order_item.quantity),
@@ -510,16 +457,18 @@ class OrderManager:
 
         result = {
             'order_id': str(order.id),
-            'payment_type': str(order.payment_type), 
+            'payment_type': str(encrypter.decrypt(order.payment_type)), 
             'order_date': str(order.orderdate),
-            'status': str(encrypter.decrypt(order.status)), 'customer_id': str(order.customer_id),
-            'customer': (encrypter.decrypt(order.customer.first_name) + " " + encrypter.decrypt(order.customer.last_name)),
+            'status': str(encrypter.decrypt(order.status)), 
+            'customer_id': str(order.customer_id),
+            'customer': encrypter.decrypt(order.customer.first_name) + " " + encrypter.decrypt(order.customer.last_name),
             'formatted_delivery_date': order.deliverydate.strftime("%B %d %Y") if order.deliverydate else str(None),
             'delivery_timeslot': str(order.timeslot.start_time)+"-"+str(order.timeslot.end_time) if order.timeslot else str(None),
             'delivery_date': str(order.deliverydate),
+            'delivery_street': str(encrypter.decrypt(order.deliverystreet)),
             'delivery_town': str(encrypter.decrypt(order.deliverytown)), 
-            'delivery_parish': str(encrypter.decrypt(order.deliveryparish)), 
-            'checkout_by': empName
+            'delivery_parish': str(encrypter.decrypt(order.parish.name)), 
+            'checkout_by': str(encrypter.decrypt(order.employee.first_name)) + " " + str(encrypter.decrypt(order.employee.last_name))
         }
         getOrderItems()
         result['order_items'] = order_items
