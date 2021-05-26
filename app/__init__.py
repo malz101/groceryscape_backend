@@ -18,7 +18,7 @@ mail = Mail(app)
 cors = CORS(app, resources={r"/*": {"origins": ["https://groceryscape.web.app","https://groceryscape-admin.web.app"]}})
 # csrf = CSRFProtect(app)
 uploaddir = app.config['UPLOAD_FOLDER']
-encrypter = Encrypt(app.config['DB_ENCRYPTION_KEY'])
+encrypter = Encrypt(app.config['DB_ENCRYPTION_KEY'],app.config['DB_ENCRYPTION_SALT'])
 db = SQLAlchemy(app)
 # print('MAIL_USERNAME', app.config['MAIL_USERNAME'])
 # print('MAIL_PASSWORD', app.config['MAIL_PASSWORD'])

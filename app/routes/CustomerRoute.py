@@ -36,7 +36,7 @@ rating_manager = RatingManager(rating_access)
 def signup():
     """Pass all the responsibility of creating an account to the account manager"""
     try:
-        customer = customer_manager.createAccount(request, mail,url_for, app.config['SECRET_KEY'])
+        customer = customer_manager.createAccount(request, mail,url_for, app.config['SECRET_KEY'], app.config['EMAIL_CONFIRM_KEY'])
         if customer:
             response = {'msg': 'account created', 'data':{}}, 201
         else:
@@ -358,7 +358,7 @@ def get_payment_key():
     if user and (not 'role' in user):
         if bool(user['email_confirmed']):
             try:
-                response = {'msg':'success', 'data':{'payment_key':os.environ.get('STRIPE_PUBLIC_KEY')}}, 200
+                response = {'msg':'success', 'data':{'payment_key':app.config['STRIPE_PUBLIC_KEY']}}, 200
             except Exception as e:
                 print(e)
                 response = {'msg':'', 'error':'ise-0001'}, 500

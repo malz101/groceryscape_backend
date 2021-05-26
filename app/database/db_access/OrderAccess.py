@@ -13,11 +13,11 @@ class OrderAccess:
     def createOrder(self,data):
         order = Order(
             data['customer_id'],
-            data['deliverydate'],
-            data['deliverytimeslot'],
-            data['deliverystreet'],
-            data['deliverytown'],
-            data['deliveryparish'], 
+            data['delivery_date'],
+            data['delivery_timeslot'],
+            data['delivery_street'],
+            data['delivery_town'],
+            data['delivery_parish'], 
             data['payment_type'], 
             data['notes']
         )
@@ -76,14 +76,14 @@ class OrderAccess:
             return  False
 
 
-    def scheduleDelivery(self, orderId,timeslot, deliverydate,custId):
+    def scheduleDelivery(self, orderId,timeslot, delivery_date,custId):
 
         order = self.getOrderById(orderId)
         if order:
             if order.customer_id == custId:
-                date_obj = datetime.strptime(deliverydate,'%Y-%m-%d').date()
-                order.deliverytimeslot = timeslot
-                order.deliverydate = date_obj
+                date_obj = datetime.strptime(delivery_date,'%Y-%m-%d').date()
+                order.delivery_timeslot = timeslot
+                order.delivery_date = date_obj
                 db.session.commit()
                 return order
             else:
@@ -93,10 +93,10 @@ class OrderAccess:
 
     
 
-    def getDeliveryTimeSlotCount(self, deliverytimeslot, deliverydate):
+    def getDeliveryTimeSlotCount(self, delivery_timeslot, delivery_date):
         date_obj = datetime.strptime('2020-02-02','%Y-%m-%d').date()
-        count = db.session.query(func.count(Order.deliverytimeslot)).filter(and_(
-            Order.deliverytimeslot==deliverytimeslot,Order.deliverydate==date_obj)).first()[0]
+        count = db.session.query(func.count(Order.delivery_timeslot)).filter(and_(
+            Order.delivery_timeslot==delivery_timeslot,Order.delivery_date==date_obj)).first()[0]
         return count
 
 
@@ -149,11 +149,11 @@ class OrderAccess:
         else:
             max_delivery_date = datetime.strptime(max_delivery_date, '%Y-%m-%d')
         
-        street_provided = ''
-        if delivery_street is None:
-            street_provided = None
-            delivery_street = ''
-        delivery_street = encrypter.encrypt('%{}%'.format(delivery_street))
+        # street_provided = ''
+        # if delivery_street is None:
+        #     street_provided = None
+        #     delivery_street = ''
+        # delivery_street = encrypter.encrypt('%{}%'.format(delivery_street))
 
         town_provided = ''
         if delivery_town is None:
@@ -179,14 +179,14 @@ class OrderAccess:
                 and_(
                     Order.customer_id==custId,\
                     Order.status.ilike(status),\
-                    or_(Order.deliverystreet.ilike(delivery_street), Order.deliverystreet == street_provided),\
-                    or_(Order.deliverytown.ilike(delivery_town), Order.deliverytown == town_provided),\
-                    or_(Order.deliveryparish.ilike(delivery_parish), Order.deliveryparish == parish_provided),\
+                    # or_(Order.delivery_street.ilike(delivery_street), Order.delivery_street == street_provided),\
+                    or_(Order.delivery_town.ilike(delivery_town), Order.delivery_town == town_provided),\
+                    or_(Order.delivery_parish.ilike(delivery_parish), Order.delivery_parish == parish_provided),\
                     or_(Order.payment_type.ilike(payment_type), Order.payment_type == payment_type_provided),\
                     and_(Order.orderdate >= min_order_timestamp, Order.orderdate <= max_order_timestamp),\
                     or_(
-                        and_(Order.deliverydate >= min_delivery_date, Order.deliverydate <= max_delivery_date),\
-                        Order.deliverydate == delivery_range_provided\
+                        and_(Order.delivery_date >= min_delivery_date, Order.delivery_date <= max_delivery_date),\
+                        Order.delivery_date == delivery_range_provided\
                     )
                 )
             ).order_by(Order.orderdate.desc()).all()
@@ -194,14 +194,14 @@ class OrderAccess:
             orders = Order.query.join(Customer, Order.customer_id==Customer.id).filter(
                 and_(
                     Order.status.ilike(status),\
-                    or_(Order.deliverystreet.ilike(delivery_street), Order.deliverystreet == street_provided),\
-                    or_(Order.deliverytown.ilike(delivery_town), Order.deliverytown == town_provided),\
-                    or_(Order.deliveryparish.ilike(delivery_parish), Order.deliveryparish == parish_provided),\
+                    # or_(Order.delivery_street.ilike(delivery_street), Order.delivery_street == street_provided),\
+                    or_(Order.delivery_town.ilike(delivery_town), Order.delivery_town == town_provided),\
+                    or_(Order.delivery_parish.ilike(delivery_parish), Order.delivery_parish == parish_provided),\
                     or_(Order.payment_type.ilike(payment_type), Order.payment_type == payment_type_provided),\
                     and_(Order.orderdate >= min_order_timestamp, Order.orderdate <= max_order_timestamp),\
                     or_(
-                        and_(Order.deliverydate >= min_delivery_date, Order.deliverydate <= max_delivery_date),\
-                        Order.deliverydate == delivery_range_provided\
+                        and_(Order.delivery_date >= min_delivery_date, Order.delivery_date <= max_delivery_date),\
+                        Order.delivery_date == delivery_range_provided\
                     )
                 )
             ).order_by(Order.orderdate.desc()).order_by(Customer.last_name).order_by(Customer.first_name).all()
@@ -250,9 +250,9 @@ class OrderAccess:
         order = self.getOrderById(orderId)
         if order:
             if order.customer_id == custId:
-                order.deliverystreet = encrypter.encrypt(street)
-                order.deliveryparish = encrypter.encrypt(parish)
-                order.deliverytown = encrypter.encrypt(town)
+                order.delivery_street = encrypter.encrypt(street)
+                order.delivery_parish = encrypter.encrypt(parish)
+                order.delivery_town = encrypter.encrypt(town)
                 db.session.commit()
                 return order
             else:

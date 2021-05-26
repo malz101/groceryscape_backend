@@ -1,0 +1,15 @@
+1, Kingston, 912.65
+2, St. Mary, 3463.13
+3, St. Thomas, 3069.99
+4, St. Ann, 1108.6
+5, Clarendon, 1077.84
+6, St. James, 2382.32
+7, Trelawny, 3022.32
+8, Portland, 1054.38
+9, St. Andrew, 1891.69
+10, Manchester, 2475.99
+11, St. Elizabeth, 1810.05
+12, Westmoreland, 2810.47
+13, Hanover, 1714.39
+14, St. Catherine, 3430.25
+15, None, 0.0

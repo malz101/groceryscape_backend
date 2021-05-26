@@ -1,5 +1,5 @@
 from ... import db
-from ..Models import DeliveryTimeSlot, MaxDeliveriesPerSlot,DeliveryParish, OrderGroceries 
+from ..Models import DeliveryTimeSlot, Miscellaneous,DeliveryParish, OrderGroceries 
 
 class DeliveryAccess:
 
@@ -25,5 +25,5 @@ class DeliveryAccess:
     
     def getMaxDeliveriesPerTimeSlot(self):
         '''returns maximum allowed deliveries perslot'''
-        max_deliveries_per_slot = MaxDeliveriesPerSlot.query.first()
+        max_deliveries_per_slot = Miscellaneous.query.first()
         return max_deliveries_per_slot.max_deliveries_per_time_slot

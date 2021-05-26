@@ -35,9 +35,9 @@ def upgrade():
                existing_type=sa.INTEGER(),
                nullable=False)
     op.drop_constraint('orders_checkout_by_fkey', 'orders', type_='foreignkey')
-    op.drop_constraint('orders_deliveryparish_fkey', 'orders', type_='foreignkey')
+    op.drop_constraint('orders_delivery_parish_fkey', 'orders', type_='foreignkey')
     op.drop_constraint('orders_customer_id_fkey', 'orders', type_='foreignkey')
-    op.create_foreign_key(None, 'orders', 'delivery_parish', ['deliveryparish'], ['parish'])
+    op.create_foreign_key(None, 'orders', 'delivery_parish', ['delivery_parish'], ['parish'])
     op.create_foreign_key(None, 'orders', 'customer', ['customer_id'], ['id'])
     op.create_foreign_key(None, 'orders', 'employee', ['checkout_by'], ['id'])
     op.drop_constraint('payment_recorded_by_fkey', 'payment', type_='foreignkey')
@@ -73,7 +73,7 @@ def downgrade():
     op.drop_constraint(None, 'orders', type_='foreignkey')
     op.drop_constraint(None, 'orders', type_='foreignkey')
     op.create_foreign_key('orders_customer_id_fkey', 'orders', 'customer', ['customer_id'], ['id'], ondelete='SET NULL')
-    op.create_foreign_key('orders_deliveryparish_fkey', 'orders', 'delivery_parish', ['deliveryparish'], ['parish'], ondelete='SET NULL')
+    op.create_foreign_key('orders_delivery_parish_fkey', 'orders', 'delivery_parish', ['delivery_parish'], ['parish'], ondelete='SET NULL')
     op.create_foreign_key('orders_checkout_by_fkey', 'orders', 'employee', ['checkout_by'], ['id'], ondelete='SET NULL')
     op.alter_column('orders', 'customer_id',
                existing_type=sa.INTEGER(),

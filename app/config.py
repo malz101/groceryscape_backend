@@ -5,8 +5,10 @@ class Config(object):
     """Base Config Object"""
     defaults = {}
 
-    defaults['DB_ENCRYPTION_KEY'] = os.environ.get('SECRET_KEY') or 'Som3$ec5etK*y'
     defaults['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'Som3$ec5etK*y'
+    defaults['DB_ENCRYPTION_KEY'] = os.environ.get('DB_ENCRYPTION_KEY')
+    defaults['DB_ENCRYPTION_SALT'] = os.environ.get('DB_ENCRYPTION_SALT')
+    defaults['EMAIL_CONFIRM_KEY'] = os.environ.get('EMAIL_CONFIRM_KEY')
     defaults['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY') or 'Som3$ec5etK*y'
     defaults['JWT_ACCESS_TOKEN_EXPIRES'] = 1
     defaults['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or \
@@ -20,8 +22,8 @@ class Config(object):
     defaults['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
     defaults['MAIL_USE_TLS'] = True
     defaults['MAIL_USE_SSL'] = False
-    # defaults['STRIPE_PUBLIC_KEY'] = os.environ.get('STRIPE_PUBLIC_KEY')
-    # defaults['STRIPE_SECRET_KEY'] = os.environ.get('STRIPE_SECRET_KEY')
+    defaults['STRIPE_PUBLIC_KEY'] = os.environ.get('STRIPE_PUBLIC_KEY')
+    defaults['STRIPE_SECRET_KEY'] = os.environ.get('STRIPE_SECRET_KEY')
     # defaults['STRIPE_ENDPOINT_SECRET'] = os.environ.get('STRIPE_ENDPOINT_SECRET')
 
     # Reads the config file if it exists
@@ -32,9 +34,11 @@ class Config(object):
             defaults[param] = val
     except FileNotFoundError:
         pass
-
-    DB_ENCRYPTION_KEY = defaults['DB_ENCRYPTION_KEY']
+    
     SECRET_KEY = defaults['SECRET_KEY']
+    DB_ENCRYPTION_KEY = defaults['DB_ENCRYPTION_KEY']
+    DB_ENCRYPTION_SALT = defaults['DB_ENCRYPTION_SALT']
+    EMAIL_CONFIRM_KEY = defaults['EMAIL_CONFIRM_KEY']
     JWT_SECRET_KEY = defaults['JWT_SECRET_KEY']
     SQLALCHEMY_DATABASE_URI = defaults['SQLALCHEMY_DATABASE_URI']
     UPLOAD_FOLDER = defaults['UPLOAD_FOLDER']
@@ -43,8 +47,8 @@ class Config(object):
     MAIL_USERNAME = defaults['MAIL_USERNAME']
     MAIL_PASSWORD = defaults['MAIL_PASSWORD']
     MAIL_DEFAULT_SENDER = defaults['MAIL_DEFAULT_SENDER']
-    # STRIPE_PUBLIC_KEY = defaults['STRIPE_PUBLIC_KEY']
-    # STRIPE_SECRET_KEY = defaults['STRIPE_SECRET_KEY']
+    STRIPE_PUBLIC_KEY = defaults['STRIPE_PUBLIC_KEY']
+    STRIPE_SECRET_KEY = defaults['STRIPE_SECRET_KEY']
     # STRIPE_ENDPOINT_SECRET = defaults['STRIPE_ENDPOINT_SECRET']
 
     try:

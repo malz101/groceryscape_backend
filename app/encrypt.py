@@ -5,8 +5,8 @@ import os
 
 class Encrypt():
     '''encrypts sensitive data for querying with database'''
-    def __init__(self, password):
-        self.key = self.__keyFromPassword(password)
+    def __init__(self, password, salt):
+        self.key = self.__keyFromPassword(password,bytes.fromhex(salt))
 
     def __pad(self,s): 
         return s + (AES.block_size - len(s) % AES.block_size) * chr(AES.block_size - len(s) % AES.block_size) 
@@ -22,9 +22,9 @@ class Encrypt():
         return hashlib.pbkdf2_hmac('sha512', string.encode('utf8') , salt , 100000)
 
     
-    def __keyFromPassword(self,password):
+    def __keyFromPassword(self,password,salt):
         # bloated_string = self.__bloatString(password, base64.b64encode(os.urandom(16)))
-        bloated_string = self.__bloatString(password, os.urandom(16))
+        bloated_string = self.__bloatString(password, salt)
 
         return {"cipherKey": bloated_string[:24]," hashingSalt": bloated_string[24:]}
     

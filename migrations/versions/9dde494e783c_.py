@@ -21,11 +21,11 @@ def upgrade():
     # op.add_column('customer', sa.Column('email_confirmed', sa.Boolean(),nullable=False, default=False))
     op.add_column('delivery_time_slot', sa.Column('status', sa.Boolean(), default=True))
     op.create_index(op.f('ix_delivery_time_slot_id'), 'delivery_time_slot', ['id'], unique=False)
-    op.add_column('orders', sa.Column('deliverystreet', sa.String(length=100), nullable=True))
-    op.alter_column('orders', 'deliverytimeslot',
+    op.add_column('orders', sa.Column('delivery_street', sa.String(length=100), nullable=True))
+    op.alter_column('orders', 'delivery_timeslot',
                existing_type=sa.INTEGER(),
                nullable=False)
-    op.create_foreign_key(None, 'orders', 'delivery_time_slot', ['deliverytimeslot'], ['id'])
+    op.create_foreign_key(None, 'orders', 'delivery_time_slot', ['delivery_timeslot'], ['id'])
     # ### end Alembic commands ###
 
 
@@ -35,10 +35,10 @@ def downgrade():
     op.alter_column('orders', 'status',
                existing_type=sa.VARCHAR(length=40),
                nullable=False)
-    op.alter_column('orders', 'deliverytimeslot',
+    op.alter_column('orders', 'delivery_timeslot',
                existing_type=sa.INTEGER(),
                nullable=True)
-    op.drop_column('orders', 'deliverystreet')
+    op.drop_column('orders', 'delivery_street')
     op.drop_index(op.f('ix_delivery_time_slot_id'), table_name='delivery_time_slot')
     op.drop_column('delivery_time_slot', 'status')
     # ### end Alembic commands ###

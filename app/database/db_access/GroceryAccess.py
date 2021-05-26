@@ -1,7 +1,7 @@
 from ... import db
 from ..Models import Grocery
 from ..Models import Taxes
-from ..Models import Taxes_on_goods
+from ..Models import TaxesOnGrocery
 from sqlalchemy import and_, or_, not_
 
 class GroceryAccess:
@@ -113,7 +113,7 @@ class GroceryAccess:
     def getTaxType(self, groceryId, type):
         grocery = self.searchForGrocery(groceryId)
         if grocery:
-            tax = Taxes_on_goods.query.filter(and_(Taxes_on_goods.tax.ilike(type), Taxes_on_goods.grocery_id==groceryId)).first()
+            tax = TaxesOnGrocery.query.filter(and_(TaxesOnGrocery.tax.ilike(type), TaxesOnGrocery.grocery_id==groceryId)).first()
             try:
                 if tax.grocery_id:
                     return tax

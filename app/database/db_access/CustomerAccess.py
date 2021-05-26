@@ -7,18 +7,29 @@ from werkzeug.security import check_password_hash
 class CustomerAccess:
 
     """retrieve a customer record from the database given their email and password"""
-    def login(self, email, password):
-        customer = Customer.query.filter_by(email=encrypter.encrypt(email)).first()
-        if customer is not None and check_password_hash(encrypter.decrypt(customer.password), password):
+    def login(self,data):
+        customer = Customer.query.filter_by(email=encrypter.encrypt(data['email'])).first()
+        # print(customer)
+        if customer is not None and check_password_hash(encrypter.decrypt(customer.password), data['password']):
             return customer
         else:
             return False
 
     """register a customer to the db"""
-    def registerCustomer(self,firstName, lastName, telephone, email, gender, password,street, town, parish):
+    def registerCustomer(self,data):
         customer = {}
         try:
-            customer = Customer(firstName, lastName, telephone, email, gender,password,street, town, parish)
+            customer = Customer(
+                data['first_name'],
+                data['last_name'],
+                data['telephone'],
+                data['email'],
+                data['gender'],
+                data['password'],
+                data['street'],
+                data['town'],
+                data['parish']
+            )
             db.session.add(customer)
             db.session.commit()
             customer = self.getCustomerById(customer.id)

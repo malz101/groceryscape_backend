@@ -58,9 +58,9 @@ app.register_blueprint(manage_order, url_prefix="/manage_order")
     # for order in orders:
     #     newo = Orders(order.customer_id, order.payment_type)
     #     newo.status=encrypter.encrypt(order.status)
-    #     newo.deliverystreet=encrypter.encrypt(order.deliverystreet)
-    #     newo.deliverytown=encrypter.encrypt(order.deliverytown) 
-    #     newo.deliveryparish=encrypter.encrypt(order.deliveryparish)
+    #     newo.delivery_street=encrypter.encrypt(order.delivery_street)
+    #     newo.delivery_town=encrypter.encrypt(order.delivery_town) 
+    #     newo.delivery_parish=encrypter.encrypt(order.delivery_parish)
     #     db.session.add(newo)
     # db.session.commit()
     # return 'success'

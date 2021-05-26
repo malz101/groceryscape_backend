@@ -23,7 +23,7 @@ def upgrade():
                existing_type=sa.VARCHAR(length=100),
                nullable=False,
                existing_server_default=sa.text("'Meat'::character varying"))
-    op.create_foreign_key(None, 'orders', 'delivery_parish', ['deliveryparish'], ['parish'])
+    op.create_foreign_key(None, 'orders', 'delivery_parish', ['delivery_parish'], ['parish'])
     op.drop_constraint('taxes_on_goods_grocery_id_fkey', 'taxes_on_goods', type_='foreignkey')
     op.drop_constraint('taxes_on_goods_tax_fkey', 'taxes_on_goods', type_='foreignkey')
     op.create_foreign_key(None, 'taxes_on_goods', 'grocery', ['grocery_id'], ['id'])

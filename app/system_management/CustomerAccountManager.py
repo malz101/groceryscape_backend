@@ -9,35 +9,37 @@ class AccountManager:
         self.MLManager = MLManager
         self.customer_access = customer_access
 
-    def createAccount(self, request, mail,url_for, key):
+    def createAccount(self, request, mail,url_for, key, email_key):
 
         """extract details from the request"""
         getParam = self.getRequestType(request)
-        firstName = getParam('first_name')
-        lastName = getParam('last_name')
-        telephone = getParam('telephone')
-        email = getParam('email')
-        gender = getParam('gender')
-        password = getParam('password')
-        street = getParam('street')
-        town = getParam('town')
-        parish = getParam('parish')
-
+        
+        data={
+            'first_name': getParam('first_name'),
+            'last_name': getParam('last_name'),
+            'telephone': getParam('telephone'),
+            'email': getParam('email'),
+            'gender': getParam('gender'),
+            'password': getParam('password'),
+            'street': getParam('street'),
+            'town': getParam('town'),
+            'parish': getParam('parish')
+        }
+        print('data',data)
         """sanitize and verify details"""
-
         """create account with sanitized data"""
-        customer = self.customer_access.registerCustomer(firstName, lastName, telephone, email, gender, password, street, town, parish)
+        customer = self.customer_access.registerCustomer(data)
         if customer:
-            self.__sendConfirmationEmail(firstName,email, mail, url_for,key)
+            self.__sendConfirmationEmail(data['first_name'],data['email'], mail, url_for,key,email_key)
             return True
         return False
 
-    def __sendConfirmationEmail(self,fname,email,mail,url_for, key):
+    def __sendConfirmationEmail(self,fname,email,mail,url_for, key, email_key):
         '''sends a confirmation email to user'''
         s = URLSafeTimedSerializer(key)
-        salt = os.environ.get('EMAIL_CONFIRM_KEY')
+        salt = email_key
         token = s.dumps(email, salt=salt)
-        link = url_for('manage_customer_account.confirm_email', token=token, _external=True)
+        link = url_for('customer.confirm_email', token=token, _external=True)
 
         msg = Message(recipients=[email])
         msg.subject = "Confirm Email"
@@ -64,13 +66,16 @@ class AccountManager:
     def login(self, request):
 
         getParam = self.getRequestType(request)
-        email = getParam('email')
-        password = getParam('password')
+        data={
+            'email' : getParam('email'),
+            'password' : getParam('password')
+        }
+        print('Data',data)
         
         """sanitize email and password"""
 
         """get the customer's account"""
-        customer = self.customer_access.login(email, password)
+        customer = self.customer_access.login(data)
         if customer:
             return {
                 "cust_id": str(customer.id),

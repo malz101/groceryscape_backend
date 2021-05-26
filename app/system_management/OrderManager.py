@@ -4,9 +4,9 @@ from flask_weasyprint import HTML, render_pdf
 import os
 import stripe
 from flask_mail import Message
-from .. import encrypter
+from .. import encrypter, app
 
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+stripe.api_key = app.config['STRIPE_SECRET_KEY']
 class OrderManager:
     
     def __init__(self, orderAccess, paymentAccess, deliveryAccess, cartAccess=None):
@@ -34,9 +34,9 @@ class OrderManager:
         parish = str(getParam('parish'))
         
         if order_preview:
-            deliveryparish = self.deliveryAccess.getDeliveryParish(parish)
-            order_preview['delivery_parish'] = str(encryter.decryt(deliveryparish.parish)) 
-            delivery_cost = deliveryparish.delivery_rate
+            delivery_parish = self.deliveryAccess.getDeliveryParish(parish)
+            order_preview['delivery_parish'] = str(encrypter.decryt(delivery_parish.parish)) 
+            delivery_cost = delivery_parish.delivery_rate
             order_preview['delivery_cost'] = str(delivery_cost)
             order_preview['total'] = order_preview['sub_total']+order_preview['total_sct']+order_preview['total_gct']+ float(delivery_cost)
             return order_preview
@@ -51,15 +51,15 @@ class OrderManager:
         order_data = {
             'customer_id': user['cust_id'],
             'payment_type': getParam('payment_type'),
-            'deliverystreet': getParam('street'),
-            'deliverytown': getParam('town'),
-            'deliveryparish': getParam('parish'),
-            'deliverytimeslot': getParam('timeslot'),
-            'deliverydate': getParam('date'),
+            'delivery_street': getParam('street'),
+            'delivery_town': getParam('town'),
+            'delivery_parish': getParam('parish'),
+            'delivery_timeslot': getParam('timeslot'),
+            'delivery_date': getParam('date'),
             'notes': getParam('notes')
         }
 
-        cart_items = self.cartAccess.getAllCartItems(int(cust_id))
+        cart_items = self.cartAccess.getAllCartItems(int(order_data['customer_id']))
         if cart_items:
             order = self.orderAcess.createOrder(order_data)
             if order:
@@ -90,16 +90,16 @@ class OrderManager:
     def scheduleOrder(self, request, user):
         '''schedules the date and time that customer wants order to be delivered'''
         getParam = self.getRequestType(request)
-        deliverytimeslot = getParam('timeslot')
-        deliverydate = getParam('date')
-        orderId = getParam('order_id')
+        delivery_timeslot = getParam('timeslot')
+        delivery_date = getParam('date')
+        order_id = getParam('order_id')
         custId = user['cust_id']
         
         state = True #tracks status order to knw if to delete
-        if custId and deliverydate and deliverytimeslot and orderId:
-            if datetime.strptime(deliverydate,'%Y-%m-%d').date() < (datetime.now().date()+timedelta(days=2)):
-                if self.validSlot(deliverytimeslot, deliverydate):
-                    order = self.orderAccess.scheduleDelivery(orderId,int(deliverytimeslot),deliverydate,int(custId))
+        if custId and delivery_date and delivery_timeslot and order_id:
+            if datetime.strptime(delivery_date,'%Y-%m-%d').date() < (datetime.now().date()+timedelta(days=2)):
+                if self.validSlot(delivery_timeslot, delivery_date):
+                    order = self.orderAccess.scheduleDelivery(order_id,int(delivery_timeslot),delivery_date,int(custId))
                     if order:
                         return {'msg':'success','data':{'order':self.__getOrderDetails(order)}}, 200
 
@@ -147,13 +147,13 @@ class OrderManager:
             return {'msg':'', 'error':'ise-0001'}, 500
 
 
-    def validSlot(self,deliverytimeslot, deliverydate):
+    def validSlot(self,delivery_timeslot, delivery_date):
         '''determines whether a slot is a valid delivery time slot.
             It is a valid slot if the time of day is offered and it hasn't reach capacity'''
 
         max_deliveries_per_slot = self.deliveryAccess.getMaxDeliveriesPerTimeSlot()
         # print('max deliveries per slot',max_deliveries_per_slot)
-        slot_count = self.orderAccess.getDeliveryTimeSlotCount(int(deliverytimeslot),deliverydate)
+        slot_count = self.orderAccess.getDeliveryTimeSlotCount(int(delivery_timeslot),delivery_date)
         # print('slot count', slot_count)
         return slot_count < max_deliveries_per_slot
 
@@ -475,11 +475,11 @@ class OrderManager:
             'status': str(encrypter.decrypt(order.status)), 
             'customer_id': str(order.customer_id),
             'customer': encrypter.decrypt(order.customer.first_name) + " " + encrypter.decrypt(order.customer.last_name),
-            'formatted_delivery_date': order.deliverydate.strftime("%B %d %Y") if order.deliverydate else str(None),
+            'formatted_delivery_date': order.delivery_date.strftime("%B %d %Y") if order.delivery_date else str(None),
             'delivery_timeslot': str(order.timeslot.start_time)+"-"+str(order.timeslot.end_time) if order.timeslot else str(None),
-            'delivery_date': str(order.deliverydate),
-            'delivery_street': str(encrypter.decrypt(order.deliverystreet)),
-            'delivery_town': str(encrypter.decrypt(order.deliverytown)), 
+            'delivery_date': str(order.delivery_date),
+            'delivery_street': str(encrypter.decrypt(order.delivery_street)),
+            'delivery_town': str(encrypter.decrypt(order.delivery_town)), 
             'delivery_parish': str(encrypter.decrypt(order.parish.name)), 
             'checkout_by': str(encrypter.decrypt(order.employee.first_name)) + " " + str(encrypter.decrypt(order.employee.last_name))
         }
