@@ -1,6 +1,6 @@
 from sqlalchemy import exc
 from ... import db, encrypter
-from ..Models import Customer, Order, OrderGroceries, TotalAmountPurchased
+from ..models import Customer, Order, OrderGroceries, TotalAmountPurchased
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash
 

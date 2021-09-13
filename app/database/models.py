@@ -17,7 +17,6 @@ class Customer(db.Model):
     last_name = db.Column(db.LargeBinary, nullable=False)
     telephone = db.Column(db.LargeBinary, nullable=False)
     email = db.Column(db.LargeBinary, nullable=False, unique=True)
-    gender = db.Column(db.LargeBinary, nullable=False)
     password = db.Column(db.LargeBinary, nullable=False)
     street = db.Column(db.LargeBinary)
     town = db.Column(db.LargeBinary, nullable=False)

@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Blueprint,redirect, url_for, session, request, render_template
 from app import app, mail
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-from ..system_management.CustomerAccountManager import AccountManager
+from ..system_management.CustomerAccountManager import CustomerAccountManager
 from ..system_management.GroceryManager import GroceryManager
 from ..system_management.CartManager import CartManager
 from ..system_management.OrderManager import OrderManager
@@ -17,7 +17,7 @@ from ..system_management.MLManager import MLManager
 customer = Blueprint("customer", __name__)
 
 """create an object that manages all operations on a customer's account"""
-customer_manager = AccountManager(customer_access, MLManager(customer_access, order_access, rating_access, cart_access))
+customer_account_manager = CustomerAccountManager(customer_access, MLManager(customer_access, order_access, rating_access, cart_access))
 
 """creates cart manager"""
 cart_manager = CartManager(cart_access, grocery_access)
@@ -32,8 +32,27 @@ grocery_manager = GroceryManager(grocery_access, rating_access,MLManager(custome
 rating_manager = RatingManager(rating_access)
 
 """handles customers' account requests"""
+
+@customer.route('/<customer_id>', methods=['GET','POST','DELETE','PUT'])
+@jwt_required()
+def manage_account(customer_id):
+    '''Process customer account information'''
+    user = get_jwt_identity()
+    if user and (not 'role' in user):
+        if request.method == 'GET':
+            return customer_account_manager.get_customer(user,request)
+        if request.method == 'PUT':
+            return customer_account_manager.update_account(user,request)
+        if request.method == 'DELETE':
+            return customer_account_manager.deactivate_account()
+    else:
+        return redirect(url_for('index'))
+    
+
+
+
 @customer.route('/signup', methods=['POST'])
-def signup():
+def create_account():
     """Pass all the responsibility of creating an account to the account manager"""
     try:
         customer = customer_manager.createAccount(request, mail,url_for, app.config['SECRET_KEY'], app.config['EMAIL_CONFIRM_KEY'])
@@ -53,7 +72,8 @@ def confirm_email(token):
     try:
         response = customer_manager.confirmEmail(token,app.config['SECRET_KEY'])
         if response == True:
-            response = redirect('https://groceryscape.web.app/login')
+            # response = redirect('https://groceryscape.web.app/login')
+            response = redirect('http://localhost:8080/login')
     except Exception as e:
         print(e)
         response = {'msg':'', 'error':'ise-0001'}, 500
@@ -98,8 +118,7 @@ def logout():
         return {'msg': '', 'error':'internal server error'}, 500
 
 
-@customer.route('/update_account', methods=["POST"])
-@jwt_required()
+
 def update_account():
     user = get_jwt_identity()
     if user and (not 'role' in user):

@@ -1,6 +1,6 @@
 from ... import db
-from ..Models import Cart
-from ..Models import Grocery
+from ..models import Cart
+from ..models import Grocery
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import and_, or_, not_, func

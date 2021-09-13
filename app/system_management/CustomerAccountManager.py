@@ -3,7 +3,7 @@ from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
 from .. import encrypter
 
-class AccountManager:
+class CustomerAccountManager:
 
     def __init__(self, customer_access, MLManager):
         self.MLManager = MLManager
