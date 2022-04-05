@@ -1,6 +1,6 @@
-from ... import db
-from ..Models import OrderGroceries
-from ..Models import DeliveryParish
+from app import db
+from ..models import OrderGroceries
+from ..models import DeliveryParish
 
 class DeliveryParishAccess:
 

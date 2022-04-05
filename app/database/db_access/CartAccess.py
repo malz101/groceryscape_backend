@@ -1,9 +1,10 @@
-from ... import db
-from ..models import Cart
+from app import db
+from ..models import CartItem
 from ..models import Grocery
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import and_, or_, not_, func
+
 class CartAccess:
 
     def __init__(self, groceryAccess, orderAccess, customerAccess):
@@ -21,8 +22,7 @@ class CartAccess:
                 
                 if (grocery.quantity > 0) and (quantity <= grocery.quantity) and quantity>-1:
                     # self.groceryAccess.updateGrocery(grocery.id,'quantity', grocery.quantity - quantity)
-                    cart = Cart(cart_id=customer.id, quantity=quantity)
-                    cart.cart_items = grocery
+                    cart = CartItem(customer_id=cartId, item_id=itemId, quantity=quantity)
                     customer.cart_items.append(cart)
                     db.session.add(cart)
                     db.session.commit()
@@ -39,7 +39,7 @@ class CartAccess:
 
     def emptyCart(self, cartId):
         # 1) check if there are atleast one cart entry for customer
-        cart = Cart.query.filter_by(cart_id=cartId).first()
+        cart = CartItem.query.filter_by(cart_id=cartId).first()
 
         try:
             if cart.cart_id:
@@ -55,7 +55,7 @@ class CartAccess:
             return False
 
     def removeItem(self, cartId, itemId):
-        cart_item = Cart.query.filter_by(cart_id=cartId, item_id=itemId).first()
+        cart_item = CartItem.query.filter_by(cart_id=cartId, item_id=itemId).first()
         if cart_item:
             db.session.delete(cart_item)
             db.session.commit()
@@ -76,14 +76,14 @@ class CartAccess:
 
 
     def getAllCartItems(self, cartId):
-        cartItems = Cart.query.filter_by(cart_id=cartId).all() 
+        cartItems = CartItem.query.filter_by(cart_id=cartId).all() 
         return cartItems
 
 
     def updateCart(self, cartId, new_values):
         item_ids = [int(key) for key in new_values.keys()]
         # print('item_ids',item_ids)
-        cart_items = Cart.query.filter(and_(Cart.cart_id==cartId,Cart.item_id.in_(item_ids))).all()
+        cart_items = CartItem.query.filter(and_(CartItem.cart_id==cartId,CartItem.item_id.in_(item_ids))).all()
         # print('cart items',str(cart_items))
         updated_cart = []
         for cartItem in cart_items:

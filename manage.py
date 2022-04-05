@@ -1,12 +1,8 @@
-from flask_script import Manager
-from flask_migrate import Migrate, MigrateCommand
-
-from app import app # we import the app object from the app module
-from app import db
-
-migrate = Migrate(app, db)
-manager = Manager(app) # keeps track of all the commands and handles how they are called from the command line
-manager.add_command('db', MigrateCommand)
+from app import create_app_db_migration # we import the app object from the app module
+from app.util.extensions import db
 
 if __name__ == '__main__':
-    manager.run() # prepares your Manager instance to receive input from the command line.
+    app = create_app_db_migration()
+    app.run(debug=True, host="0.0.0.0")
+
+

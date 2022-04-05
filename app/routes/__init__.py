@@ -1,9 +1,8 @@
 import os
-from app import app, db
+from flask import current_app
 from flask import Flask, render_template, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask import session
-from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
 
 """import blueprints (routes) for different sections of the system"""
 from .CustomerRoute import customer
@@ -23,12 +22,12 @@ account_manager = AccountManager(customer_access, MLManager(customer_access, ord
 
 
 """register blueprints"""
-app.register_blueprint(customer, url_prefix="/customer")
-app.register_blueprint(manage_employee_account, url_prefix="/manage_employee_account")
-app.register_blueprint(manage_groceries, url_prefix="/manage_groceries")
-app.register_blueprint(manage_cart, url_prefix="/manage_cart")
-app.register_blueprint(manage_rating, url_prefix="/manage_rating")
-app.register_blueprint(manage_order, url_prefix="/manage_order")
+current_app.register_blueprint(customer, url_prefix="/customer")
+current_app.register_blueprint(manage_employee_account, url_prefix="/manage_employee_account")
+current_app.register_blueprint(manage_groceries, url_prefix="/manage_groceries")
+current_app.register_blueprint(manage_cart, url_prefix="/manage_cart")
+current_app.register_blueprint(manage_rating, url_prefix="/manage_rating")
+current_app.register_blueprint(manage_order, url_prefix="/manage_order")
 
 # from app import encrypter
 # from app.database.Models import Customers, Employees, Order, Customer, Employee, Orders,DeliveryParish, DeliveryParishes
@@ -39,21 +38,21 @@ app.register_blueprint(manage_order, url_prefix="/manage_order")
 #     #     new = Customers(customer.first_name, customer.last_name,\
 #     #     customer.telephone, customer.email,customer.gender, customer.password, customer.street, \
 #     #     customer.town, customer.parish)
-#     #     db.session.add(new)
-#     # db.session.commit()
+#     #     current_app.db.session.add(new)
+#     # current_app.db.session.commit()
 #     ps = DeliveryParish.query.all()
 #     for p in ps:
 #         newd= DeliveryParishes(str(p.parish),p.delivery_rate)
-#         db.session.add(newd)
-#     db.session.commit()
+#         current_app.db.session.add(newd)
+#     current_app.db.session.commit()
 #     return 'success'
 #     # employees = Employee.query.all()
 #     # for employee in employees:
 #     #     newe = Employees(employee.first_name, employee.last_name,\
 #     #     employee.telephone, employee.email, employee.password, employee.street, \
 #     #     employee.town, employee.parish, employee.role, employee.salary)
-#     #     db.session.add(newe)
-#     # db.session.commit()
+#     #     current_app.db.session.add(newe)
+#     # current_app.db.session.commit()
     # orders = Order.query.all()
     # for order in orders:
     #     newo = Orders(order.customer_id, order.payment_type)
@@ -61,20 +60,20 @@ app.register_blueprint(manage_order, url_prefix="/manage_order")
     #     newo.delivery_street=encrypter.encrypt(order.delivery_street)
     #     newo.delivery_town=encrypter.encrypt(order.delivery_town) 
     #     newo.delivery_parish=encrypter.encrypt(order.delivery_parish)
-    #     db.session.add(newo)
-    # db.session.commit()
+    #     current_app.db.session.add(newo)
+    # current_app.db.session.commit()
     # return 'success'
 
 """serves the index page for users"""
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
+@current_app.route('/', defaults={'path': ''})
+@current_app.route('/<path:path>')
 def index(path):
     # return app.send_static_file('index.html')
     return render_template('index.html')
 
 
 
-@app.route('/get_parish/<parish>', methods=['GET'])
+@current_app.route('/get_parish/<parish>', methods=['GET'])
 @jwt_required()
 def get_parish(parish):
     try:
@@ -91,7 +90,7 @@ def get_parish(parish):
         return response
 
 
-@app.route('/get_delivery_timeslots', methods=['GET'])
+@current_app.route('/get_delivery_timeslots', methods=['GET'])
 @jwt_required()
 def get_delivery_timeslots():
     try:
@@ -114,7 +113,7 @@ def get_delivery_timeslots():
         return response
 
 
-@app.route('/get_parishes', methods=['GET'])
+@current_app.route('/get_parishes', methods=['GET'])
 @jwt_required()
 def get_parishes():
     try:
@@ -133,10 +132,10 @@ def get_parishes():
         return response
 
 
-@app.route('/uploads/<filename>')
+@current_app.route('/uploads/<filename>')
 def get_image(filename):
     root_dir = os.getcwd()
-    return send_from_directory(os.path.join(root_dir,app.config['UPLOAD_FOLDER']), filename)
+    return send_from_directory(os.path.join(root_dir,current_app.config['UPLOAD_FOLDER']), filename)
 
 
 # We are using the `refresh=True` options in jwt_required to only allow

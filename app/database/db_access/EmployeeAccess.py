@@ -1,5 +1,5 @@
-from ... import db
-from ..Models import Employee
+from app import db
+from ..models import Employee
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash
 from app import encrypter

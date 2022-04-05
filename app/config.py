@@ -1,82 +1,57 @@
 import os
 import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Config(object):
     """Base Config Object"""
-    defaults = {}
 
-    defaults['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'Som3$ec5etK*y'
-    defaults['DB_ENCRYPTION_KEY'] = os.environ.get('DB_ENCRYPTION_KEY')
-    defaults['DB_ENCRYPTION_SALT'] = os.environ.get('DB_ENCRYPTION_SALT')
-    defaults['EMAIL_CONFIRM_KEY'] = os.environ.get('EMAIL_CONFIRM_KEY')
-    defaults['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY') or 'Som3$ec5etK*y'
-    defaults['JWT_ACCESS_TOKEN_EXPIRES'] = 1
-    defaults['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or \
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'Som3$ec5etK*y'
+    DB_ENCRYPTION_KEY = os.environ.get('DB_ENCRYPTION_KEY')
+    DB_ENCRYPTION_SALT = os.environ.get('DB_ENCRYPTION_SALT')
+    EMAIL_CONFIRM_KEY = os.environ.get('EMAIL_CONFIRM_KEY')
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'Som3$ec5etK*y'
+    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=1)
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or \
                         'mysql+mysqlconnector://root:@localhost/food_delivery'
-    defaults['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    defaults['UPLOAD_FOLDER'] = './uploads'
-    defaults['MAIL_SERVER'] = os.environ.get('MAIL_SERVER') or 'localhost'
-    defaults['MAIL_PORT'] = os.environ.get('MAIL_PORT') or '25'
-    defaults['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
-    defaults['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-    defaults['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
-    defaults['MAIL_USE_TLS'] = True
-    defaults['MAIL_USE_SSL'] = False
-    defaults['STRIPE_PUBLIC_KEY'] = os.environ.get('STRIPE_PUBLIC_KEY')
-    defaults['STRIPE_SECRET_KEY'] = os.environ.get('STRIPE_SECRET_KEY')
-    # defaults['STRIPE_ENDPOINT_SECRET'] = os.environ.get('STRIPE_ENDPOINT_SECRET')
-
-    # Reads the config file if it exists
-    try:
-        conf = open('./app/pyapp.cfg')
-        for c in conf.readlines():
-            param, val = c.strip().split(' = ', 1)
-            defaults[param] = val
-    except FileNotFoundError:
-        pass
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    UPLOAD_FOLDER = './uploads'
+    MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'localhost'
+    MAIL_PORT = os.environ.get('MAIL_PORT') or '25'
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
+    MAIL_USE_TLS = True
+    MAIL_USE_SSL = False
+    STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
+    STRIPE_SECRET_KEY= os.environ.get('STRIPE_SECRET_KEY')
+    # STRIPE_ENDPOINT_SECRET = os.environ.get('STRIPE_ENDPOINT_SECRET')
     
-    SECRET_KEY = defaults['SECRET_KEY']
-    DB_ENCRYPTION_KEY = defaults['DB_ENCRYPTION_KEY']
-    DB_ENCRYPTION_SALT = defaults['DB_ENCRYPTION_SALT']
-    EMAIL_CONFIRM_KEY = defaults['EMAIL_CONFIRM_KEY']
-    JWT_SECRET_KEY = defaults['JWT_SECRET_KEY']
-    SQLALCHEMY_DATABASE_URI = defaults['SQLALCHEMY_DATABASE_URI']
-    UPLOAD_FOLDER = defaults['UPLOAD_FOLDER']
-    MAIL_SERVER = defaults['MAIL_SERVER']
-    MAIL_PORT = defaults['MAIL_PORT']
-    MAIL_USERNAME = defaults['MAIL_USERNAME']
-    MAIL_PASSWORD = defaults['MAIL_PASSWORD']
-    MAIL_DEFAULT_SENDER = defaults['MAIL_DEFAULT_SENDER']
-    STRIPE_PUBLIC_KEY = defaults['STRIPE_PUBLIC_KEY']
-    STRIPE_SECRET_KEY = defaults['STRIPE_SECRET_KEY']
-    # STRIPE_ENDPOINT_SECRET = defaults['STRIPE_ENDPOINT_SECRET']
-
-    try:
-        JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=int(defaults['JWT_ACCESS_TOKEN_EXPIRES']))
-    except ValueError:
-        raise Exception('JWT_ACCESS_TOKEN_EXPIRES must be a number')
-
-    try:
-        SQLALCHEMY_TRACK_MODIFICATIONS = bool(defaults['SQLALCHEMY_TRACK_MODIFICATIONS'])
-    except ValueError:
-        raise Exception('JWT_ACCESS_TOKEN_EXPIRES must be either True/False (case sensitive)')
-
-    try:
-        MAIL_USE_TLS = bool(defaults['MAIL_USE_TLS'])
-    except ValueError:
-        raise Exception('JWT_ACCESS_TOKEN_EXPIRES must be either True/False (case sensitive)')
-
-    try:
-        MAIL_USE_SSL = bool(defaults['MAIL_USE_SSL'])
-    except ValueError:
-        raise Exception('JWT_ACCESS_TOKEN_EXPIRES must be either True/False (case sensitive)')
+    SESSION_TYPE = os.environ.get('SESSION_TYPE')
+    SESSION_KEY_PREFIX = os.environ.get('SESSION_KEY_PREFIX')
+    SESSION_PERMANENT = os.environ.get('SESSION_PERMANENT')
+    PERMANENT_SESSION_LIFETIME = datetime.timedelta(days=31) #31 days
+    SESSION_USE_SIGNER = os.environ.get('SESSION_USE_SIGNER')
+    from redis import Redis
+    SESSION_REDIS = Redis(
+        host=os.environ.get('REDIS_HOST'),
+        port=os.environ.get('REDIS_PORT'), 
+        #password='password'
+    )
+    WTF_CSRF_SECRET_KEY = SECRET_KEY #Random data for generating secure tokens. If this is not set then SECRET_KEY is used.
+    WTF_CSRF_TIME_LIMIT = int(os.environ.get('WTF_CSRF_TIME_LIMIT')) #Number of seconds that the token is valid
+    WTF_CSRF_METHODS = (os.environ.get('WTF_CSRF_METHODS')).split(',') #HTTP methods to protect from CSRF.
+    WTF_CSRF_HEADERS = (os.environ.get('WTF_CSRF_HEADERS')).split(',') #HTTP headers to search for CSRF token when it is not provided in the form
+    WTF_CSRF_FIELD_NAME = os.environ.get('WTF_CSRF_FIELD_NAME') #Key where token is stored in session for comparison.
         
 class DevelopmentConfig(Config):
     """Development Config that extends the Base Config Object"""
-    FLASK_ENV = 'development'
+    ENV = 'development'
     DEVELOPMENT = True
     DEBUG = True
 
 class ProductionConfig(Config):
     """Production Config that extends the Base Config Object"""
     DEBUG = False
+    SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE')

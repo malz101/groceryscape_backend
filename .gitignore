@@ -4,6 +4,7 @@ Thumbs.db
 
 *.py[cod]
 *$py.class
+__pycache__/
 
 # virtualenv
 .venv/
@@ -16,3 +17,6 @@ commands.md
 
 # conf
 *.cfg
+
+#app config parameters
+.env

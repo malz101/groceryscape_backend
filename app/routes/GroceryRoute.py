@@ -48,7 +48,7 @@ def delete_grocery(grocery_id):
     user = get_jwt_identity()
     if user and ('role' in user):
         response = grocery_manager.deleteGrocery(grocery_id)
-        return reponse
+        return response
     else:
         return redirect(url_for('manage_employee_account.index'))
 
@@ -64,13 +64,13 @@ def get_grocery():
     return response
 
 @manage_groceries.route('/get_featured_items', methods=['POST','GET'])
-def getFeaturedItems():
+def getFeaturedItems():#highest rated
     response = grocery_manager.getFeaturedItems()
     return response
 
 
 @manage_groceries.route('/get_popular_items', methods=['GET'])
-def get_popular_items():
+def get_popular_items():#mostly bougth
     response = grocery_manager.getPopularItems()
     return response
 

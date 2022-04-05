@@ -1,6 +1,5 @@
 from flask import Blueprint
 from flask import redirect, url_for, session, request, abort
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from ..system_management.OrderManager import OrderManager
 from ..database.db_access import order_access,payment_access,delivery_access
 from app import mail

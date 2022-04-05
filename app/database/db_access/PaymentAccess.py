@@ -1,4 +1,4 @@
-from ... import db
+from app import db
 from ..Models import CashPayment, CardPayment
 from datetime import datetime
 class PaymentAccess:

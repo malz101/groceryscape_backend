@@ -1,10 +1,10 @@
-from ... import db, encrypter
+from app import db, encrypter
 from datetime import datetime, timedelta, timezone, date
-from ..Models import Order, OrderGroceries, Customer, TotalQuantityPurchased, CountPairs
+from ..models import Order, OrderGroceries, Customer, TotalQuantityPurchased, CountPairs
 # from .OrderGroceriesAccess import OrderGroceriesAccess
 from .CustomerAccess import CustomerAccess
 from .GroceryAccess import GroceryAccess
-from ..Models import Cart
+from ..models import Cart
 from sqlalchemy import and_, or_, not_, func
 import time
 

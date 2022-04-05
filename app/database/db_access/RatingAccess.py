@@ -1,5 +1,5 @@
-from ... import db
-from ..Models import Rating, Grocery, Customer, ItemTotalRating
+from app import db
+from ..models import Rating, Grocery, Customer, ItemTotalRating
 from sqlalchemy import create_engine
 import pymysql
 import  pandas as pd
@@ -48,14 +48,16 @@ class RatingAccess:
         ratings = Rating.query.all()
 
         ratingsDict = {}
+        product_id_set = set()
         for r in ratings:
+            product_id_set.add(r.product_id)
             # Organizes the data in a dictionary indexed by customerID
             try:
                 ratingsDict[r.cust_id][r.item_id] = r.rating
             except KeyError:
                 ratingsDict[r.cust_id] = {}
                 ratingsDict[r.cust_id][r.item_id] = r.rating
-        return ratingsDict
+        return ratingsDict, list(product_id_set)
 
     def getTopItems(self, ):
         top_items = ItemTotalRating.query.order_by(ItemTotalRating.coefficient.desc()).limit(50).all()

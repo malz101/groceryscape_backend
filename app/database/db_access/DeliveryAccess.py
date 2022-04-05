@@ -1,5 +1,5 @@
-from ... import db
-from ..Models import DeliveryTimeSlot, Miscellaneous,DeliveryParish, OrderGroceries 
+from app import db
+from ..models import DeliveryTimeSlot, Miscellaneous,DeliveryParish, OrderGroceries 
 
 class DeliveryAccess:
 

@@ -1,5 +1,5 @@
 from sqlalchemy import exc
-from ... import db, encrypter
+from app import db, encrypter
 from ..models import Customer, Order, OrderGroceries, TotalAmountPurchased
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash
@@ -40,7 +40,9 @@ class CustomerAccess:
             return False
 
     def confirmEmail(self,email):
-        customer = Customer.query.filter_by(email=encrypter.encrypt(email)).first()
+        num_rows_updated = Customer.query.filter(Customer.email==encrypter.encrypt(email)).\
+            update(dict(email_confirmed=True))
+        return
         if customer:
             customer.email_confirmed = True
             db.session.commit()

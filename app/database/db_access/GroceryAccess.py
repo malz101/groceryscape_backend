@@ -1,15 +1,15 @@
-from ... import db
-from ..Models import Grocery
-from ..Models import Taxes
-from ..Models import TaxesOnGrocery
+from app import db
+from ..models import Grocery
+from ..models import Taxes
+from ..models import TaxesOnGrocery
 from sqlalchemy import and_, or_, not_
 
 class GroceryAccess:
 
-    def create_grocery(self, name, description, quantity, units, price, grams_per_unit,category, photo):
+    def create_grocery(self, name, description, quantity, units, price, unit_weight,category, photo):
 
         grocery = Grocery(name, description, quantity, units, price,\
-                          grams_per_unit, category, photo)
+                          unit_weight, category, photo)
         db.session.add(grocery)
         db.session.commit()
         return self.searchForGrocery(grocery.id)
@@ -42,8 +42,8 @@ class GroceryAccess:
                 grocery.cost_per_unit = float(value)
                 db.session.commit()
                 return self.searchForGrocery(groceryId)
-            if attribute == 'grams_per_unit':
-                grocery.grams_per_unit = float(value)
+            if attribute == 'unit_weight':
+                grocery.unit_weight = float(value)
                 db.session.commit()
                 return self.searchForGrocery(groceryId)
             if attribute == 'category':
@@ -97,11 +97,15 @@ class GroceryAccess:
         # except:
         #     return False
     
-    def getGroceriesInList(self,ids):
+    def get_groceries_in_list(self,ids):
         groceries = Grocery.query.filter(Grocery.id.in_(ids)).all()
         # print('Groceries in grcoery access',groceries)
         return groceries
-
+    
+    def get_grocery(self, id):
+        grocery = Grocery.query.filter(Grocery.id==id)
+        return grocery
+        
     def removeGroceryItem(self, groceryId):
 
         grocery = self.searchForGrocery(groceryId)
