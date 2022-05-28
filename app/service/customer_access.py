@@ -1,6 +1,7 @@
-import os
 from app import db,encryp
 from app.database.models import Customer
+
+import os
 from flask_sqlalchemy import get_debug_queries
 
 def create_customer(new_customer_data:dict):
@@ -28,7 +29,7 @@ def get_customer(customer_id=None, email=None):
     elif email:
         customer = Customer.query.where(Customer._email == encryp.encrypt(email)).one()
     else:
-        return None
+        customer = None
 
     return customer
 

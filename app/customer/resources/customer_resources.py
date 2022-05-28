@@ -42,7 +42,7 @@ class CustomerApi(Resource):
         :return: Customer.customer_id, 201 HTTP status code.
         """
         try:
-            create_customer_schema = CustomerSchema(exclude=('id', 'is_active', 'time_created', 'email_confirmed'))
+            create_customer_schema = CustomerSchema(exclude=('id', 'is_active', 'created_at', 'email_confirmed'))
             new_customer_data = create_customer_schema.load(request.json) #use marshmellow to verify schema
             customer = customer_access.create_customer(new_customer_data)
             if customer:
@@ -78,7 +78,7 @@ class CustomerApi(Resource):
     @login_required
     def patch(self):
         try:
-            update_customer_schema = CustomerSchema(exclude=('id', 'is_active', 'time_created', 'email_confirmed'), partial=True)
+            update_customer_schema = CustomerSchema(exclude=('id', 'is_active', 'created_at', 'email_confirmed'), partial=True)
 
             customer_new_data = update_customer_schema.load(request.json, partial=True)
 

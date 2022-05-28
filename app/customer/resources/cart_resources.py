@@ -61,75 +61,11 @@ class CartApi(Resource):
         
         return response
 
-                
 
     def post(self):
-        """addtocart"""
-        #Just to not cause confusion in the future, my first approach was to take a list of new cart items and then add them to cart
-        #however I changed to just take a single item and put responsibilty of frontend to make multiple request to add multiple items
-        #to cart, for reasons as follows:
-        #It's more difficult to craft error messages for multiple items.
-        #Also by nature, 1 cart entry is one resource and that is what the post request is for, to add a resource
-
-        #new item to add to cart are received as [product_id: quantity,...]
-        try:
-
-            add_to_cart_schema = CartItemSchema(exclude=('product','line_price','line_subtotal_price','line_weight'))
-            new_cart_item = add_to_cart_schema.load(request.json)
-            new_cart_item_id = new_cart_item['product_id']
-            new_cart_item_quantity = new_cart_item['quantity']
-
-            
-            product = product_access.get_product(new_cart_item_id)
-            # new_cart_item_ids_list = list(new_cart_items.keys()) #create a list of all grocey ids to all to cart
-            # products_found = product_access.get_products_in_list(new_cart_item_ids_list) #get a list of all products found from id list
-            # products_not_found = set(new_cart_item_ids_list) - set([product.id for product in groceries_found]) #get a list of ids of items that don't exist in the database or out of stock
-            
-            # if groceries_not_found:
-                # message = [f'The product with id# {invalid_product_id} doesn\'t exist.' for invalid_product_id in groceries_not_found]
-                # response, status = jsonify({'messages': message})
-            
-                #creates a list of dicts that represent new cart items to be added to database using mutiple insers
-                #new_cart_items_dict = [{'customer_id': session['customer_id'], 'item_id': product.id, 'quantity': min(new_cart_items[product.id], product.available)} for product in groceries_found if product.id not in groceries_not_available]
-                #cart_access.add_items_to_cart(new_cart_items_dict)   
-            if product:
-                cart_item_schema = CartItemSchema() 
-                if product.available < 1:
-                    raise ProductNotAvailableError
-                    # response = {'message': 'Cart Error','description': f'The product {product.name} is already sold out.'}
-                    # response.status_code = 422
-                elif new_cart_item_quantity <= product.available:
-                    if session.get('logged_in'): 
-                        cart_item = cart_access.add_to_cart(session['customer_id'], new_cart_item_id, new_cart_item_quantity)
-                        # response = jsonify(serialize_line_item_auth(cart_item))
-                        response = jsonify(cart_item_schema.load(cart_item))
-                        response.status_code = 201
-                    else:#not logged in
-                        session.setdefault('cart',dict({}))#initialize an empty cart if cart doesn't exist
-                        if session.get['cart'].get(new_cart_item_id):
-                            raise CartItemAlreadyExistsError
-                            # response = jsonify({'message': 'Cart Error','description':f'{product.name} already exists in cart.'}),422
-                            # response.status_code = 422
-                        else:#item not already in cart
-                            session['cart'][new_cart_item_id] = new_cart_item_quantity
-                            response = jsonify(serialize_line_item_not_auth(new_cart_item_quantity,product))
-                            response.status_code = 201
-                else: #new_cart_item_quantity > product.available
-                    response = jsonify({'message': 'Cart Error',\
-                        'description': f'You cannot add {new_cart_item_quantity} {product.name} to cart. '+\
-                                        f'Only {product.available} {product.name} in stock.'})
-                    response.status_code = 422
-            else:
-                raise ProductNotExistsError
-                # response = jsonify({'message': 'Product Error', 'description': f'Product with id# {new_cart_item_id} does not exist'})
-                # response.status_code = 404
-        except ValidationError as err:
-            status = 400
-            response = jsonify({'message': 'Schema Validation Error', 'description':err.messages, 'status':status})
-            response.status_code = status
-        except IntegrityError as err:
-            raise CartItemAlreadyExistsError  
-        return response
+        if session.get('logged_in'):
+            cart = cart_access.create_cart(session['customer_id'])
+            session['cart_id']= cart.id
 
 
     def patch(self):
@@ -150,7 +86,7 @@ class CartApi(Resource):
             else:
                 session.setdefault('cart',dict({}))#initlialize cart if not already created
                 cart_item = {'product_id':cart_item_to_update_id , 'quantity':session.get('cart').get(cart_item_to_update_id)}\
-                    if session.get('cart').get(cart_item_to_update_id,None) else dict({})
+                    if session['cart'].get(cart_item_to_update_id,None) else dict({})
 
             if cart_item: #if item exist in cart
                 cart_item_schema = CartItemSchema()
@@ -222,29 +158,92 @@ class CartApi(Resource):
         return response
 
 
+class CartItemApi(Resource):
+    def post(self):
+        """addtocart"""
+        #Just to not cause confusion in the future, my first approach was to take a list of new cart items and then add them to cart
+        #however I changed to just take a single item and put responsibilty of frontend to make multiple request to add multiple items
+        #to cart, for reasons as follows:
+        #It's more difficult to craft error messages for multiple items.
+        #Also by nature, 1 cart entry is one resource and that is what the post request is for, to add a resource
+
+        #new item to add to cart are received as [product_id: quantity,...]
+        try:
+            add_items_to_cart_schema = CartItemSchema(many=True,exclude=('cart_id','product','line_price','line_subtotal_price','line_weight'))
+            new_cart_items_data = add_items_to_cart_schema.load(request.json)
+            
+            if session.get('logged_in'):
+                result = cart_access.add_items_to_cart(session['cart_id'],new_cart_items_data)
+                if type(result)==tuple:
+                    status=422
+                    if result[0]==1:
+                        response = jsonify({
+                            'message': 'Cart Error',
+                            'description': f'The product \'{result[1].name}\' is already sold out.',
+                            'status': status
+                        })
+                    elif result[0]==2:
+                        response = jsonify({
+                            'message' : 'Cart Error',
+                            'description': (f'Cannot add {result[2]["quantity"]} {result[1].name} to cart. '
+                                            f'Only {result[1].available} {result[1].name} in stock.'),
+                            'status': status
+                        })
+                    else:
+                        response - jsonify({
+                            'message': 'Product Error',
+                            'description': f'Product with ID {result[1]} doesn\'t exists',
+                            'status': status
+                        })
+                    response.status_code = status
+                else:
+                    cart_item_schema = CartItemSchema(many=True)
+                    response = jsonify(cart_item_schema.dump(result))
+                    response.status_code = 201
+            
+            else: #not logged in
+ 
+                session.setdefault('cart',dict({}))#initialize an empty cart if cart doesn't exist
+                for new_cart_item_data in new_cart_items_data:
+                    if new_cart_item_data['quantity'] > 0:
+                        product = product_access.get_product(new_cart_item_data['product_id'])
+                        if product: #if product exists
+                            if product.available < 1:
+
+                            if session['cart'].get(new_cart_item_id):
+                                raise CartItemAlreadyExistsError
+                                # response = jsonify({'message': 'Cart Error','description':f'{product.name} already exists in cart.'}),422
+                                # response.status_code = 422
+                            else:#item not already in cart
+                                session['cart'][new_cart_item_id] = new_cart_item_quantity
+                                response = jsonify(serialize_line_item_not_auth(new_cart_item_quantity,product))
+                                response.status_code = 201
+                    else: #new_cart_item_quantity > product.available
+                        response = jsonify({'message': 'Cart Error',\
+                            'description': f'You cannot add {new_cart_item_quantity} {product.name} to cart. '+\
+                                            f'Only {product.available} {product.name} in stock.'})
+                        response.status_code = 422
+                else:
+                    raise ProductNotExistsError
+                    # response = jsonify({'message': 'Product Error', 'description': f'Product with id# {new_cart_item_id} does not exist'})
+                    # response.status_code = 404
+        except ValidationError as err:
+            status = 400
+            response = jsonify({'message': 'Schema Validation Error', 'description':err.messages, 'status':status})
+            response.status_code = status
+        except IntegrityError as err:
+            raise CartItemAlreadyExistsError  
+        return response
+
+
 class SynchronizeCartsApi(Resource):
     """Synchronizes session cart with cart stored in database"""
     @login_required
     def post(self):
         session.setdefault('cart', dict({}))#initlialize cart if not already created
-        session_cart = session['cart']
         #cart for non-logged in user is stored in session as {product_id: quantity}
-        products_in_session_cart = product_access.get_products_in_list(list(session_cart.keys())) if session_cart else []
-        db_cart = cart_access.get_cart_items(session['customer_id'])
-        
-        #update persistant cart with items from session cart
-        for product in products_in_session_cart:
-            quantity = session_cart[product.id]#quantity of item in session cart
-            for cart_item_index in range(len(db_cart)):
-                #if item in session cart is already in db cart, add the quantities of both and update db cart
-                if product.id == db_cart[cart_item_index].product_id:
-                    quantity += db_cart[cart_item_index].quantity #add quantity of item in session cart to quantity in db
-                    quantity = min(quantity, product.available)#make sure quantity isn't more than what's available
-                    cart_access.update_cart_item(session['customer_id'], product.id,quantity)
-                    db_cart.pop(cart_item_index)
-                    break
-            else:#if item not already in cart (i.e if the inner loop wasn't broken)
-                cart_access.add_cart_item(session['customer_id'],product.id, quantity)
+        cart_access.update_cart(session['cart_id'],{'updates':session['cart']}) #update persistant cart with items from session cart
+        session.pop('cart')
                 
 
 

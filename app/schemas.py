@@ -10,7 +10,7 @@ class UserSchema(Schema):
     street = fields.String(required=True)
     town = fields.String(required=True)
     parish = fields.String(required=True)
-    time_created = fields.DateTime()
+    created_at = fields.DateTime()
     is_active = fields.Boolean()
     
     class Meta:
@@ -53,7 +53,7 @@ class ProductSchema(Schema):
     sku = fields.String(required=True)
     package_type = fields.String()
     taxable = fields.Boolean(required=True)
-    time_created = fields.DateTime()
+    created_at = fields.DateTime()
     category_ids = fields.List() #list of category ids to filter products by
 
     # relationships (referenced by)
@@ -90,11 +90,41 @@ class ProductCategorySchema(Schema):
     # category = fields.Nested(lambda: CategorySchema(exclude=('products',)))
 
 
+class CartSchema(Schema):
+    id = fields.Integer()
+    customer_id = fields.Integer()
+    created_at = fields.DateTime()
+    modified_at = fields.DateTime()
+    status = fields.String()
+    notes = fields.String()
+    
+    items = fields.Nested(lambda: CartItemSchema())
+
+
+class CartItemSchema(Schema):
+    cart_id = fields.Integer()
+    product_id = fields.Integer(required=True)
+    quantity = fields.Integer(validate=[validate.Range(min=0)],required=True)
+    product = fields.Nested(lambda: ProductSchema())
+
+    line_price = fields.Function(lambda obj: obj.product.unit_price)
+    line_subtotal_price = fields.Function(lambda obj: obj.quantity*obj.product.unit_price)
+    line_weight = fields.Function(lambda obj: obj.product.unit_weight * obj.quantity)    
+
+
+# class LineItemSchema(Schema):
+#     product = fields.Nested(lambda: ProductSchema())
+#     line_price = fields.Function(lambda obj: obj.product.unit_price)
+#     line_subtotal_price = fields.Function(lambda obj: obj.quantity*obj.product.unit_price)
+#     line_weight = fields.Function(lambda obj: obj.product.unit_weight * obj.quantity)
+    # line_level_discount = fields.Function() #check shopify cart api 
+
+
 class OrderSchema(Schema):
     #columns 
     id = fields.Integer()
     customer_id = fields.Integer()
-    time_created = fields.DateTime()
+    created_at = fields.DateTime()
     status = fields.String()
     payment_type = fields.String()
     billing_first_name = fields.String(required=True)
@@ -232,27 +262,6 @@ class OrderLineSchema(Schema):
         return data
      
 
-
-class CartItemSchema(Schema):
-    customer_id = fields.Integer()
-    product_id = fields.Integer(required=True)
-    quantity = fields.Integer(required=True)
-    product = fields.Nested(lambda: ProductSchema())
-
-    line_price = fields.Function(lambda obj: obj.product.unit_price)
-    line_subtotal_price = fields.Function(lambda obj: obj.quantity*obj.product.unit_price)
-    line_weight = fields.Function(lambda obj: obj.product.unit_weight * obj.quantity)    
-    # customer = fields.Nested(lambda: CustomerSchema(exclude=('cart',)))
-
-
-# class LineItemSchema(Schema):
-#     product = fields.Nested(lambda: ProductSchema())
-#     line_price = fields.Function(lambda obj: obj.product.unit_price)
-#     line_subtotal_price = fields.Function(lambda obj: obj.quantity*obj.product.unit_price)
-#     line_weight = fields.Function(lambda obj: obj.product.unit_weight * obj.quantity)
-    # line_level_discount = fields.Function() #check shopify cart api 
-
-
 class CustomerProductRatingSchema(Schema):
     customer_id = fields.Integer()
     product_id = fields.Integer(required=True)
@@ -268,7 +277,7 @@ class PaymentSchema(Schema):
     #columns
     id = fields.Integer()
     order_id = fields.Integer(required=True)
-    time_created =fields.DateTime()
+    created_at =fields.DateTime()
     amount_tendered = fields.Decimal(10,2)
     change = fields.Decimal(10,2)
     intent_id = fields.String()

@@ -1,16 +1,18 @@
+from app import csrf
+from app.service import customer_access, cart_access
+from app.schemas import CustomerSchema
+from ..common.decorators import login_required
+from .errors import InternalServerError,AuthenticationError, EmailDoesNotExistsError, CSRFTokenAlreadyExistsError
+
+
 from flask_restful import Resource
 from flask import current_app, session, redirect, request, jsonify
 from flask_wtf.csrf import generate_csrf, validate_csrf
 from wtforms import ValidationError
 from werkzeug.security import check_password_hash
 from itsdangerous import URLSafeTimedSerializer
-
-from app import csrf
-from ..common.decorators import login_required
-from .errors import InternalServerError,AuthenticationError, EmailDoesNotExistsError, CSRFTokenAlreadyExistsError
-from app.service import customer_access
-from app.schemas import CustomerSchema
 from marshmallow import ValidationError
+
 
 class LoginApi(Resource):
     def get(self):
@@ -31,9 +33,12 @@ class LoginApi(Resource):
                 # #regenerate session to prevent session fixation attack
                 # current_app.session_interface.regenerate_session(session) #moved to app wide app.util.decorators
                 #create new session values
-                session['customer_id'] = customer.id
                 session['logged_in'] = True
-                session['email_confirmed'] = customer.email_confirmed 
+                session['customer_id'] = customer.id
+                session['email_confirmed'] = customer.email_confirmed
+                # cart_lst = cart_access.get_carts(customer_id=customer.id,statuses=('shopping')) #should return a list wirh a single cart
+                # cart = cart_lst[0] if cart_lst else cart_access.create_cart(customer.id) #customers should only have one shopping cart
+                # session['cart_id'] = cart.id
                 response = jsonify({'message' : 'login success'})
                 response.status_code = 200
                 #generate new csrf token for logged in session

@@ -1,10 +1,8 @@
 from app import db, encryp
 from datetime import datetime, date, timedelta
-from sqlalchemy.ext.hybrid import hybrid_property
 from .view_factory import MaterializedView, create_mat_view, refresh_all_mat_views
 from werkzeug.security import generate_password_hash
 from sqlalchemy.orm import aliased
-import pprint
 
 class Customer(db.Model):
     __tablename__ = 'customer'
@@ -21,12 +19,12 @@ class Customer(db.Model):
     _town = db.Column('town',db.LargeBinary, nullable=False)
     _parish = db.Column('parish',db.LargeBinary, nullable=False)
     email_confirmed = db.Column(db.Boolean,nullable=False, default=True)#remember to change back to false
-    time_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     is_active = db.Column(db.Boolean,nullable=False, default=True)#remember to change back to false
 
     #relationships
     orders = db.relationship('Order', back_populates='customer', passive_deletes=True, lazy='noload')
-    cart = db.relationship('CartItem', back_populates="customer", passive_deletes=True, lazy='noload')
+    carts = db.relationship('Cart', back_populates='customer', passive_deletes=True, lazy='noload')
     ratings = db.relationship('CustomerProductRating', back_populates='customer', passive_deletes=True, lazy='noload')
     # count_of_product_prev_ordered = db.relationship('TotalofProductOrderedbyCustomerMV', backref='customer',
     #                     uselist=True, # makes it a one-to-many relationship, this is the default setting
@@ -128,7 +126,7 @@ class Employee(db.Model): #a new table called priveledges or access rights needs
     _parish = db.Column('parish',db.LargeBinary, nullable=False)
     _role = db.Column('role',db.LargeBinary, nullable=False)
     salary = db.Column(db.Numeric(10,2), nullable=True)
-    time_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     is_active = db.Column(db.Boolean,nullable=False, default=True)#remember to change back to false
 
     # represent the payment collected an employee (many to one relationship)
@@ -228,13 +226,14 @@ class Product(db.Model):
     sku = db.Column(db.String(50), unique=True, nullable=True)
     package_type = db.Column(db.String(50), nullable=True)
     taxable = db.Column(db.Boolean,nullable=False)
-    time_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     __table_args__ = (db.UniqueConstraint('name', 'size', name='_product_name_size_uc'),)
     
     # relationships (referenced by)
     order_lines = db.relationship("OrderLine", back_populates="product", passive_deletes=True, lazy='noload')
-    carts = db.relationship("CartItem", back_populates="product", passive_deletes=True, lazy='noload')
+    cart_items = db.relationship("CartItem", back_populates="product", passive_deletes=True, lazy='noload')
     customer_ratings = db.relationship("CustomerProductRating", back_populates="product", passive_deletes=True, lazy='noload')
     categories = db.relationship('ProductCategory', back_populates='product', passive_deletes=True, lazy='noload')
 
@@ -294,13 +293,62 @@ class ProductCategory(db.Model):
     category = db.relationship('Category', back_populates='products', lazy='noload')
 
 
+class Cart(db.Model):
+    __tablename__ = 'cart'
+    id = db.Column(db.Integer, primary_key=True, index=True)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id',ondelete='CASCADE'), primary_key=True, index=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    _status = db.Column(db.LargeBinary,nullable=False, default=encryp.encrypt('shopping')) #shopping, checkout, paid and abandoned.
+    _notes = db.Column('notes',db.LargeBinary, nullable=True)
+
+    #relationships
+    customer = db.relationship('Customer',back_populates='carts',lazy='noload')
+    items = db.relationship('CartItem', back_populates='cart',passive_deletes=True, lazy='noload')
+
+    def __init__(self,customer_id):
+        self.customer_id = customer_id
+        self.notes = None
+    
+    @property
+    def status(self):
+        return encryp.decrypt(self._status)
+    @status.setter
+    def status(self,status):
+        self._status = encryp.encrypt(status)
+
+    @property
+    def notes(self):
+        return encryp.decrypt(self._notes)
+    @notes.setter
+    def notes(self,notes):
+        self._notes = encryp.encrypt(notes)
+
+
+class CartItem(db.Model):
+    __tablename__ = 'cart_item'
+    cart_id = db.Column(db.Integer, db.ForeignKey('cart.id',ondelete='CASCADE'), primary_key=True, index=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id',ondelete='CASCADE'), primary_key=True, index=True)
+    quantity = db.Column(db.Integer, nullable=False)
+    
+    # relationships (references)
+    product = db.relationship('Product', back_populates='carts', lazy='noload') #change relationship name to product or product_product
+    cart = db.relationship('Cart', back_populates='items', lazy='noload')
+
+    def __init__(self, cart_id, product_id, quantity):
+        self.cart_id = cart_id
+        self.product_id = product_id         #change name from product_id to product_id
+        self.quantity = quantity
+        
+
+
 class Order(db.Model):
     __tablename__ = 'orders'
     #columns 
     id = db.Column(db.Integer, primary_key=True, index=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id',ondelete='CASCADE'), nullable=False)
-    time_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    status = db.Column(db.LargeBinary,nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    _status = db.Column(db.LargeBinary,nullable=False,default=encryp.encrypt('pending'))
     _payment_type = db.Column('payment_type',db.LargeBinary,nullable=False)
     _billing_first_name = db.Column('billing_first_name',db.LargeBinary, nullable=False)
     _billing_last_name = db.Column('billing_last_name',db.LargeBinary, nullable=False)
@@ -334,7 +382,7 @@ class Order(db.Model):
 
     def __init__(self, customer_id,billing_fname, billing_lname,billing_telephone, billing_street,billing_town,billing_parish,\
                     shipping_fname,shipping_lname,shipping_telephone,shipping_date,shipping_time_slot_start,shipping_time_slot_end,\
-                    shipping_street,shipping_town,shipping_parish,shipping_fee,status, notes=None):
+                    shipping_street,shipping_town,shipping_parish,shipping_fee,notes=None):
         self.customer_id = customer_id
         self.billing_first_name = billing_fname
         self.billing_last_name = billing_lname
@@ -354,7 +402,14 @@ class Order(db.Model):
         self.shipping_fee = shipping_fee
         # self.payment_type = payment_type #I feel I should remove this since the payment table would already store it
         self.notes = notes
-    
+
+    @property
+    def status(self):
+        return encryp.decrypt(self._status)
+    @status.setter
+    def status(self,status):
+        self._status = encryp.encrypt(status)
+
     @property
     def billing_first_name(self):
         return encryp.decrypt(self._billing_first_name)
@@ -488,22 +543,6 @@ class OrderLine(db.Model):
         self.photo = photo
 
 
-class CartItem(db.Model):
-    __tablename__ = 'cart_item'
-    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id',ondelete='CASCADE'), primary_key=True, index=True)
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id',ondelete='CASCADE'), primary_key=True, index=True)
-    quantity = db.Column(db.Integer, nullable=False)
-    
-    # relationships (references)
-    product = db.relationship("Product", back_populates="carts", lazy='noload') #change relationship name to product or product_product
-    customer = db.relationship("Customer", back_populates="cart", lazy='noload') #change relationship name to customer
-
-    def __init__(self, customer_id, product_id, quantity):
-        self.cart_id = customer_id     #change name from cart_id to customer_id
-        self.product_id = product_id         #change name from product_id to product_id
-        self.quantity = quantity
-
-
 class CustomerProductRating(db.Model):
     __tablename__ = 'customer_product_rating'
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id',ondelete='CASCADE'), primary_key=True)
@@ -524,7 +563,7 @@ class Payment(db.Model):
     #columns
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('orders.id',ondelete='CASCADE'), primary_key=True)
-    time_created = db.Column(db.DateTime,default=datetime.utcnow)
+    created_at = db.Column(db.DateTime,default=datetime.utcnow)
     amount_tendered = db.Column(db.Numeric(10,2), nullable=False)
     change = db.Column(db.Numeric(10,2), nullable=True)
     _intent_id = db.Column('intent_id',db.LargeBinary, unique=True, nullable = True)
@@ -656,7 +695,7 @@ class TotalProductOrderedLastThreeMonthsMV(MaterializedView):
         ).join(
             Order, OrderLine.order_id==Order.id #explicit condition,from OrderGroceries join Order on OrderLine.order_id==Order.id
         ).where(
-            str(datetime.utcnow()) - Order.time_created < str(timedelta(days=90))
+            str(datetime.utcnow()) - Order.created_at < str(timedelta(days=90))
         ).group_by(OrderLine.product_id)
     )
 db.Index('ix_total_product_ordered_last_three_months_product_id',TotalProductOrderedLastThreeMonthsMV.product_id, unique=True)
@@ -720,7 +759,7 @@ def create_views():
                                         # the these tables in the database isn't ran. Creating 
                                         # tables in the database should only be done using
                                         # the flask migrations.
-                                        # i.e. db.metadata.create_all is ran
+                                        # i.e. when db.metadata.create_all is ran
                                         # it creates all tables in the database, therefore
                                         # I temporarily remove those tables from metadata 
                                         # in order for it to not delete them

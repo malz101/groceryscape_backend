@@ -32,7 +32,7 @@ class OrderListApi(Resource):
     def post(self):
         #create order
         try:
-            add_order_schema = OrderSchema(exclude=('id','customer_id','time_created','delivered_time','checkout_by'))
+            add_order_schema = OrderSchema(exclude=('id','customer_id','created_at','delivered_time','checkout_by'))
             new_order_data = add_order_schema.load(request.json)
             new_order_data.update({'customer_id':session['customer_id']})
             order = order_access.create_order(new_order_data)
@@ -87,7 +87,7 @@ def serialize_order(order):
     # serialized_order = {
     #     'id': order.id,
     #     'customer_id': order.customer_id,
-    #     'time_created': order.time_created, 
+    #     'created_at': order.created_at, 
     #     'status': order.status,
     #     'payment_type': order.payment_type,
     #     'billing': {
@@ -113,7 +113,7 @@ def serialize_order(order):
     #     },
     #     # 'payment': { serialize each payment
     #     #     'order_id': order.payment.order_id,
-    #     #     'time_created': order.payment.time_created,
+    #     #     'created_at': order.payment.created_at,
     #     #     'amount_tendered': order.payment.amount_tendered,
     #     #     'type': 
     #     # },

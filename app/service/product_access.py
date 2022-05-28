@@ -1,13 +1,16 @@
-import os
-import random
-import numpy as np
-from flask import current_app
-from werkzeug.utils import secure_filename
 from app import db
 from app.database.models import Product, ProductAvgRatingMV, ProductCategory,\
      TotalProductOrderedLastThreeMonthsMV, PairsofProductsOrderedTogetherMV,\
          TotalofProductOrderedbyCustomerMV
 from app.service import rating_access, customer_access, cart_access
+
+from datetime import datetime, timezone
+import random
+from decimal import Decimal
+import numpy as np
+from flask import current_app
+from werkzeug.utils import secure_filename
+
 
 # def addGrocery( request):
 
@@ -87,19 +90,22 @@ from app.service import rating_access, customer_access, cart_access
 #         return {'msg':'request failed', 'error':'ise-0001'}, 500
 
 
-def get_products(name='', brand='', description='', categories=[]):
+def get_products(name='', brand='', description='', package_type='',categories=(), min_inventory=-2147483648, max_inventory=2147483647,min_unit_price=Decimal('-Infinity'),\
+    max_unit_price=Decimal('Infinity'),min_created_at=str(datetime(1970, 1, 1,tzinfo=timezone.utc)),max_created_at=None, min_modified_at=str(datetime(1970, 1, 1,tzinfo=timezone.utc)),\
+        max_modified_at=None,taxable=None):#-2147483648 and 2147483647 are the minimum and maximum value, respectively for int in postgres, please change based on db used
     '''return products filtered by specific criteria'''
+    
     name = f'%{name}%' if name else name
-
     brand = f'%{brand}%' if brand else brand
+    description = f'%{description}%' if description else description
+    package_type = f'%{package_type}%' if package_type else package_type
+    max_created_at = max_created_at if max_created_at else str(datetime.utcnow()) #have to do this inside the function, otherwise the default max_created_at timestamp would be time at which the function as compilied
+    max_modified_at = max_modified_at if max_modified_at else str(datetime.utcnow())
 
     # select p.* from product p 
     #     where p.id in (
     #         select distinct product_id from product_category where product_category.category_id in categories) as products_in_categories pic
-    #     ) and ... and ...
-
-    description = f'%{description}%' if description else description
-    
+    #     ) and ... and ...    
     subquery = ProductCategory.query.with_entities(ProductCategory.product_id).where(ProductCategory.catergory_id.in_(categories)).distinct().subquery()
     
     products = Product.query.where(
@@ -107,8 +113,17 @@ def get_products(name='', brand='', description='', categories=[]):
                 Product.name.ilike(name),
                 Product.brand.ilike(brand),
                 Product.description.ilike(description),
-                Product.brand.ilike(brand),
-                Product.id.in_(subquery) if categories else Product.id.not_in(subquery)
+                Product.package_type.ilike(package_type),
+                Product.id.in_(subquery) if categories else Product.id.not_in(subquery),
+                db.or_(Product.taxable == True, Product.taxable == False) if taxable==None else Product.taxable == bool(taxable),
+                Product.inventory >= min_inventory,
+                Product.inventory <= max_inventory,
+                Product.unit_price >= min_unit_price,
+                Product.unit_price <= max_unit_price,
+                Product.created_at >= min_created_at,
+                Product.created_at <= max_created_at,
+                Product.modified_at >= min_modified_at,
+                Product.modified_at <= max_modified_at
             )
         ).all()
     return products
@@ -133,7 +148,7 @@ def get_product(product_id):
 
 def get_top_rated_products(num_to_select):
     '''return a specified number of top rated products'''
-    top_rated_products = Product.query.join(Product.avg_rating).where(ProductAvgRatingMV.num_customers > 1000).order_by(db.desc(ProductAvgRatingMV.avg_rating)).limit(num_to_select).all()
+    top_rated_products = Product.query.join(Product.avg_rating).where(ProductAvgRatingMV.num_customers > 50).order_by(db.desc(ProductAvgRatingMV.avg_rating)).limit(num_to_select).all()
     return random.sample(top_rated_products, num_to_select)
     
     #select * from (select * from product_avg_rating where num_customers > 1000) as most_rated_items) limit 50 order by rating desc
@@ -204,7 +219,7 @@ def get_freq_bought_with_in_list(product_ids, num_to_select):
     return list(map(lambda p: p[1], pairFreq[:num_to_select]))
 
 
-def get_customer_recommendations(customer_id, num_to_select):
+def get_customer_recommendations(customer_id, cart_id, num_to_select):
     """ Uses a Pearson product-moment correlation coefficient matrix
         to determine the similarity among customers based on preferences
         specified by ratings then by the amount of items purchased over
@@ -330,9 +345,9 @@ def get_customer_recommendations(customer_id, num_to_select):
         similar_customers = getMostSimilar(quantity_lst[customer_idx], quantity_lst, customer_id_lst)
 
     recommended_items = set()
-    cart_items = cart_access.get_cart_items(customer_id)
-    if (type(cart_items) == list):
-        cart_items = set(list(map(lambda i: i.item_id, cart_items)))
+    cart = cart_access.get_cart(cart_id)
+    if (type(cart.items) == list):
+        cart_items = set(list(map(lambda cart_item: cart_item.product_id, cart.items)))
     else:
         cart_items = set()
 
